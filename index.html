@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Programa de Producción</title>
+    <title>Dashboard Premium - Programa de Producción</title>
     
     <!-- Tailwind CSS (CDN) -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -14,7 +14,7 @@
                 extend: {
                     colors: {
                         slate: {
-                            900: '#0f172a',
+                            900: '#0b1120',
                             800: '#1e293b',
                             700: '#334155',
                             600: '#475569',
@@ -47,122 +47,183 @@
     <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+    <!-- GSAP & ScrollTrigger -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
     <!-- Custom CSS -->
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #0f172a; color: #f8fafc; }
-        .card { background-color: #1e293b; border: 1px solid #2d3a52; border-radius: 0.5rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #0b1120; 
+            /* Fondo base oscuro */
+            background-image: radial-gradient(circle at 50% 0%, #1e293b 0%, #0b1120 70%);
+            color: #f8fafc; 
+            background-attachment: fixed;
+            overflow-x: hidden; 
+        }
         
-        /* FullCalendar Overrides for Dark Mode */
-        .fc-theme-standard td, .fc-theme-standard th, .fc-theme-standard .fc-scrollgrid { border-color: #334155 !important; }
-        .fc .fc-button-primary { background-color: #3b82f6 !important; border-color: #3b82f6 !important; }
-        .fc .fc-button-primary:hover { background-color: #2563eb !important; }
-        .fc-day-today { background-color: #1e293b !important; box-shadow: inset 0 0 0 1px #3b82f6; }
-        .fc-event { border: none !important; padding: 2px 4px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; }
-        .fc .fc-toolbar-title { font-size: 1.125rem !important; font-weight: 600; }
+        /* Contenedor del fondo reactivo bloom */
+        #ambient-bg {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        #glow-orb {
+            position: absolute;
+            width: 800px;
+            height: 800px;
+            border-radius: 50%;
+            /* Efecto bloom sutil */
+            background: radial-gradient(circle, rgba(59, 130, 246, 0.15) 0%, rgba(139, 92, 246, 0.1) 40%, rgba(0, 0, 0, 0) 70%);
+            filter: blur(80px);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            will-change: transform;
+        }
+        
+        .card { 
+            background: linear-gradient(145deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.9)); 
+            border: 1px solid rgba(255, 255, 255, 0.05); 
+            border-radius: 0.75rem; 
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.1); 
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .card-hover:hover {
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+            border-color: rgba(59, 130, 246, 0.3);
+        }
+
+        .kpi-filter.active-filter {
+            background: linear-gradient(145deg, rgba(59, 130, 246, 0.2), rgba(30, 41, 59, 0.9));
+            border-color: #3b82f6;
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.2);
+        }
+        
+        .fc-theme-standard td, .fc-theme-standard th, .fc-theme-standard .fc-scrollgrid { border-color: rgba(255,255,255,0.05) !important; }
+        .fc .fc-button-primary { background: linear-gradient(145deg, #3b82f6, #2563eb) !important; border: none !important; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        .fc .fc-button-primary:hover { background: linear-gradient(145deg, #2563eb, #1d4ed8) !important; }
+        .fc-day-today { background-color: rgba(59, 130, 246, 0.05) !important; }
+        .fc-event { border: none !important; padding: 3px 5px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; box-shadow: 0 2px 4px rgba(0,0,0,0.2); transition: transform 0.2s; }
+        .fc-event:hover { transform: scale(1.02); }
+        .fc .fc-toolbar-title { font-size: 1.125rem !important; font-weight: 600; text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
         .fc .fc-col-header-cell-cushion { color: #94a3b8; font-weight: 500; }
         .fc .fc-daygrid-day-number { color: #cbd5e1; }
         
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-track { background: #0f172a; }
-        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
         ::-webkit-scrollbar-thumb:hover { background: #475569; }
 
-        .drop-zone { border: 2px dashed #475569; transition: all 0.2s; }
-        .drop-zone.dragover { border-color: #3b82f6; background-color: rgba(59, 130, 246, 0.1); }
+        .drop-zone { border: 2px dashed rgba(71, 85, 105, 0.5); transition: all 0.3s; background: rgba(30, 41, 59, 0.3); }
+        .drop-zone.dragover { border-color: #3b82f6; background-color: rgba(59, 130, 246, 0.1); transform: scale(1.01); }
 
-        /* Swal Dark Theme */
-        .swal2-popup { background-color: #1e293b !important; color: #f8fafc !important; }
+        .swal2-popup { 
+            background: rgba(15, 23, 42, 0.95) !important; 
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #f8fafc !important; 
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5) !important;
+            border-radius: 1rem !important;
+        }
         .swal2-title { color: #f8fafc !important; }
         .swal2-html-container { color: #cbd5e1 !important; }
+        .swal2-close { color: #94a3b8 !important; }
+        .swal2-close:hover { color: #f8fafc !important; }
         
-        /* Badges */
-        .badge { padding: 0.25rem 0.5rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; }
-        .badge-red { background-color: rgba(239, 68, 68, 0.2); color: #f87171; }
-        .badge-orange { background-color: rgba(249, 115, 22, 0.2); color: #fb923c; }
-        .badge-yellow { background-color: rgba(234, 179, 8, 0.2); color: #facc15; }
-        .badge-green { background-color: rgba(34, 197, 94, 0.2); color: #4ade80; }
+        .badge { padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .badge-red { background: linear-gradient(145deg, rgba(239, 68, 68, 0.2), rgba(153, 27, 27, 0.3)); color: #fca5a5; border: 1px solid rgba(239,68,68,0.2); }
+        .badge-orange { background: linear-gradient(145deg, rgba(249, 115, 22, 0.2), rgba(154, 52, 18, 0.3)); color: #fdba74; border: 1px solid rgba(249,115,22,0.2); }
+        .badge-yellow { background: linear-gradient(145deg, rgba(234, 179, 8, 0.2), rgba(133, 77, 14, 0.3)); color: #fde047; border: 1px solid rgba(234,179,8,0.2); }
+        .badge-green { background: linear-gradient(145deg, rgba(34, 197, 94, 0.2), rgba(22, 101, 52, 0.3)); color: #86efac; border: 1px solid rgba(34,197,94,0.2); }
+        
+        .bar-ate { background: linear-gradient(90deg, #3b82f6, #60a5fa); box-shadow: 0 0 10px rgba(59,130,246,0.5); }
+        .bar-lima { background: linear-gradient(90deg, #8b5cf6, #a78bfa); box-shadow: 0 0 10px rgba(139,92,246,0.5); }
     </style>
 </head>
-<body class="min-h-screen flex flex-col p-4 md:p-6 space-y-6">
+<body class="min-h-screen flex flex-col p-4 md:p-6 space-y-6 relative">
+
+    <!-- Ambient Bloom Background -->
+    <div id="ambient-bg">
+        <div id="glow-orb"></div>
+    </div>
 
     <!-- Header -->
-    <header class="flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0">
+    <header class="gsap-header flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0 relative z-10 opacity-0">
         <div>
-            <h1 class="text-2xl font-bold tracking-tight flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                Programa de Producción RM Pendientes
+            <h1 class="text-3xl font-bold tracking-tight flex items-center gap-3 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                Programa de Producción
             </h1>
-            <p class="text-sm text-slate-400 mt-1">Panel de control de programación de productos y fechas estimadas</p>
+            <p class="text-sm text-slate-400 mt-1 ml-11">Panel de control y fechas estimadas de RMD</p>
         </div>
-        <div class="flex flex-wrap gap-2">
-            <button onclick="clearData()" class="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-md text-sm font-medium transition flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+        <div class="flex flex-wrap gap-3">
+            <button onclick="clearData()" class="bg-slate-800/80 hover:bg-slate-700 text-slate-300 border border-slate-600 hover:text-white px-5 py-2.5 rounded-lg text-sm font-medium transition-all shadow-lg flex items-center gap-2 backdrop-blur-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                 Limpiar Datos
             </button>
         </div>
     </header>
 
     <!-- Upload Zone -->
-    <div id="dropZone" class="card drop-zone p-6 flex flex-col items-center justify-center cursor-pointer" onclick="document.getElementById('fileInput').click()">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-slate-400 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
-        <p class="text-slate-300 font-medium">Haz clic o arrastra un archivo Excel aquí</p>
-        <p class="text-xs text-slate-500 mt-1">Soporta formatos .xlsx y .xls</p>
+    <div id="dropZone" class="card drop-zone p-8 flex flex-col items-center justify-center cursor-pointer relative overflow-hidden opacity-0" onclick="requireAdmin(() => document.getElementById('fileInput').click())">
+        <div class="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-purple-500/5 pointer-events-none"></div>
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-slate-400 mb-3 transition-transform group-hover:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+        <p class="text-slate-200 font-medium text-lg text-center">Haz clic o arrastra tu reporte Excel aquí</p>
+        <p class="text-sm text-slate-500 mt-2 text-center">Área protegida por contraseña</p>
         <input type="file" id="fileInput" class="hidden" accept=".xlsx, .xls" onchange="handleFile(event)">
     </div>
 
-    <!-- History Summary (Hidden by default) -->
-    <div id="historySummary" class="card p-4 hidden bg-blue-900/20 border-blue-800/50">
-        <h3 class="text-blue-400 font-medium text-sm mb-2 flex items-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-            Resumen de Carga
-        </h3>
-        <ul id="historyList" class="text-sm text-slate-300 space-y-1"></ul>
-    </div>
-
     <!-- KPIs -->
-    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-        <div class="card p-4 cursor-pointer hover:bg-slate-700 transition kpi-filter ring-2 ring-blue-500 bg-slate-700" onclick="setFilter('ALL')" id="kpi-card-total" title="Clic para mostrar todo en el calendario">
-            <p class="text-xs text-slate-400 uppercase font-semibold">Total Productos</p>
-            <p id="kpi-total" class="text-2xl font-bold mt-1 text-white">0</p>
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-5">
+        <div class="card card-hover p-5 cursor-pointer transition-all kpi-filter active-filter opacity-0" onclick="setFilter('ALL')" id="kpi-card-total" title="Mostrar todo">
+            <p class="text-xs text-slate-400 uppercase font-bold tracking-wider">Total Productos</p>
+            <p id="kpi-total" class="text-3xl font-bold mt-2 text-white">0</p>
         </div>
-        <div class="card p-4 cursor-pointer hover:bg-slate-700 transition kpi-filter" onclick="setFilter('ATE')" id="kpi-card-ate" title="Clic para filtrar calendario por ATE">
-            <p class="text-xs text-slate-400 uppercase font-semibold">Planta ATE</p>
-            <p id="kpi-ate" class="text-2xl font-bold mt-1 text-blue-400">0</p>
+        <div class="card card-hover p-5 cursor-pointer transition-all kpi-filter opacity-0" onclick="setFilter('ATE')" id="kpi-card-ate" title="Filtrar por ATE">
+            <p class="text-xs text-slate-400 uppercase font-bold tracking-wider">Planta ATE</p>
+            <p id="kpi-ate" class="text-3xl font-bold mt-2 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400">0</p>
         </div>
-        <div class="card p-4 cursor-pointer hover:bg-slate-700 transition kpi-filter" onclick="setFilter('LIMA')" id="kpi-card-lima" title="Clic para filtrar calendario por LIMA">
-            <p class="text-xs text-slate-400 uppercase font-semibold">Planta LIMA</p>
-            <p id="kpi-lima" class="text-2xl font-bold mt-1 text-purple-400">0</p>
+        <div class="card card-hover p-5 cursor-pointer transition-all kpi-filter opacity-0" onclick="setFilter('LIMA')" id="kpi-card-lima" title="Filtrar por LIMA">
+            <p class="text-xs text-slate-400 uppercase font-bold tracking-wider">Planta LIMA</p>
+            <p id="kpi-lima" class="text-3xl font-bold mt-2 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-fuchsia-400">0</p>
         </div>
-        <div class="card p-4">
-            <p class="text-xs text-slate-400 uppercase font-semibold">Vencidos</p>
-            <p id="kpi-vencidos" class="text-2xl font-bold mt-1 text-red-400">0</p>
+        <div class="card p-5 opacity-0">
+            <p class="text-xs text-slate-400 uppercase font-bold tracking-wider">Vencidos</p>
+            <p id="kpi-vencidos" class="text-3xl font-bold mt-2 text-transparent bg-clip-text bg-gradient-to-r from-red-400 to-orange-400">0</p>
         </div>
-        <div class="card p-4">
-            <p class="text-xs text-slate-400 uppercase font-semibold">Próx. 7 Días</p>
-            <p id="kpi-prox7" class="text-2xl font-bold mt-1 text-yellow-400">0</p>
+        <div class="card p-5 opacity-0">
+            <p class="text-xs text-slate-400 uppercase font-bold tracking-wider">Próx. 7 Días</p>
+            <p id="kpi-prox7" class="text-3xl font-bold mt-2 text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-yellow-500">0</p>
         </div>
-        <div class="card p-4">
-            <p class="text-xs text-slate-400 uppercase font-semibold">Día Pico</p>
-            <p id="kpi-max-day" class="text-lg font-bold mt-1 text-emerald-400">-</p>
+        <div class="card p-5 opacity-0">
+            <p class="text-xs text-slate-400 uppercase font-bold tracking-wider">Día Pico</p>
+            <p id="kpi-max-day" class="text-xl font-bold mt-3 text-emerald-400">-</p>
         </div>
     </div>
 
     <!-- Main Grid: Calendar + Alerts/Activity -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Calendar -->
-        <div class="card p-4 lg:col-span-2">
-            <div id="calendar" class="min-h-[500px]"></div>
+        <div class="card p-5 lg:col-span-2 opacity-0">
+            <div id="calendar" class="min-h-[550px]"></div>
         </div>
 
         <!-- Right Column -->
-        <div class="space-y-6 flex flex-col h-[500px]">
+        <div class="space-y-6 flex flex-col h-[550px]">
             <!-- Alerts -->
-            <div class="card p-0 flex-1 flex flex-col overflow-hidden">
-                <div class="p-4 border-b border-slate-700 bg-slate-800/50">
+            <div class="card p-0 flex-1 flex flex-col overflow-hidden opacity-0">
+                <div class="p-4 border-b border-slate-700/50 bg-slate-800/30">
                     <h2 class="font-semibold text-slate-200 flex items-center gap-2">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>
-                        Alertas por Fecha Crítica
+                        Fechas Críticas
                     </h2>
                 </div>
                 <div class="overflow-y-auto p-4 space-y-3 flex-1 custom-scrollbar" id="alertsList">
@@ -171,44 +232,44 @@
             </div>
 
             <!-- Activity Log -->
-            <div class="card p-0 h-48 flex flex-col overflow-hidden">
-                <div class="p-3 border-b border-slate-700 bg-slate-800/50">
+            <div class="card p-0 h-52 flex flex-col overflow-hidden opacity-0">
+                <div class="p-4 border-b border-slate-700/50 bg-slate-800/30">
                     <h2 class="font-semibold text-slate-200 text-sm flex items-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                        Centro de Actividad
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                        Actividad Reciente
                     </h2>
                 </div>
-                <div class="overflow-y-auto p-3 space-y-2 flex-1 text-xs" id="activityList">
+                <div class="overflow-y-auto p-4 space-y-3 flex-1 text-xs" id="activityList">
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Comparativa de Plantas -->
-    <div class="card p-4">
-        <h2 class="font-semibold text-slate-200 mb-4 text-sm flex items-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" /></svg>
-            Comparativa de Productos Pendientes de RMD (ATE vs LIMA)
+    <div class="card p-6 opacity-0">
+        <h2 class="font-semibold text-slate-200 mb-5 text-sm flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
+            Distribución de Carga RMD (ATE vs LIMA)
         </h2>
-        <div class="flex items-center justify-between mb-2 text-sm">
-            <span class="text-blue-400 font-bold" id="comp-ate-text">ATE: 0 (0%)</span>
-            <span class="text-purple-400 font-bold" id="comp-lima-text">LIMA: 0 (0%)</span>
+        <div class="flex items-center justify-between mb-3 text-sm">
+            <span class="text-blue-400 font-bold tracking-wide" id="comp-ate-text">ATE: 0 (0%)</span>
+            <span class="text-purple-400 font-bold tracking-wide" id="comp-lima-text">LIMA: 0 (0%)</span>
         </div>
-        <div class="w-full bg-slate-800 rounded-full h-4 flex overflow-hidden border border-slate-700">
-            <div id="comp-ate-bar" class="bg-blue-500 h-4 transition-all duration-500" style="width: 50%"></div>
-            <div id="comp-lima-bar" class="bg-purple-500 h-4 transition-all duration-500" style="width: 50%"></div>
+        <div class="w-full bg-slate-800/50 rounded-full h-5 flex overflow-hidden border border-slate-700 shadow-inner p-0.5">
+            <div id="comp-ate-bar" class="bar-ate h-full rounded-l-full transition-all duration-1000 ease-out" style="width: 50%"></div>
+            <div id="comp-lima-bar" class="bar-lima h-full rounded-r-full transition-all duration-1000 ease-out" style="width: 50%"></div>
         </div>
     </div>
 
     <!-- Charts Row -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 pb-10">
-        <div class="card p-4">
-            <h2 class="font-semibold text-slate-200 mb-4 text-sm">Productos por Semana (Fecha Crítica)</h2>
-            <div class="h-[250px] w-full"><canvas id="chartWeekly"></canvas></div>
+        <div class="card p-5 opacity-0">
+            <h2 class="font-semibold text-slate-200 mb-4 text-sm">Volumen Semanal</h2>
+            <div class="h-[280px] w-full"><canvas id="chartWeekly"></canvas></div>
         </div>
-        <div class="card p-4">
-            <h2 class="font-semibold text-slate-200 mb-4 text-sm">Carga Diaria (Timeline)</h2>
-            <div class="h-[250px] w-full"><canvas id="chartTimeline"></canvas></div>
+        <div class="card p-5 opacity-0">
+            <h2 class="font-semibold text-slate-200 mb-4 text-sm">Timeline Diario</h2>
+            <div class="h-[280px] w-full"><canvas id="chartTimeline"></canvas></div>
         </div>
     </div>
     
@@ -222,9 +283,82 @@
         let calendar;
         let chartWeeklyInst = null;
         let chartTimelineInst = null;
-        let currentPlantFilter = 'ALL'; // Posibles: 'ALL', 'ATE', 'LIMA'
+        let currentPlantFilter = 'ALL';
 
-        // HELPER: Convert DD-MM-YYYY to standard ISO YYYY-MM-DD
+        // --- Fondo Reactivo (Sutil Bloom) ---
+        function initReactiveBackground() {
+            const glowOrb = document.getElementById('glow-orb');
+            if (!glowOrb) return;
+
+            // Iniciar en el centro
+            let mouseX = window.innerWidth / 2;
+            let mouseY = window.innerHeight / 2;
+            let orbX = mouseX;
+            let orbY = mouseY;
+
+            // Rastrear el movimiento del ratón
+            window.addEventListener('mousemove', (e) => {
+                mouseX = e.clientX;
+                mouseY = e.clientY;
+            });
+
+            // Animar con interpolación lineal (lerp) para suavidad
+            function animate() {
+                orbX += (mouseX - orbX) * 0.04;
+                orbY += (mouseY - orbY) * 0.04;
+                
+                // Calcular el desplazamiento desde el centro para el transform
+                const moveX = orbX - window.innerWidth / 2;
+                const moveY = orbY - window.innerHeight / 2;
+                
+                glowOrb.style.transform = `translate(calc(-50% + ${moveX}px), calc(-50% + ${moveY}px))`;
+                
+                requestAnimationFrame(animate);
+            }
+            
+            animate();
+        }
+
+        // --- Autenticación con contraseña ---
+        function requireAdmin(callback) {
+            Swal.fire({
+                title: '<span class="text-white text-xl font-bold tracking-wide">Acceso Restringido</span>',
+                html: '<p class="text-slate-400 text-sm mt-1 mb-2">Por favor, ingrese la contraseña de administrador.</p>',
+                input: 'password',
+                inputAttributes: { autocapitalize: 'off', autocorrect: 'off' },
+                buttonsStyling: false,
+                customClass: {
+                    popup: 'bg-slate-900/95 backdrop-blur-xl border border-slate-700/50 rounded-2xl shadow-2xl pb-6',
+                    input: 'w-5/6 mx-auto bg-slate-800/80 text-white border border-slate-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-lg px-4 py-2.5 text-center mt-4 outline-none transition-all',
+                    actions: 'flex flex-row gap-3 w-5/6 mx-auto mt-6',
+                    confirmButton: 'flex-1 bg-blue-600 hover:bg-blue-500 text-white px-4 py-2.5 rounded-lg text-sm font-medium transition-all shadow-lg',
+                    cancelButton: 'flex-1 bg-slate-700 hover:bg-slate-600 text-white px-4 py-2.5 rounded-lg text-sm font-medium transition-all shadow-lg'
+                },
+                background: 'rgba(15, 23, 42, 0.95)', showCancelButton: true, confirmButtonText: 'Verificar', cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed && result.value === 'DOC') callback();
+                else if (result.isConfirmed) Swal.fire({ icon: 'error', title: 'Acceso Denegado', background: 'rgba(15, 23, 42, 0.95)', color: '#f8fafc', customClass: { confirmButton: 'bg-blue-600 text-white px-5 py-2.5 rounded-lg' }, buttonsStyling: false });
+            });
+        }
+
+        // --- Función para animación de conteo numérico (CountUp GSAP) MÁS LENTA Y FLUIDA ---
+        function animateCounter(elementId, endValue) {
+            const el = document.getElementById(elementId);
+            if (!el) return;
+            
+            const startValue = parseInt(el.textContent.replace(/,/g, '')) || 0;
+            const counter = { val: startValue };
+            
+            gsap.to(counter, {
+                val: endValue,
+                duration: 3, // Animación lenta de 3 segundos
+                ease: "power2.out", 
+                onUpdate: function() {
+                    el.textContent = Math.floor(counter.val).toLocaleString('en-US');
+                }
+            });
+        }
+
         function formatToIso(dateStr) {
             if (!dateStr) return null;
             const parts = dateStr.split('-');
@@ -232,37 +366,46 @@
             return `${parts[2]}-${parts[1]}-${parts[0]}`;
         }
 
-        // Initialization
+        function getEtapaNombre(abbr) {
+            const map = { 'FAB': 'Fabricación', 'ENV': 'Envase', 'ACO': 'Acondicionado', 'REC': 'Recubierta', 'INS': 'Inspección' };
+            const cleanAbbr = (abbr || '').toString().trim().toUpperCase();
+            return map[cleanAbbr] || (cleanAbbr === '' ? 'No definida' : cleanAbbr);
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             initCalendar();
             loadFromLocalStorage();
             setupDragAndDrop();
+            initAnimations();
+            initReactiveBackground();
         });
+
+        function initAnimations() {
+            gsap.registerPlugin(ScrollTrigger);
+            gsap.fromTo('.gsap-header', { y: -30, opacity: 0 }, { y: 0, opacity: 1, duration: 1, ease: "power3.out" });
+            gsap.utils.toArray('.card').forEach((card) => {
+                gsap.fromTo(card, { y: 60, opacity: 0, scale: 0.95 }, {
+                    y: 0, opacity: 1, scale: 1, duration: 0.7, ease: "power2.out",
+                    scrollTrigger: { trigger: card, start: "top 95%", toggleActions: "play none none reverse" }
+                });
+            });
+        }
 
         function setupDragAndDrop() {
             const dropZone = document.getElementById('dropZone');
-            dropZone.addEventListener('dragover', (e) => {
-                e.preventDefault();
-                dropZone.classList.add('dragover');
-            });
-            dropZone.addEventListener('dragleave', () => {
-                dropZone.classList.remove('dragover');
-            });
+            dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
+            dropZone.addEventListener('dragleave', () => { dropZone.classList.remove('dragover'); });
             dropZone.addEventListener('drop', (e) => {
-                e.preventDefault();
-                dropZone.classList.remove('dragover');
+                e.preventDefault(); dropZone.classList.remove('dragover');
                 const file = e.dataTransfer.files[0];
-                if (file) processFile(file);
+                if (file) requireAdmin(() => processFile(file));
             });
         }
 
-        function handleFile(e) {
-            const file = e.target.files[0];
-            if (file) processFile(file);
-            e.target.value = ''; // reset
-        }
+        function handleFile(e) { const file = e.target.files[0]; if (file) processFile(file); e.target.value = ''; }
 
         function processFile(file) {
+            Swal.fire({ title: 'Procesando archivo...', text: 'Extrayendo datos de producción.', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); }, background: 'rgba(15, 23, 42, 0.95)', color: '#f8fafc' });
             const reader = new FileReader();
             reader.onload = (e) => {
                 try {
@@ -270,183 +413,74 @@
                     const workbook = XLSX.read(data, { type: 'array' });
                     const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
                     const jsonData = XLSX.utils.sheet_to_json(firstSheet, { defval: "" });
-                    
                     parseExcelData(jsonData);
-                } catch (error) {
-                    console.error("Detalle del error:", error);
-                    Swal.fire({ 
-                        icon: 'error', 
-                        title: 'Error de Lectura', 
-                        text: 'Detalle: ' + (error.message || 'Error desconocido')
-                    });
-                }
+                } catch (error) { Swal.fire({ icon: 'error', title: 'Error', text: 'Error procesando archivo.', background: 'rgba(15, 23, 42, 0.95)', customClass: { confirmButton: 'bg-blue-600 text-white px-5 py-2.5 rounded-lg' }, buttonsStyling: false }); }
             };
             reader.readAsArrayBuffer(file);
         }
 
         function parseExcelData(data) {
-            if (data.length === 0) {
-                Swal.fire({ icon: 'warning', title: 'Archivo vacío', text: 'El archivo Excel no contiene datos.' });
-                return;
-            }
-
+            if (data.length === 0) { Swal.fire({ icon: 'warning', title: 'Archivo vacío', text: 'El Excel no contiene datos.', background: 'rgba(15, 23, 42, 0.95)', color: '#f8fafc', customClass: { confirmButton: 'bg-blue-600 text-white px-5 py-2.5 rounded-lg' }, buttonsStyling: false }); return; }
             const keys = Object.keys(data[0]);
-            const dateRegex = /^\d{2}-\d{2}-\d{4}$/;
-            const dateColumns = keys.filter(k => dateRegex.test(k));
-
+            const dateColumns = keys.filter(k => /^\d{2}-\d{2}-\d{4}$/.test(k));
+            const headerEtapa = keys.find(k => k.toLowerCase().includes('etapa')) || keys[5];
             const newProductsMap = new Map();
 
             data.forEach(row => {
-                const plantaRaw = row["Planta"];
-                if (plantaRaw === undefined || plantaRaw === null) return;
-                
-                const planta = String(plantaRaw).trim();
-                if (!planta) return; // REGLA CLAVE: Saltar productos sin planta
-
+                const planta = String(row["Planta"] || "").trim();
                 const orden = row["Orden"];
-                const codigo = row["Código"] || "";
-                const descripcion = row["Descripción"] || "";
-                
-                if (!orden) return; 
+                if (!planta || !orden) return; 
 
-                const dates = [];
-                dateColumns.forEach(col => {
-                    const val = String(row[col]).trim().toUpperCase();
-                    if (val === "SI") {
-                        dates.push(col);
-                    }
-                });
-
+                const dates = dateColumns.filter(col => String(row[col]).trim().toUpperCase() === "SI");
                 if (dates.length > 0) {
                     newProductsMap.set(String(orden), {
-                        orden: String(orden),
-                        planta,
-                        codigo: String(codigo),
-                        descripcion,
-                        // Sort natively using Date objects to avoid Day.js plugin dependencies
+                        orden: String(orden), planta, codigo: String(row["Código"] || ""), descripcion: row["Descripción"] || "", etapa: String(row[headerEtapa] || ""),
                         dates: dates.sort((a, b) => new Date(formatToIso(a)).getTime() - new Date(formatToIso(b)).getTime())
                     });
                 }
             });
 
-            const newProductsList = Array.from(newProductsMap.values());
-            
-            if (newProductsList.length === 0) {
-                Swal.fire({ icon: 'warning', title: 'Sin datos válidos', text: 'No se encontraron productos con planta asignada y fechas "SI".' });
-                return;
-            }
-
-            compareHistory(newProductsList);
-            products = newProductsList;
-            saveToLocalStorage();
-            updateDashboard();
-            logActivity(`📂 Excel cargado: ${products.length} productos parseados.`);
+            products = Array.from(newProductsMap.values());
+            saveToLocalStorage(); updateDashboard(); logActivity(`📂 Excel cargado: ${products.length} productos procesados.`);
+            Swal.fire({ icon: 'success', title: '¡Carga Exitosa!', text: `Se han procesado ${products.length} órdenes.`, timer: 2000, showConfirmButton: false, background: 'rgba(15, 23, 42, 0.95)', color: '#f8fafc' });
         }
 
-        function compareHistory(newList) {
-            const oldMap = new Map(products.map(p => [p.orden, p]));
-            let added = 0, modified = 0, removed = 0;
+        function getCriticalDate(product) { return product.dates && product.dates.length > 0 ? product.dates[0] : null; }
 
-            newList.forEach(newP => {
-                if (!oldMap.has(newP.orden)) {
-                    added++;
-                } else {
-                    const oldP = oldMap.get(newP.orden);
-                    if (JSON.stringify(oldP.dates) !== JSON.stringify(newP.dates)) {
-                        modified++;
-                    }
-                }
-            });
-
-            const newMap = new Map(newList.map(p => [p.orden, p]));
-            products.forEach(oldP => {
-                if (!newMap.has(oldP.orden)) removed++;
-            });
-
-            const summaryEl = document.getElementById('historySummary');
-            const listEl = document.getElementById('historyList');
-            summaryEl.classList.remove('hidden');
-            
-            listEl.innerHTML = `
-                <li><span class="text-green-400 font-bold">+${added}</span> productos nuevos</li>
-                <li><span class="text-yellow-400 font-bold">~${modified}</span> productos con fechas modificadas</li>
-                <li><span class="text-red-400 font-bold">-${removed}</span> productos eliminados</li>
-            `;
-            
-            setTimeout(() => { summaryEl.classList.add('hidden'); }, 10000); 
-        }
-
-        function getCriticalDate(product) {
-            if (!product.dates || product.dates.length === 0) return null;
-            return product.dates[0]; // Ya viene ordenado en el parseo
-        }
-
-        // Filtro de plantas para el Calendario
         function setFilter(plant) {
             currentPlantFilter = plant;
-            
-            // Actualizar interfaz (resaltar botón)
-            document.querySelectorAll('.kpi-filter').forEach(el => {
-                el.classList.remove('ring-2', 'ring-blue-500', 'bg-slate-700');
-            });
-            
-            if (plant === 'ALL') {
-                document.getElementById('kpi-card-total').classList.add('ring-2', 'ring-blue-500', 'bg-slate-700');
-            } else if (plant === 'ATE') {
-                document.getElementById('kpi-card-ate').classList.add('ring-2', 'ring-blue-500', 'bg-slate-700');
-            } else if (plant === 'LIMA') {
-                document.getElementById('kpi-card-lima').classList.add('ring-2', 'ring-blue-500', 'bg-slate-700');
-            }
-            
-            // Renderizar exclusivamente el calendario con el filtro aplicado
+            document.querySelectorAll('.kpi-filter').forEach(el => el.classList.remove('active-filter'));
+            if (plant === 'ALL') document.getElementById('kpi-card-total').classList.add('active-filter');
+            else if (plant === 'ATE') document.getElementById('kpi-card-ate').classList.add('active-filter');
+            else if (plant === 'LIMA') document.getElementById('kpi-card-lima').classList.add('active-filter');
             renderCalendar();
         }
 
-        function updateDashboard() {
-            renderKPIs();
-            renderCalendar(); // Respeta el filtro actual
-            renderAlerts();
-            renderCharts();
-        }
+        function updateDashboard() { renderKPIs(); renderCalendar(); renderAlerts(); renderCharts(); }
 
         function renderKPIs() {
-            const today = dayjs();
-            let countAte = 0, countLima = 0, vencidos = 0, prox7 = 0;
-            let dateCounts = {};
-
+            const today = dayjs(); let countAte = 0, countLima = 0, vencidos = 0, prox7 = 0; let dateCounts = {};
             products.forEach(p => {
                 const planta = String(p.planta).toUpperCase();
-                if (planta.includes("ATE")) countAte++;
-                else if (planta.includes("LIMA")) countLima++;
-
+                if (planta.includes("ATE")) countAte++; else if (planta.includes("LIMA")) countLima++;
                 const critStr = getCriticalDate(p);
                 if (critStr) {
-                    const critDate = dayjs(formatToIso(critStr));
-                    const diff = critDate.diff(today, 'day');
-                    
-                    if (diff < 0) vencidos++;
-                    else if (diff <= 7) prox7++;
+                    const diff = dayjs(formatToIso(critStr)).diff(today, 'day');
+                    if (diff < 0) vencidos++; else if (diff <= 7) prox7++;
                 }
-
-                p.dates.forEach(d => {
-                    dateCounts[d] = (dateCounts[d] || 0) + 1;
-                });
+                p.dates.forEach(d => { dateCounts[d] = (dateCounts[d] || 0) + 1; });
             });
 
             let maxDay = "-", maxVal = 0;
-            for (const [date, count] of Object.entries(dateCounts)) {
-                if (count > maxVal) { maxVal = count; maxDay = date; }
-            }
+            for (const [date, count] of Object.entries(dateCounts)) { if (count > maxVal) { maxVal = count; maxDay = date; } }
 
-            // Actualizar tarjetas
-            document.getElementById('kpi-total').textContent = products.length;
-            document.getElementById('kpi-ate').textContent = countAte;
-            document.getElementById('kpi-lima').textContent = countLima;
-            document.getElementById('kpi-vencidos').textContent = vencidos;
+            animateCounter('kpi-total', products.length);
+            animateCounter('kpi-ate', countAte);
+            animateCounter('kpi-lima', countLima);
+            animateCounter('kpi-vencidos', vencidos);
+            
             document.getElementById('kpi-prox7').textContent = prox7;
             document.getElementById('kpi-max-day').textContent = maxVal > 0 ? `${maxDay} (${maxVal})` : '-';
-            
-            // Actualizar barra de comparativa
             renderComparison(countAte, countLima);
         }
 
@@ -454,339 +488,142 @@
             const total = countAte + countLima;
             const pctAte = total === 0 ? 0 : (countAte / total) * 100;
             const pctLima = total === 0 ? 0 : (countLima / total) * 100;
-            
             document.getElementById('comp-ate-text').textContent = `ATE: ${countAte} (${Math.round(pctAte)}%)`;
             document.getElementById('comp-lima-text').textContent = `LIMA: ${countLima} (${Math.round(pctLima)}%)`;
-            
-            // Si no hay datos, dejar la barra 50/50 estéticamente o en 0
             document.getElementById('comp-ate-bar').style.width = total === 0 ? '50%' : `${pctAte}%`;
             document.getElementById('comp-lima-bar').style.width = total === 0 ? '50%' : `${pctLima}%`;
         }
 
         function renderCalendar() {
-            calendar.removeAllEvents();
-            const events = [];
-
+            calendar.removeAllEvents(); const events = [];
             products.forEach(p => {
                 const planta = String(p.planta).toUpperCase();
-                
-                // Aplicar Filtro de Planta para el calendario
                 if (currentPlantFilter === 'ATE' && !planta.includes("ATE")) return;
                 if (currentPlantFilter === 'LIMA' && !planta.includes("LIMA")) return;
-
-                let color = '#6b7280'; // gris
-                if (planta.includes("ATE")) color = '#3b82f6'; // azul
-                else if (planta.includes("LIMA")) color = '#8b5cf6'; // morado
-
-                // Obtener solo la primera palabra de la descripción
-                const descString = p.descripcion || '';
-                const firstWord = descString.trim() ? descString.trim().split(/\s+/)[0] : p.orden;
-
-                p.dates.forEach(d => {
-                    events.push({
-                        id: p.orden,
-                        title: firstWord, // Se muestra solo la primera palabra
-                        start: formatToIso(d), // Usamos formato nativo YYYY-MM-DD
-                        color: color,
-                        extendedProps: { ...p }
-                    });
-                });
+                let color = planta.includes("ATE") ? '#3b82f6' : (planta.includes("LIMA") ? '#8b5cf6' : '#475569');
+                const firstWord = p.descripcion.trim() ? p.descripcion.trim().split(/\s+/)[0] : p.orden;
+                p.dates.forEach(d => { events.push({ id: p.orden, title: firstWord, start: formatToIso(d), backgroundColor: color, borderColor: color, extendedProps: { ...p } }); });
             });
-
             calendar.addEventSource(events);
-            if (events.length > 0 && currentPlantFilter === 'ALL') {
-                const firstDate = events.map(e => e.start).sort()[0];
-                calendar.gotoDate(firstDate);
-            }
+            if (events.length > 0 && currentPlantFilter === 'ALL') calendar.gotoDate(events.map(e => e.start).sort()[0]);
         }
 
         function initCalendar() {
-            const calendarEl = document.getElementById('calendar');
-            calendar = new FullCalendar.Calendar(calendarEl, {
-                initialView: 'dayGridMonth',
-                locale: 'es',
-                headerToolbar: {
-                    left: 'prev,next today',
-                    center: 'title',
-                    right: 'dayGridMonth,dayGridWeek'
-                },
-                buttonText: { today: 'Hoy', month: 'Mes', week: 'Semana' },
-                firstDay: 1, 
-                height: 500,
-                eventClick: function(info) {
-                    showProductModal(info.event.extendedProps);
-                }
+            calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
+                initialView: 'dayGridMonth', locale: 'es',
+                headerToolbar: { left: 'prev,next today', center: 'title', right: 'dayGridMonth,dayGridWeek' },
+                buttonText: { today: 'Hoy', month: 'Mes', week: 'Semana' }, firstDay: 1, height: 550,
+                eventClick: (info) => showProductModal(info.event.extendedProps),
+                eventMouseEnter: (info) => info.el.setAttribute('title', `${info.event.extendedProps.descripcion}\nEtapa: ${getEtapaNombre(info.event.extendedProps.etapa)}`)
             });
             calendar.render();
         }
 
         function renderAlerts() {
-            const alertsList = document.getElementById('alertsList');
-            alertsList.innerHTML = '';
-            const today = dayjs();
-            const alerts = [];
-
+            const alertsList = document.getElementById('alertsList'); alertsList.innerHTML = '';
+            const today = dayjs(); const alerts = [];
             products.forEach(p => {
-                const critStr = getCriticalDate(p);
-                if (!critStr) return;
-                
-                const critDate = dayjs(formatToIso(critStr));
-                const diff = critDate.diff(today, 'day');
-                
-                let type, priority, badgeClass, label;
-                
-                if (diff < 0) { type = 'Rojo'; priority = 1; badgeClass = 'badge-red'; label = 'Vencido'; }
-                else if (diff <= 3) { type = 'Naranja'; priority = 2; badgeClass = 'badge-orange'; label = '≤ 3 días'; }
-                else if (diff <= 7) { type = 'Amarillo'; priority = 3; badgeClass = 'badge-yellow'; label = '≤ 7 días'; }
-                else { type = 'Verde'; priority = 4; badgeClass = 'badge-green'; label = '> 7 días'; }
-
+                const critStr = getCriticalDate(p); if (!critStr) return;
+                const diff = dayjs(formatToIso(critStr)).diff(today, 'day');
+                let priority, badgeClass, label;
+                if (diff < 0) { priority = 1; badgeClass = 'badge-red'; label = 'Vencido'; }
+                else if (diff <= 3) { priority = 2; badgeClass = 'badge-orange'; label = '≤ 3 días'; }
+                else if (diff <= 7) { priority = 3; badgeClass = 'badge-yellow'; label = '≤ 7 días'; }
+                else { priority = 4; badgeClass = 'badge-green'; label = '> 7 días'; }
                 alerts.push({ product: p, diff, priority, badgeClass, label, critStr });
             });
+            alerts.sort((a, b) => a.priority !== b.priority ? a.priority - b.priority : a.diff - b.diff);
 
-            alerts.sort((a, b) => {
-                if (a.priority !== b.priority) return a.priority - b.priority;
-                return a.diff - b.diff; 
-            });
-
-            if (alerts.length === 0) {
-                alertsList.innerHTML = '<p class="text-sm text-slate-500 text-center mt-10">Sin alertas</p>';
-                return;
-            }
-
+            if (alerts.length === 0) { alertsList.innerHTML = '<p class="text-sm text-slate-500 text-center mt-10">Sin alertas</p>'; return; }
             alerts.forEach(a => {
-                const p = a.product;
                 const el = document.createElement('div');
-                el.className = 'p-3 rounded-md bg-slate-800/80 border border-slate-700 cursor-pointer hover:bg-slate-700 transition shadow-sm';
-                el.onclick = () => showProductModal(p);
-                
-                el.innerHTML = `
-                    <div class="flex justify-between items-start mb-1">
-                        <span class="text-sm font-bold text-slate-200">#${p.orden}</span>
-                        <span class="badge ${a.badgeClass}">${a.label}</span>
-                    </div>
-                    <p class="text-xs text-slate-300 truncate mb-2" title="${p.descripcion}">${p.descripcion}</p>
-                    <div class="flex justify-between items-center text-xs">
-                        <span class="text-slate-400">Planta: <span class="font-medium text-slate-300">${p.planta}</span></span>
-                        <span class="text-slate-400">Fecha: <span class="font-medium text-slate-200">${a.critStr}</span></span>
-                    </div>
-                `;
+                el.className = 'p-4 rounded-lg bg-slate-800/40 border border-slate-700/50 cursor-pointer hover:bg-slate-700/60 hover:-translate-y-0.5 transition-all shadow-sm';
+                el.onclick = () => showProductModal(a.product);
+                el.innerHTML = `<div class="flex justify-between items-start mb-2"><span class="text-sm font-bold text-slate-200">#${a.product.orden}</span><span class="badge ${a.badgeClass}">${a.label}</span></div>
+                    <p class="text-xs text-slate-300 truncate mb-3" title="${a.product.descripcion}">${a.product.descripcion}</p>
+                    <div class="flex justify-between items-center text-xs"><span class="text-slate-400 border border-slate-600 px-2 py-1 rounded bg-slate-900/50">${getEtapaNombre(a.product.etapa)}</span><span class="text-slate-400">Fecha: <span class="font-medium text-slate-200">${a.critStr}</span></span></div>`;
                 alertsList.appendChild(el);
             });
         }
 
         function renderCharts() {
-            const weekCounts = {};
-            const dateCounts = {};
-
+            const weekCounts = {}; const dateCounts = {};
             products.forEach(p => {
                 const critStr = getCriticalDate(p);
-                if (critStr) {
-                    const d = dayjs(formatToIso(critStr));
-                    const week = `Semana ${d.week()}`;
-                    weekCounts[week] = (weekCounts[week] || 0) + 1;
-                }
-
-                p.dates.forEach(d => {
-                    const fmt = formatToIso(d); 
-                    dateCounts[fmt] = (dateCounts[fmt] || 0) + 1;
-                });
+                if (critStr) { const week = `Semana ${dayjs(formatToIso(critStr)).week()}`; weekCounts[week] = (weekCounts[week] || 0) + 1; }
+                p.dates.forEach(d => { const fmt = formatToIso(d); dateCounts[fmt] = (dateCounts[fmt] || 0) + 1; });
             });
 
-            // Grafico Semanal
-            const sortedWeeks = Object.keys(weekCounts).sort();
-            const weekData = sortedWeeks.map(w => weekCounts[w]);
-
+            Chart.defaults.color = '#94a3b8'; Chart.defaults.font.family = 'Inter';
             const ctxWeekly = document.getElementById('chartWeekly').getContext('2d');
             if (chartWeeklyInst) chartWeeklyInst.destroy();
+            let gradW = ctxWeekly.createLinearGradient(0, 0, 0, 400); gradW.addColorStop(0, 'rgba(59, 130, 246, 0.8)'); gradW.addColorStop(1, 'rgba(59, 130, 246, 0.1)');
             chartWeeklyInst = new Chart(ctxWeekly, {
-                type: 'bar',
-                data: {
-                    labels: sortedWeeks,
-                    datasets: [{
-                        label: 'Productos',
-                        data: weekData,
-                        backgroundColor: '#3b82f6',
-                        borderRadius: 4
-                    }]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        y: { grid: { color: '#334155' }, ticks: { color: '#94a3b8' } },
-                        x: { grid: { display: false }, ticks: { color: '#94a3b8' } }
-                    }
-                }
+                type: 'bar', data: { labels: Object.keys(weekCounts).sort(), datasets: [{ data: Object.keys(weekCounts).sort().map(w => weekCounts[w]), backgroundColor: gradW, borderRadius: 6 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { grid: { color: 'rgba(255,255,255,0.05)' } }, x: { grid: { display: false } } } }
             });
 
-            // Grafico Timeline Diario
-            const sortedDates = Object.keys(dateCounts).sort();
-            const dateData = sortedDates.map(d => dateCounts[d]);
-
-            const ctxTimeline = document.getElementById('chartTimeline').getContext('2d');
+            const ctxTime = document.getElementById('chartTimeline').getContext('2d');
             if (chartTimelineInst) chartTimelineInst.destroy();
-            chartTimelineInst = new Chart(ctxTimeline, {
-                type: 'bar',
-                data: {
-                    labels: sortedDates.map(d => dayjs(d).format('DD MMM')),
-                    datasets: [{
-                        label: 'Carga',
-                        data: dateData,
-                        backgroundColor: '#10b981',
-                        borderRadius: 4
-                    }]
-                },
-                options: {
-                    indexAxis: 'y', 
-                    responsive: true, maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        x: { grid: { color: '#334155' }, ticks: { color: '#94a3b8' } },
-                        y: { grid: { display: false }, ticks: { color: '#94a3b8', autoSkip: false } }
-                    }
-                }
+            let gradT = ctxTime.createLinearGradient(400, 0, 0, 0); gradT.addColorStop(0, 'rgba(16, 185, 129, 0.8)'); gradT.addColorStop(1, 'rgba(16, 185, 129, 0.1)');
+            chartTimelineInst = new Chart(ctxTime, {
+                type: 'bar', data: { labels: Object.keys(dateCounts).sort().map(d => dayjs(d).format('DD MMM')), datasets: [{ data: Object.keys(dateCounts).sort().map(d => dateCounts[d]), backgroundColor: gradT, borderRadius: 6 }] },
+                options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { color: 'rgba(255,255,255,0.05)' } }, y: { grid: { display: false } } } }
             });
         }
 
-        // --- Gestión de Notas ---
-        function getNotes(orden) {
-            const notes = localStorage.getItem(`notes_${orden}`);
-            return notes ? JSON.parse(notes) : [];
-        }
-        function saveNote(orden, text) {
-            const notes = getNotes(orden);
-            notes.push({ id: Date.now(), text, date: dayjs().format('DD/MM/YYYY HH:mm') });
-            localStorage.setItem(`notes_${orden}`, JSON.stringify(notes));
-        }
-        function deleteNote(orden, id) {
-            let notes = getNotes(orden);
-            notes = notes.filter(n => n.id !== id);
-            localStorage.setItem(`notes_${orden}`, JSON.stringify(notes));
-        }
+        function getNotes(orden) { return JSON.parse(localStorage.getItem(`notes_${orden}`) || '[]'); }
+        function saveNote(orden, text) { const notes = getNotes(orden); notes.push({ id: Date.now(), text, date: dayjs().format('DD/MM/YY HH:mm') }); localStorage.setItem(`notes_${orden}`, JSON.stringify(notes)); }
+        function deleteNote(orden, id) { localStorage.setItem(`notes_${orden}`, JSON.stringify(getNotes(orden).filter(n => n.id !== id))); }
 
         function showProductModal(product) {
-            const datesHtml = product.dates.map(d => `<span class="inline-block bg-slate-700 px-2 py-1 rounded text-xs text-slate-300 mr-2 mb-2">${d}</span>`).join('');
-            
             Swal.fire({
-                title: `<div class="text-lg font-bold text-left text-white border-b border-slate-700 pb-2">Detalles: #${product.orden}</div>`,
+                title: `<div class="text-xl font-bold text-left text-white border-b border-slate-700/50 pb-3 mb-2 flex justify-between items-center"><span>Detalle de Orden</span><span class="text-sm bg-blue-500/20 text-blue-400 px-3 py-1 rounded-full border border-blue-500/30">#${product.orden}</span></div>`,
                 html: `
-                    <div class="text-left mt-4 space-y-3 text-sm">
-                        <div class="grid grid-cols-2 gap-4">
-                            <div><span class="text-slate-400">Planta:</span> <span class="font-semibold text-slate-200">${product.planta}</span></div>
-                            <div><span class="text-slate-400">Código:</span> <span class="font-semibold text-slate-200">${product.codigo}</span></div>
+                    <div class="text-left space-y-4 text-sm px-1">
+                        <div class="grid grid-cols-2 gap-4 bg-slate-800/30 p-4 rounded-lg border border-slate-700/50">
+                            <div><span class="text-slate-400 block text-xs mb-1 uppercase tracking-wider">Planta</span> <span class="font-semibold text-slate-200 text-base">${product.planta}</span></div>
+                            <div><span class="text-slate-400 block text-xs mb-1 uppercase tracking-wider">Código</span> <span class="font-semibold text-slate-200 text-base">${product.codigo}</span></div>
                         </div>
-                        <div><span class="text-slate-400">Descripción Original:</span><br><span class="font-semibold text-slate-200">${product.descripcion}</span></div>
-                        <div><span class="text-slate-400">Fechas Programadas:</span><br><div class="mt-1">${datesHtml}</div></div>
-                        
-                        <div class="mt-6 pt-4 border-t border-slate-700">
-                            <h4 class="font-semibold text-slate-200 mb-2">Notas</h4>
-                            <div class="flex gap-2 mb-3">
-                                <input type="text" id="swal-note-input" class="flex-1 bg-slate-800 border border-slate-600 rounded px-2 py-1 text-sm text-white focus:outline-none focus:border-blue-500" placeholder="Añadir observación...">
-                                <button onclick="handleAddNote('${product.orden}')" class="bg-blue-600 hover:bg-blue-500 text-white px-3 py-1 rounded text-sm transition">Agregar</button>
-                            </div>
-                            <div id="swal-notes-list" class="space-y-2 max-h-40 overflow-y-auto custom-scrollbar"></div>
+                        <div class="bg-indigo-900/20 border border-indigo-500/30 p-3 rounded-lg flex items-center justify-between"><span class="text-indigo-300 font-medium text-xs uppercase tracking-wider">Etapa Actual</span><span class="font-bold text-indigo-400 bg-indigo-500/10 px-3 py-1 rounded shadow-inner">${getEtapaNombre(product.etapa)}</span></div>
+                        <div><span class="text-slate-400 text-xs uppercase tracking-wider">Descripción Original</span><br><span class="font-medium text-slate-200 mt-1 block">${product.descripcion}</span></div>
+                        <div><span class="text-slate-400 text-xs uppercase tracking-wider">Fechas Programadas</span><br><div class="mt-2">${product.dates.map(d => `<span class="inline-block bg-slate-700/50 border border-slate-600 px-2 py-1 rounded text-xs text-slate-200 mr-2 mb-2 shadow-sm">${d}</span>`).join('')}</div></div>
+                        <div class="mt-6 pt-4 border-t border-slate-700/50"><h4 class="font-semibold text-slate-200 mb-3 text-xs uppercase tracking-wider">Observaciones</h4>
+                            <div class="flex gap-2 mb-3"><input type="text" id="swal-note-input" class="flex-1 bg-slate-900/50 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500" placeholder="Añadir nota..."><button onclick="handleAddNote('${product.orden}')" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow-md">Guardar</button></div>
+                            <div id="swal-notes-list" class="space-y-2 max-h-40 overflow-y-auto custom-scrollbar pr-1"></div>
                         </div>
                     </div>
                 `,
-                showConfirmButton: false,
-                showCloseButton: true,
-                width: '600px',
-                didOpen: () => renderModalNotes(product.orden)
+                showConfirmButton: false, showCloseButton: true, width: '600px', didOpen: () => renderModalNotes(product.orden)
             });
         }
 
         function renderModalNotes(orden) {
-            const container = document.getElementById('swal-notes-list');
-            if(!container) return;
+            const container = document.getElementById('swal-notes-list'); if(!container) return;
             const notes = getNotes(orden);
-            if(notes.length === 0) {
-                container.innerHTML = '<p class="text-slate-500 text-xs italic">No hay notas.</p>';
-                return;
-            }
-            container.innerHTML = notes.map(n => `
-                <div class="bg-slate-800 p-2 rounded border border-slate-700 flex justify-between items-start">
-                    <div>
-                        <p class="text-xs text-slate-300">${n.text}</p>
-                        <p class="text-[10px] text-slate-500 mt-1">${n.date}</p>
-                    </div>
-                    <button onclick="handleDeleteNote('${orden}', ${n.id})" class="text-slate-500 hover:text-red-400"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>
-                </div>
-            `).join('');
+            if(notes.length === 0) { container.innerHTML = '<p class="text-slate-500 text-xs italic text-center py-2">No hay notas registradas.</p>'; return; }
+            container.innerHTML = notes.map(n => `<div class="bg-slate-800/50 p-3 rounded-lg border border-slate-700/50 flex justify-between items-start group"><div><p class="text-sm text-slate-300">${n.text}</p><p class="text-[10px] text-slate-500 mt-1.5">${n.date}</p></div><button onclick="handleDeleteNote('${orden}', ${n.id})" class="text-slate-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button></div>`).join('');
         }
 
-        window.handleAddNote = function(orden) {
-            const input = document.getElementById('swal-note-input');
-            const text = input.value.trim();
-            if(text) {
-                saveNote(orden, text);
-                input.value = '';
-                renderModalNotes(orden);
-            }
-        };
-        window.handleDeleteNote = function(orden, id) {
-            deleteNote(orden, id);
-            renderModalNotes(orden);
-        };
+        window.handleAddNote = function(orden) { const input = document.getElementById('swal-note-input'); if(input.value.trim()) { saveNote(orden, input.value.trim()); input.value = ''; renderModalNotes(orden); } };
+        window.handleDeleteNote = function(orden, id) { deleteNote(orden, id); renderModalNotes(orden); };
 
-        // --- Registro de Actividad ---
         function logActivity(message) {
-            const time = dayjs().format('DD/MM HH:mm');
             const logs = JSON.parse(localStorage.getItem('dashboard_activity') || '[]');
-            logs.unshift({ time, message });
-            if (logs.length > 50) logs.pop(); 
-            localStorage.setItem('dashboard_activity', JSON.stringify(logs));
-            renderActivity();
+            logs.unshift({ time: dayjs().format('DD/MM HH:mm'), message }); if (logs.length > 50) logs.pop(); 
+            localStorage.setItem('dashboard_activity', JSON.stringify(logs)); renderActivity();
         }
 
         function renderActivity() {
-            const logs = JSON.parse(localStorage.getItem('dashboard_activity') || '[]');
-            const container = document.getElementById('activityList');
-            if (logs.length === 0) {
-                container.innerHTML = '<p class="text-slate-500 text-center mt-4">Sin actividad</p>';
-                return;
-            }
-            container.innerHTML = logs.map(l => `
-                <div class="flex items-start gap-2 border-b border-slate-700/50 pb-2 last:border-0">
-                    <span class="text-slate-500 min-w-[70px]">${l.time}</span>
-                    <span class="text-slate-300">${l.message}</span>
-                </div>
-            `).join('');
+            const logs = JSON.parse(localStorage.getItem('dashboard_activity') || '[]'); const container = document.getElementById('activityList');
+            if (logs.length === 0) { container.innerHTML = '<p class="text-slate-500 text-center mt-4">Sin actividad</p>'; return; }
+            container.innerHTML = logs.map(l => `<div class="flex items-start gap-3 p-2 hover:bg-slate-800/30 rounded transition border-b border-slate-700/30 last:border-0"><span class="text-blue-400/70 font-medium min-w-[75px]">${l.time}</span><span class="text-slate-300">${l.message}</span></div>`).join('');
         }
 
-        // --- Manejo de Storage ---
-        function saveToLocalStorage() {
-            localStorage.setItem('dashboard_products', JSON.stringify(products));
-        }
+        function saveToLocalStorage() { localStorage.setItem('dashboard_products', JSON.stringify(products)); }
+        function loadFromLocalStorage() { const saved = localStorage.getItem('dashboard_products'); if (saved) { products = JSON.parse(saved); updateDashboard(); } renderActivity(); }
 
-        function loadFromLocalStorage() {
-            const saved = localStorage.getItem('dashboard_products');
-            if (saved) {
-                products = JSON.parse(saved);
-                updateDashboard();
-            }
-            renderActivity();
-        }
-
-        function clearData() {
-            Swal.fire({
-                title: '¿Estás seguro?',
-                text: "Se eliminarán todos los datos, notas y actividad local.",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#ef4444',
-                cancelButtonColor: '#475569',
-                confirmButtonText: 'Sí, limpiar',
-                cancelButtonText: 'Cancelar'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    localStorage.clear();
-                    products = [];
-                    updateDashboard();
-                    renderActivity();
-                    Swal.fire('Eliminado', 'Los datos han sido borrados.', 'success');
-                }
-            });
-        }
+        function clearData() { requireAdmin(() => { localStorage.clear(); products = []; updateDashboard(); renderActivity(); Swal.fire({ icon: 'success', title: 'Limpio', text: 'El dashboard ha sido vaciado correctamente.', background: 'rgba(15, 23, 42, 0.95)', color: '#f8fafc', customClass: { confirmButton: 'bg-blue-600 text-white px-5 py-2.5 rounded-lg' }, buttonsStyling: false }); }); }
     </script>
 </body>
 </html>
