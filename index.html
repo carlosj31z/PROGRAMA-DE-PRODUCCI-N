@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PROGRAMA DE PRODUCCIÓN</title>
+    <title>Programa de Producción - Dashboard Unificado</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com">
@@ -63,6 +63,13 @@
     </script>
 
     <style>
+        :root {
+            --color-1: #3b82f6;
+            --color-2: #8b5cf6;
+            --color-3: #10b981;
+            --color-4: #f59e0b;
+        }
+
         body {
             font-family: 'Inter', sans-serif;
             background-color: #0b1120;
@@ -102,6 +109,7 @@
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
             transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            margin-bottom: 1.5rem;
         }
         
         .card-hover:hover {
@@ -132,29 +140,208 @@
             box-shadow: 0 0 15px rgba(16, 185, 129, 0.3);
         }
         
-        /* Tab Styles */
-        .tab-btn {
+        /* Gooey Nav Styles - CORREGIDO SIN CUADRO NEGRO */
+        .gooey-nav-container {
             position: relative;
-            transition: all 0.3s ease;
+            display: inline-flex;
         }
-        .tab-btn.active-tab {
+
+        .gooey-nav-container nav {
+            display: flex;
+            position: relative;
+            z-index: 3;
+        }
+
+        .gooey-nav-container nav ul {
+            display: flex;
+            gap: 0.25rem;
+            list-style: none;
+            padding: 0.25rem;
+            margin: 0;
+            position: relative;
+            z-index: 3;
+            color: #94a3b8;
+            background: rgba(30, 41, 59, 0.6);
+            border-radius: 0.75rem;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+        }
+
+        .gooey-nav-container nav ul li {
+            border-radius: 0.5rem;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #94a3b8;
+            white-space: nowrap;
+            z-index: 4;
+        }
+
+        .gooey-nav-container nav ul li a {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-decoration: none;
+            color: inherit;
+            cursor: pointer;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 5;
+        }
+
+        .gooey-nav-container nav ul li:hover {
             color: #f8fafc;
         }
-        .tab-btn.active-tab::after {
+
+        .gooey-nav-container nav ul li.active {
+            color: white;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .gooey-nav-container nav ul li.active a {
+            background: linear-gradient(145deg, rgba(59, 130, 246, 0.9), rgba(139, 92, 246, 0.9));
+        }
+
+        /* Efecto de partículas - SIN CUADRO NEGRO */
+        .gooey-nav-container .effect {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 0;
+            height: 0;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 1;
+            border-radius: 0.5rem;
+        }
+
+        .gooey-nav-container .effect.filter {
+            filter: blur(7px) contrast(100) blur(0);
+            mix-blend-mode: lighten;
+            opacity: 1;
+        }
+
+        .gooey-nav-container .effect.filter::before {
+            display: none;
+        }
+
+        .gooey-nav-container .effect.filter::after {
             content: '';
             position: absolute;
-            bottom: -2px;
-            left: 0;
-            width: 100%;
-            height: 3px;
-            border-radius: 3px 3px 0 0;
-            transition: all 0.3s ease;
+            inset: 0;
+            background: linear-gradient(145deg, rgba(59, 130, 246, 0.9), rgba(139, 92, 246, 0.9));
+            transform: scale(0);
+            opacity: 0;
+            z-index: -1;
+            border-radius: 0.5rem;
         }
-        .tab-btn.rmd-tab.active-tab::after {
-            background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+
+        .gooey-nav-container .effect.active::after {
+            animation: pill 0.3s ease both;
         }
-        .tab-btn.prod-tab.active-tab::after {
-            background: linear-gradient(90deg, #10b981, #06b6d4);
+
+        @keyframes pill {
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .particle,
+        .point {
+            display: block;
+            opacity: 0;
+            width: 12px;
+            height: 12px;
+            border-radius: 100%;
+            transform-origin: center;
+        }
+
+        .particle {
+            --time: 5s;
+            position: absolute;
+            top: calc(50% - 6px);
+            left: calc(50% - 6px);
+            animation: particle calc(var(--time)) ease 1 -350ms;
+        }
+
+        .point {
+            background: var(--color);
+            opacity: 1;
+            animation: point calc(var(--time)) ease 1 -350ms;
+        }
+
+        @keyframes particle {
+            0% {
+                transform: rotate(0deg) translate(calc(var(--start-x)), calc(var(--start-y)));
+                opacity: 1;
+                animation-timing-function: cubic-bezier(0.55, 0, 1, 0.45);
+            }
+            70% {
+                transform: rotate(calc(var(--rotate) * 0.5)) translate(calc(var(--end-x) * 1.2), calc(var(--end-y) * 1.2));
+                opacity: 1;
+                animation-timing-function: ease;
+            }
+            85% {
+                transform: rotate(calc(var(--rotate) * 0.66)) translate(calc(var(--end-x)), calc(var(--end-y)));
+                opacity: 1;
+            }
+            100% {
+                transform: rotate(calc(var(--rotate) * 1.2)) translate(calc(var(--end-x) * 0.5), calc(var(--end-y) * 0.5));
+                opacity: 0;
+            }
+        }
+
+        @keyframes point {
+            0% {
+                transform: scale(0);
+                opacity: 0;
+            }
+            25% {
+                transform: scale(calc(var(--scale) * 0.25));
+            }
+            38% {
+                opacity: 1;
+            }
+            65% {
+                transform: scale(var(--scale));
+                opacity: 1;
+            }
+            85% {
+                transform: scale(var(--scale));
+                opacity: 1;
+            }
+            100% {
+                transform: scale(0);
+                opacity: 0;
+            }
+        }
+
+        /* Drop zone mini */
+        .drop-zone-mini {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border: 1px dashed rgba(255, 255, 255, 0.15);
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.8rem;
+            white-space: nowrap;
+            background: rgba(30, 41, 59, 0.5);
+        }
+        .drop-zone-mini:hover {
+            border-color: rgba(59, 130, 246, 0.5);
+            background: rgba(59, 130, 246, 0.08);
+        }
+        .drop-zone-mini.prod-style:hover {
+            border-color: rgba(16, 185, 129, 0.5);
+            background: rgba(16, 185, 129, 0.08);
         }
         
         /* FullCalendar Overrides */
@@ -190,7 +377,6 @@
         .fc .fc-toolbar-title {
             font-size: 1.125rem !important;
             font-weight: 600;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
         }
         .fc .fc-col-header-cell-cushion {
             color: #94a3b8;
@@ -215,49 +401,30 @@
             background: #475569;
         }
 
-        .drop-zone {
-            border: 2px dashed rgba(71, 85, 105, 0.5);
-            transition: all 0.3s;
-            background: rgba(30, 41, 59, 0.3);
+        .tab-content {
+            display: none;
         }
-        .drop-zone.dragover {
-            border-color: #3b82f6;
-            background-color: rgba(59, 130, 246, 0.1);
-            transform: scale(1.01);
-        }
-        .drop-zone.prod-dragover {
-            border-color: #10b981;
-            background-color: rgba(16, 185, 129, 0.1);
-            transform: scale(1.01);
-        }
-
-        .swal2-popup {
-            background: rgba(15, 23, 42, 0.95) !important;
-            backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: #f8fafc !important;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5) !important;
-            border-radius: 1rem !important;
-        }
-        .swal2-title {
-            color: #f8fafc !important;
-        }
-        .swal2-html-container {
-            color: #cbd5e1 !important;
-        }
-        .swal2-close {
-            color: #94a3b8 !important;
-        }
-        .swal2-close:hover {
-            color: #f8fafc !important;
+        .tab-content.active {
+            display: block;
         }
         
+        .info-badge {
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: #6ee7b7;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
         .badge {
             padding: 0.25rem 0.75rem;
             border-radius: 9999px;
             font-size: 0.75rem;
             font-weight: 600;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
         .badge-red {
             background: linear-gradient(145deg, rgba(239, 68, 68, 0.2), rgba(153, 27, 27, 0.3));
@@ -289,149 +456,172 @@
             box-shadow: 0 0 10px rgba(139, 92, 246, 0.5);
         }
         
-        .tab-content {
-            display: none;
+        .section-spacing {
+            margin-bottom: 1.5rem;
         }
-        .tab-content.active {
-            display: block;
+
+        .swal2-popup {
+            background: rgba(15, 23, 42, 0.95) !important;
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #f8fafc !important;
+            border-radius: 1rem !important;
         }
+        .swal2-title { color: #f8fafc !important; }
+        .swal2-html-container { color: #cbd5e1 !important; }
     </style>
 </head>
-<body class="min-h-screen flex flex-col p-4 md:p-6 space-y-6 relative">
+<body class="min-h-screen flex flex-col p-3 md:p-5 space-y-4 relative">
 
     <!-- Ambient Bloom Background -->
     <div id="ambient-bg">
         <div id="glow-orb"></div>
     </div>
 
-    <!-- Header -->
-    <header class="gsap-header flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0 relative z-10 opacity-0">
-        <div>
-            <h1 class="text-3xl font-bold tracking-tight flex items-center gap-3">
+    <!-- Header - Compacto -->
+    <header class="gsap-header flex flex-col md:flex-row justify-between items-start md:items-center space-y-2 md:space-y-0 relative z-10 opacity-0" style="padding: 0.25rem 0;">
+        <div class="flex items-center gap-3">
+            <h1 class="text-xl md:text-2xl font-bold tracking-tight">
                 <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-emerald-400">
-                    PROGRAMA DE PRODUCCIÓN
+                    Programa de Producción
                 </span>
             </h1>
-            <p class="text-sm text-slate-400 mt-1 ml-2">QA - DOC - P1 y P2</p>
         </div>
-        <div class="flex flex-wrap gap-3">
-            <button onclick="clearCurrentTabData()" class="bg-slate-800/80 hover:bg-slate-700 text-slate-300 border border-slate-600 hover:text-white px-5 py-2.5 rounded-lg text-sm font-medium transition-all shadow-lg flex items-center gap-2 backdrop-blur-sm">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                Limpiar Datos
-            </button>
-        </div>
+        <button onclick="clearCurrentTabData()" class="bg-slate-800/80 hover:bg-slate-700 text-slate-300 border border-slate-600 hover:text-white px-4 py-2 rounded-lg text-xs font-medium transition-all shadow-lg flex items-center gap-1.5 backdrop-blur-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+            Limpiar
+        </button>
     </header>
 
-    <!-- Tab Navigation -->
-    <div class="flex gap-1 bg-slate-800/50 p-1 rounded-xl backdrop-blur-sm border border-slate-700/30 w-fit opacity-0" id="tab-nav">
-        <button class="tab-btn rmd-tab active-tab px-6 py-3 rounded-lg text-sm font-semibold transition-all text-slate-300 hover:text-white" data-tab="rmd" onclick="switchTab('rmd')">
-            <span class="flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                RMD pendiente de Autorizar
-            </span>
-        </button>
-        <button class="tab-btn prod-tab px-6 py-3 rounded-lg text-sm font-semibold transition-all text-slate-300 hover:text-white" data-tab="produccion" onclick="switchTab('produccion')">
-            <span class="flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
-                Programa de Producción
-            </span>
-        </button>
+    <!-- Tab Navigation + Upload Zone -->
+    <div class="flex items-center gap-3 flex-wrap opacity-0" id="tab-nav-row">
+        <!-- Gooey Nav Container -->
+        <div class="gooey-nav-container" id="gooeyNavContainer">
+            <nav>
+                <ul id="gooeyNavList">
+                    <li class="active" data-tab="rmd">
+                        <a href="#" onclick="return false;">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                            RMD
+                        </a>
+                    </li>
+                    <li data-tab="produccion">
+                        <a href="#" onclick="return false;">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
+                            Producción
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            <span class="effect filter" id="gooeyFilter"></span>
+        </div>
+
+        <!-- Inline Upload Zone RMD -->
+        <div class="flex items-center gap-2" id="inlineUploadRMD">
+            <div class="drop-zone-mini" onclick="document.getElementById('fileInputRMD').click()" title="Cargar Excel RMD">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                <span>Cargar RMD</span>
+            </div>
+            <input type="file" id="fileInputRMD" class="hidden" accept=".xlsx, .xls" onchange="handleFileRMD(event)">
+            <span class="text-xs text-emerald-400 font-medium" id="rmdStatusBadge" style="display:none;">✓ Cargado</span>
+        </div>
+
+        <!-- Inline Upload Zone Prod -->
+        <div class="flex items-center gap-2" id="inlineUploadProd" style="display:none;">
+            <div class="drop-zone-mini prod-style" onclick="document.getElementById('fileInputProd').click()" title="Cargar Excel Producción">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                <span>Cargar Prod</span>
+            </div>
+            <input type="file" id="fileInputProd" class="hidden" accept=".xlsx, .xls" onchange="handleFileProd(event)">
+            <span class="text-xs text-emerald-400 font-medium" id="prodStatusBadge" style="display:none;">✓ Cargado</span>
+        </div>
     </div>
 
-    <!-- ==================== TAB 1: RMD (Órdenes sin Autorizar) ==================== -->
+    <!-- ==================== TAB 1: RMD ==================== -->
     <div class="tab-content active" id="tab-rmd">
         
-        <!-- Upload Zone RMD -->
-        <div id="dropZoneRMD" class="card drop-zone p-8 flex flex-col items-center justify-center cursor-pointer relative overflow-hidden opacity-0" onclick="document.getElementById('fileInputRMD').click()">
-            <div class="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-purple-500/5 pointer-events-none"></div>
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-slate-400 mb-3 transition-transform group-hover:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
-            <p class="text-slate-200 font-medium text-lg text-center">Haz clic o arrastra tu Excel aquí</p>
-            <p class="text-sm text-slate-500 mt-2 text-center">Soporta archivos tipo xlx. o xlsx.</p>
-            <input type="file" id="fileInputRMD" class="hidden" accept=".xlsx, .xls" onchange="handleFileRMD(event)">
-        </div>
-
         <!-- KPIs RMD -->
-        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-5">
-            <div class="card card-hover p-5 cursor-pointer transition-all kpi-filter active-filter opacity-0" onclick="setFilterRMD('ALL')" id="kpi-card-total" title="Mostrar todo">
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 section-spacing">
+            <div class="card card-hover p-4 cursor-pointer transition-all kpi-filter active-filter opacity-0" onclick="setFilterRMD('ALL')" id="kpi-card-total">
                 <p class="text-xs text-slate-400 uppercase font-bold tracking-wider">Total Productos</p>
-                <p id="kpi-total" class="text-3xl font-bold mt-2 text-white">0</p>
+                <p id="kpi-total" class="text-2xl font-bold mt-1.5 text-white">0</p>
             </div>
-            <div class="card card-hover p-5 cursor-pointer transition-all kpi-filter opacity-0" onclick="setFilterRMD('ATE')" id="kpi-card-ate" title="Filtrar por ATE">
+            <div class="card card-hover p-4 cursor-pointer transition-all kpi-filter opacity-0" onclick="setFilterRMD('ATE')" id="kpi-card-ate">
                 <p class="text-xs text-slate-400 uppercase font-bold tracking-wider">Planta ATE</p>
-                <p id="kpi-ate" class="text-3xl font-bold mt-2 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400">0</p>
+                <p id="kpi-ate" class="text-2xl font-bold mt-1.5 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400">0</p>
             </div>
-            <div class="card card-hover p-5 cursor-pointer transition-all kpi-filter opacity-0" onclick="setFilterRMD('LIMA')" id="kpi-card-lima" title="Filtrar por LIMA">
+            <div class="card card-hover p-4 cursor-pointer transition-all kpi-filter opacity-0" onclick="setFilterRMD('LIMA')" id="kpi-card-lima">
                 <p class="text-xs text-slate-400 uppercase font-bold tracking-wider">Planta LIMA</p>
-                <p id="kpi-lima" class="text-3xl font-bold mt-2 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-fuchsia-400">0</p>
+                <p id="kpi-lima" class="text-2xl font-bold mt-1.5 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-fuchsia-400">0</p>
             </div>
-            <div class="card p-5 opacity-0">
+            <div class="card p-4 opacity-0">
                 <p class="text-xs text-slate-400 uppercase font-bold tracking-wider">Vencidos</p>
-                <p id="kpi-vencidos" class="text-3xl font-bold mt-2 text-transparent bg-clip-text bg-gradient-to-r from-red-400 to-orange-400">0</p>
+                <p id="kpi-vencidos" class="text-2xl font-bold mt-1.5 text-transparent bg-clip-text bg-gradient-to-r from-red-400 to-orange-400">0</p>
             </div>
-            <div class="card p-5 opacity-0">
+            <div class="card p-4 opacity-0">
                 <p class="text-xs text-slate-400 uppercase font-bold tracking-wider">Próx. 7 Días</p>
-                <p id="kpi-prox7" class="text-3xl font-bold mt-2 text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-yellow-500">0</p>
+                <p id="kpi-prox7" class="text-2xl font-bold mt-1.5 text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-yellow-500">0</p>
             </div>
-            <div class="card p-5 opacity-0">
+            <div class="card p-4 opacity-0">
                 <p class="text-xs text-slate-400 uppercase font-bold tracking-wider">Día Pico</p>
-                <p id="kpi-max-day" class="text-xl font-bold mt-3 text-emerald-400">-</p>
+                <p id="kpi-max-day" class="text-lg font-bold mt-2 text-emerald-400">-</p>
             </div>
         </div>
 
-        <!-- Main Grid RMD: Calendar + Alerts -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div class="card p-5 lg:col-span-2 opacity-0">
-                <div id="calendarRMD" class="min-h-[550px]"></div>
+        <!-- Main Grid RMD -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 section-spacing">
+            <div class="card p-4 lg:col-span-2 opacity-0">
+                <div id="calendarRMD" class="min-h-[500px]"></div>
             </div>
-            <div class="space-y-6 flex flex-col h-[550px]">
+            <div class="space-y-5 flex flex-col h-[500px]">
                 <div class="card p-0 flex-1 flex flex-col overflow-hidden opacity-0">
-                    <div class="p-4 border-b border-slate-700/50 bg-slate-800/30">
-                        <h2 class="font-semibold text-slate-200 flex items-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>
+                    <div class="p-3 border-b border-slate-700/50 bg-slate-800/30">
+                        <h2 class="font-semibold text-slate-200 text-sm flex items-center gap-1.5">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-red-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>
                             Fechas Críticas
                         </h2>
                     </div>
-                    <div class="overflow-y-auto p-4 space-y-3 flex-1 custom-scrollbar" id="alertsListRMD">
-                        <p class="text-sm text-slate-500 text-center mt-10">Sin alertas</p>
+                    <div class="overflow-y-auto p-3 space-y-2.5 flex-1 custom-scrollbar" id="alertsListRMD">
+                        <p class="text-xs text-slate-500 text-center mt-8">Sin alertas</p>
                     </div>
                 </div>
-                <div class="card p-0 h-52 flex flex-col overflow-hidden opacity-0">
-                    <div class="p-4 border-b border-slate-700/50 bg-slate-800/30">
-                        <h2 class="font-semibold text-slate-200 text-sm flex items-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
-                            Actividad Reciente - Historial de carga de archivo
+                <div class="card p-0 h-44 flex flex-col overflow-hidden opacity-0">
+                    <div class="p-3 border-b border-slate-700/50 bg-slate-800/30">
+                        <h2 class="font-semibold text-slate-200 text-xs flex items-center gap-1.5">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                            Actividad Reciente
                         </h2>
                     </div>
-                    <div class="overflow-y-auto p-4 space-y-3 flex-1 text-xs" id="activityListRMD"></div>
+                    <div class="overflow-y-auto p-3 space-y-2 flex-1 text-xs" id="activityListRMD"></div>
                 </div>
             </div>
         </div>
 
         <!-- Comparativa RMD -->
-        <div class="card p-6 opacity-0">
-            <h2 class="font-semibold text-slate-200 mb-5 text-sm flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
+        <div class="card p-5 opacity-0 section-spacing">
+            <h2 class="font-semibold text-slate-200 mb-4 text-sm flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
                 Distribución de Carga RMD (ATE vs LIMA)
             </h2>
             <div class="flex items-center justify-between mb-3 text-sm">
                 <span class="text-blue-400 font-bold tracking-wide" id="comp-ate-text">ATE: 0 (0%)</span>
                 <span class="text-purple-400 font-bold tracking-wide" id="comp-lima-text">LIMA: 0 (0%)</span>
             </div>
-            <div class="w-full bg-slate-800/50 rounded-full h-5 flex overflow-hidden border border-slate-700 shadow-inner p-0.5">
+            <div class="w-full bg-slate-800/50 rounded-full h-4 flex overflow-hidden border border-slate-700 shadow-inner p-0.5">
                 <div id="comp-ate-bar" class="bar-ate h-full rounded-l-full transition-all duration-1000 ease-out" style="width: 50%"></div>
                 <div id="comp-lima-bar" class="bar-lima h-full rounded-r-full transition-all duration-1000 ease-out" style="width: 50%"></div>
             </div>
         </div>
 
-        <!-- Charts Row RMD -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 pb-10">
+        <!-- Charts RMD -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 pb-6">
             <div class="card p-5 opacity-0">
-                <h2 class="font-semibold text-slate-200 mb-4 text-sm">Volumen Semanal</h2>
-                <div class="h-[280px] w-full"><canvas id="chartWeeklyRMD"></canvas></div>
+                <h2 class="font-semibold text-slate-200 mb-3 text-sm">Volumen Semanal</h2>
+                <div class="h-[250px] w-full"><canvas id="chartWeeklyRMD"></canvas></div>
             </div>
             <div class="card p-5 opacity-0">
-                <h2 class="font-semibold text-slate-200 mb-4 text-sm">Timeline Diario</h2>
-                <div class="h-[280px] w-full"><canvas id="chartTimelineRMD"></canvas></div>
+                <h2 class="font-semibold text-slate-200 mb-3 text-sm">Timeline Diario</h2>
+                <div class="h-[250px] w-full"><canvas id="chartTimelineRMD"></canvas></div>
             </div>
         </div>
     </div>
@@ -439,54 +629,77 @@
     <!-- ==================== TAB 2: Programa de Producción ==================== -->
     <div class="tab-content" id="tab-produccion">
         
-        <!-- Upload Zone Producción -->
-        <div id="dropZoneProd" class="card drop-zone p-8 flex flex-col items-center justify-center cursor-pointer relative overflow-hidden opacity-0" onclick="document.getElementById('fileInputProd').click()">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-slate-400 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-            <p class="text-slate-200 font-medium text-lg text-center">Carga aquí el Programa de Producción (Excel)</p>
-            <p class="text-sm text-slate-500 mt-2 text-center">Analiza automáticamente todas las pestañas (SOL, PEF, ACO...)</p>
-            <input type="file" id="fileInputProd" class="hidden" accept=".xlsx, .xls" onchange="handleFileProd(event)">
+        <!-- Info Badge -->
+        <div class="info-badge opacity-0 section-spacing" id="dateFilterInfo" style="display: none;">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            <span id="dateFilterText" class="text-xs"></span>
         </div>
 
         <!-- Filtros de Áreas -->
-        <div class="opacity-0 flex gap-2 overflow-x-auto pb-2 custom-scrollbar" id="areaFiltersContainer">
-            <button class="filter-pill active px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap" onclick="setAreaFilter('TODAS')">TODAS</button>
+        <div class="opacity-0 flex gap-1.5 overflow-x-auto pb-2 custom-scrollbar section-spacing" id="areaFiltersContainer">
+            <button class="filter-pill active px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap" onclick="setAreaFilter('TODAS')">TODAS</button>
         </div>
 
         <!-- KPIs Producción -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-5">
-            <div class="card p-5 opacity-0 text-center">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 section-spacing">
+            <div class="card p-4 opacity-0 text-center">
                 <p class="text-xs text-slate-400 uppercase font-bold tracking-wider">Productos Únicos</p>
-                <p id="kpi-productos" class="text-3xl font-bold mt-2 text-white">0</p>
+                <p id="kpi-productos" class="text-2xl font-bold mt-1.5 text-white">0</p>
             </div>
-            <div class="card p-5 opacity-0 text-center">
-                <p class="text-xs text-slate-400 uppercase font-bold tracking-wider">Días Programados (Total)</p>
-                <p id="kpi-dias" class="text-3xl font-bold mt-2 text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-400">0</p>
+            <div class="card p-4 opacity-0 text-center">
+                <p class="text-xs text-slate-400 uppercase font-bold tracking-wider">Días Programados</p>
+                <p id="kpi-dias" class="text-2xl font-bold mt-1.5 text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-400">0</p>
             </div>
-            <div class="card p-5 opacity-0 text-center">
+            <div class="card p-4 opacity-0 text-center">
                 <p class="text-xs text-slate-400 uppercase font-bold tracking-wider">Área con más carga</p>
-                <p id="kpi-area-top" class="text-xl font-bold mt-3 text-cyan-400">-</p>
+                <p id="kpi-area-top" class="text-lg font-bold mt-2 text-cyan-400">-</p>
             </div>
-            <div class="card p-5 opacity-0 text-center">
+            <div class="card p-4 opacity-0 text-center">
                 <p class="text-xs text-slate-400 uppercase font-bold tracking-wider">Pestañas Leídas</p>
-                <p id="kpi-pestanas" class="text-3xl font-bold mt-2 text-slate-300">0</p>
+                <p id="kpi-pestanas" class="text-2xl font-bold mt-1.5 text-slate-300">0</p>
             </div>
         </div>
 
-        <!-- Main Grid Producción: Calendar + Lista -->
-        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 pb-10">
-            <div class="card p-0 flex flex-col h-[600px] opacity-0 lg:col-span-1">
-                <div class="p-4 border-b border-slate-700/50 bg-slate-800/30">
-                    <h2 class="font-semibold text-slate-200 flex items-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+        <!-- Main Grid Producción -->
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-5 section-spacing">
+            <div class="card p-0 flex flex-col h-[500px] opacity-0 lg:col-span-1">
+                <div class="p-3 border-b border-slate-700/50 bg-slate-800/30">
+                    <h2 class="font-semibold text-slate-200 text-sm flex items-center gap-1.5">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                         Próximas a Producir
                     </h2>
                 </div>
-                <div class="overflow-y-auto p-4 space-y-3 flex-1 custom-scrollbar" id="upcomingListProd">
-                    <p class="text-sm text-slate-500 text-center mt-10">Sube un Excel para visualizar</p>
+                <div class="overflow-y-auto p-3 space-y-2.5 flex-1 custom-scrollbar" id="upcomingListProd">
+                    <p class="text-xs text-slate-500 text-center mt-8">Sube un Excel para visualizar</p>
                 </div>
             </div>
-            <div class="card p-5 lg:col-span-3 opacity-0">
-                <div id="calendarProd" class="min-h-[550px]"></div>
+            <div class="card p-4 lg:col-span-3 opacity-0">
+                <div id="calendarProd" class="min-h-[500px]"></div>
+            </div>
+        </div>
+
+        <!-- Gráficos de Distribución -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 section-spacing">
+            <!-- Gráfico de Barras -->
+            <div class="card p-5 opacity-0">
+                <h2 class="font-semibold text-slate-200 mb-4 text-sm flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" /></svg>
+                    Distribución de Carga por Área
+                </h2>
+                <div class="h-[300px] w-full">
+                    <canvas id="chartAreaDistribution"></canvas>
+                </div>
+            </div>
+
+            <!-- Gráfico Circular 3D - Solo visible en "TODAS" -->
+            <div class="card p-5 opacity-0" id="pieChartCard">
+                <h2 class="font-semibold text-slate-200 mb-4 text-sm flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" /></svg>
+                    Comparativa de Carga entre Secciones (%)
+                </h2>
+                <div class="h-[300px] w-full">
+                    <canvas id="chartPie3D"></canvas>
+                </div>
             </div>
         </div>
     </div>
@@ -498,24 +711,125 @@
 
         let currentTab = 'rmd';
 
+        // ==================== GOOEY NAV (CORREGIDO - SIN CUADRO NEGRO) ====================
+        function initGooeyNav() {
+            const container = document.getElementById('gooeyNavContainer');
+            const navList = document.getElementById('gooeyNavList');
+            const filterEl = document.getElementById('gooeyFilter');
+            const items = navList.querySelectorAll('li');
+            
+            const animationTime = 600;
+            const particleCount = 12;
+            const particleDistances = [70, 8];
+            const particleR = 80;
+            const timeVariance = 300;
+            const colors = [1, 2, 3, 1, 2, 3, 1, 4];
+            let activeIndex = 0;
+
+            const noise = (n = 1) => n / 2 - Math.random() * n;
+
+            const getXY = (distance, pointIndex, totalPoints) => {
+                const angle = ((360 + noise(8)) / totalPoints) * pointIndex * (Math.PI / 180);
+                return [distance * Math.cos(angle), distance * Math.sin(angle)];
+            };
+
+            const createParticle = (i, t, d, r) => {
+                let rotate = noise(r / 10);
+                return {
+                    start: getXY(d[0], particleCount - i, particleCount),
+                    end: getXY(d[1] + noise(7), particleCount - i, particleCount),
+                    time: t,
+                    scale: 1 + noise(0.2),
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    rotate: rotate > 0 ? (rotate + r / 20) * 10 : (rotate - r / 20) * 10
+                };
+            };
+
+            const makeParticles = (element) => {
+                const d = particleDistances;
+                const r = particleR;
+                element.classList.remove('active');
+
+                for (let i = 0; i < particleCount; i++) {
+                    const t = animationTime * 2 + noise(timeVariance * 2);
+                    const p = createParticle(i, t, d, r);
+
+                    setTimeout(() => {
+                        const particle = document.createElement('span');
+                        const point = document.createElement('span');
+                        particle.classList.add('particle');
+                        particle.style.setProperty('--start-x', `${p.start[0]}px`);
+                        particle.style.setProperty('--start-y', `${p.start[1]}px`);
+                        particle.style.setProperty('--end-x', `${p.end[0]}px`);
+                        particle.style.setProperty('--end-y', `${p.end[1]}px`);
+                        particle.style.setProperty('--time', `${p.time}ms`);
+                        particle.style.setProperty('--scale', `${p.scale}`);
+                        particle.style.setProperty('--color', `var(--color-${p.color}, white)`);
+                        particle.style.setProperty('--rotate', `${p.rotate}deg`);
+
+                        point.classList.add('point');
+                        particle.appendChild(point);
+                        element.appendChild(particle);
+                        requestAnimationFrame(() => {
+                            element.classList.add('active');
+                        });
+                        setTimeout(() => {
+                            try { element.removeChild(particle); } catch {}
+                        }, t);
+                    }, 30);
+                }
+            };
+
+            const updateEffectPosition = (element) => {
+                if (!container || !filterEl) return;
+                const containerRect = container.getBoundingClientRect();
+                const pos = element.getBoundingClientRect();
+                Object.assign(filterEl.style, {
+                    left: `${pos.x - containerRect.x}px`,
+                    top: `${pos.y - containerRect.y}px`,
+                    width: `${pos.width}px`,
+                    height: `${pos.height}px`
+                });
+            };
+
+            const handleNavClick = (index, liEl) => {
+                if (activeIndex === index) return;
+                activeIndex = index;
+                items.forEach(item => item.classList.remove('active'));
+                liEl.classList.add('active');
+                updateEffectPosition(liEl);
+                if (filterEl) {
+                    const particles = filterEl.querySelectorAll('.particle');
+                    particles.forEach(p => filterEl.removeChild(p));
+                    makeParticles(filterEl);
+                }
+                const tab = liEl.getAttribute('data-tab');
+                switchTab(tab);
+            };
+
+            const activeLi = items[activeIndex];
+            if (activeLi) setTimeout(() => updateEffectPosition(activeLi), 100);
+
+            items.forEach((li, index) => {
+                li.addEventListener('click', () => handleNavClick(index, li));
+            });
+
+            const resizeObserver = new ResizeObserver(() => {
+                const currentActive = items[activeIndex];
+                if (currentActive) updateEffectPosition(currentActive);
+            });
+            resizeObserver.observe(container);
+        }
+
         // ==================== REACTIVE BACKGROUND ====================
         function initReactiveBackground() {
             const glowOrb = document.getElementById('glow-orb');
             if (!glowOrb) return;
-            let mouseX = window.innerWidth / 2;
-            let mouseY = window.innerHeight / 2;
-            let orbX = mouseX;
-            let orbY = mouseY;
-            window.addEventListener('mousemove', (e) => {
-                mouseX = e.clientX;
-                mouseY = e.clientY;
-            });
+            let mouseX = window.innerWidth / 2, mouseY = window.innerHeight / 2, orbX = mouseX, orbY = mouseY;
+            window.addEventListener('mousemove', (e) => { mouseX = e.clientX; mouseY = e.clientY; });
             function animate() {
-                orbX += (mouseX - orbX) * 0.04;
-                orbY += (mouseY - orbY) * 0.04;
-                const moveX = orbX - window.innerWidth / 2;
-                const moveY = orbY - window.innerHeight / 2;
-                glowOrb.style.transform = `translate(calc(-50% + ${moveX}px), calc(-50% + ${moveY}px))`;
+                orbX += (mouseX - orbX) * 0.04; orbY += (mouseY - orbY) * 0.04;
+                glowOrb.style.transform = `translate(calc(-50% + ${orbX - window.innerWidth / 2}px), calc(-50% + ${orbY - window.innerHeight / 2}px))`;
                 requestAnimationFrame(animate);
             }
             animate();
@@ -524,49 +838,35 @@
         // ==================== TAB SWITCHING ====================
         function switchTab(tab) {
             currentTab = tab;
-            
-            // Update buttons
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active-tab'));
-            document.querySelector(`.tab-btn[data-tab="${tab}"]`).classList.add('active-tab');
-            
-            // Update content
-            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
             document.getElementById(`tab-${tab}`).classList.add('active');
-            
-            // Update glow orb color
+            document.getElementById('inlineUploadRMD').style.display = tab === 'rmd' ? 'flex' : 'none';
+            document.getElementById('inlineUploadProd').style.display = tab === 'produccion' ? 'flex' : 'none';
             const glowOrb = document.getElementById('glow-orb');
             if (tab === 'rmd') {
                 glowOrb.style.background = 'radial-gradient(circle, rgba(59, 130, 246, 0.15) 0%, rgba(139, 92, 246, 0.1) 40%, rgba(0, 0, 0, 0) 70%)';
-                // Re-render RMD calendar to fix sizing
                 if (calendarRMD) calendarRMD.updateSize();
             } else {
                 glowOrb.style.background = 'radial-gradient(circle, rgba(16, 185, 129, 0.15) 0%, rgba(59, 130, 246, 0.1) 40%, rgba(0, 0, 0, 0) 70%)';
-                // Re-render Prod calendar to fix sizing
                 if (calendarProd) calendarProd.updateSize();
+                if (chartAreaDist) chartAreaDist.update();
+                if (chartPie3D) chartPie3D.update();
             }
-            
-            // Re-animate cards
             animateCurrentTabCards();
         }
 
         function animateCurrentTabCards() {
             gsap.registerPlugin(ScrollTrigger);
             const activeTab = document.getElementById(`tab-${currentTab}`);
-            const cards = activeTab.querySelectorAll('.card, #areaFiltersContainer');
+            const cards = activeTab.querySelectorAll('.card, #areaFiltersContainer, .info-badge');
             cards.forEach((card) => {
-                gsap.fromTo(card, { y: 40, opacity: 0 }, {
-                    y: 0, opacity: 1, duration: 0.6,
-                    scrollTrigger: { trigger: card, start: "top 95%", toggleActions: "play none none reverse" }
-                });
+                gsap.fromTo(card, { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, scrollTrigger: { trigger: card, start: "top 95%", toggleActions: "play none none reverse" } });
             });
         }
 
         function clearCurrentTabData() {
-            if (currentTab === 'rmd') {
-                clearRMData();
-            } else {
-                clearProdData();
-            }
+            if (currentTab === 'rmd') clearRMData();
+            else clearProdData();
         }
 
         // ==================== UTILITY FUNCTIONS ====================
@@ -575,14 +875,7 @@
             if (!el) return;
             const startValue = parseInt(el.textContent.replace(/,/g, '')) || 0;
             const counter = { val: startValue };
-            gsap.to(counter, {
-                val: endValue,
-                duration: duration,
-                ease: "power2.out",
-                onUpdate: function() {
-                    el.textContent = Math.floor(counter.val).toLocaleString('en-US');
-                }
-            });
+            gsap.to(counter, { val: endValue, duration, ease: "power2.out", onUpdate: () => { el.textContent = Math.floor(counter.val).toLocaleString('en-US'); } });
         }
 
         function formatToIso(dateStr) {
@@ -605,26 +898,10 @@
         let chartTimelineInst = null;
         let currentPlantFilter = 'ALL';
 
-        function setupDragAndDropRMD() {
-            const dropZone = document.getElementById('dropZoneRMD');
-            dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
-            dropZone.addEventListener('dragleave', () => { dropZone.classList.remove('dragover'); });
-            dropZone.addEventListener('drop', (e) => {
-                e.preventDefault();
-                dropZone.classList.remove('dragover');
-                const file = e.dataTransfer.files[0];
-                if (file) processFileRMD(file);
-            });
-        }
-
-        function handleFileRMD(e) {
-            const file = e.target.files[0];
-            if (file) processFileRMD(file);
-            e.target.value = '';
-        }
+        function handleFileRMD(e) { const file = e.target.files[0]; if (file) processFileRMD(file); e.target.value = ''; }
 
         function processFileRMD(file) {
-            Swal.fire({ title: 'Procesando archivo...', text: 'Extrayendo datos de producción.', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); }, background: 'rgba(15, 23, 42, 0.95)', color: '#f8fafc' });
+            Swal.fire({ title: 'Procesando...', allowOutsideClick: false, didOpen: () => Swal.showLoading(), background: '#0f172a' });
             const reader = new FileReader();
             reader.onload = (e) => {
                 try {
@@ -633,18 +910,18 @@
                     const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
                     const jsonData = XLSX.utils.sheet_to_json(firstSheet, { defval: "" });
                     parseExcelDataRMD(jsonData);
-                } catch (error) { Swal.fire({ icon: 'error', title: 'Error', text: 'Error procesando archivo.', background: 'rgba(15, 23, 42, 0.95)', customClass: { confirmButton: 'bg-blue-600 text-white px-5 py-2.5 rounded-lg' }, buttonsStyling: false }); }
+                    document.getElementById('rmdStatusBadge').style.display = 'inline';
+                } catch (error) { Swal.fire({ icon: 'error', title: 'Error', background: '#0f172a' }); }
             };
             reader.readAsArrayBuffer(file);
         }
 
         function parseExcelDataRMD(data) {
-            if (data.length === 0) { Swal.fire({ icon: 'warning', title: 'Archivo vacío', text: 'El Excel no contiene datos.', background: 'rgba(15, 23, 42, 0.95)', color: '#f8fafc', customClass: { confirmButton: 'bg-blue-600 text-white px-5 py-2.5 rounded-lg' }, buttonsStyling: false }); return; }
+            if (data.length === 0) { Swal.fire({ icon: 'warning', title: 'Vacío', background: '#0f172a' }); return; }
             const keys = Object.keys(data[0]);
             const dateColumns = keys.filter(k => /^\d{2}-\d{2}-\d{4}$/.test(k));
             const headerEtapa = keys.find(k => k.toLowerCase().includes('etapa')) || keys[5];
             const newProductsMap = new Map();
-
             data.forEach(row => {
                 const planta = String(row["Planta"] || "").trim();
                 const orden = row["Orden"];
@@ -652,25 +929,19 @@
                 const dates = dateColumns.filter(col => String(row[col]).trim().toUpperCase() === "SI");
                 if (dates.length > 0) {
                     newProductsMap.set(String(orden), {
-                        orden: String(orden),
-                        planta,
-                        codigo: String(row["Código"] || ""),
-                        descripcion: row["Descripción"] || "",
-                        etapa: String(row[headerEtapa] || ""),
+                        orden: String(orden), planta, codigo: String(row["Código"] || ""),
+                        descripcion: row["Descripción"] || "", etapa: String(row[headerEtapa] || ""),
                         dates: dates.sort((a, b) => new Date(formatToIso(a)).getTime() - new Date(formatToIso(b)).getTime())
                     });
                 }
             });
-
             productsRMD = Array.from(newProductsMap.values());
-            saveRMDataToLocalStorage();
-            updateDashboardRMD();
-            logActivityRMD(`📂 Excel cargado: ${productsRMD.length} productos procesados.`);
-            Swal.fire({ icon: 'success', title: '¡Carga Exitosa!', text: `Se han procesado ${productsRMD.length} órdenes.`, timer: 2000, showConfirmButton: false, background: 'rgba(15, 23, 42, 0.95)', color: '#f8fafc' });
+            saveRMDataToLocalStorage(); updateDashboardRMD();
+            logActivityRMD(`📂 Excel cargado: ${productsRMD.length} productos.`);
+            Swal.fire({ icon: 'success', title: '¡Listo!', text: `${productsRMD.length} órdenes.`, timer: 2000, showConfirmButton: false, background: '#0f172a' });
         }
 
         function getCriticalDate(product) { return product.dates && product.dates.length > 0 ? product.dates[0] : null; }
-
         function setFilterRMD(plant) {
             currentPlantFilter = plant;
             document.querySelectorAll('#tab-rmd .kpi-filter').forEach(el => el.classList.remove('active-filter'));
@@ -679,33 +950,20 @@
             else if (plant === 'LIMA') document.getElementById('kpi-card-lima').classList.add('active-filter');
             renderCalendarRMD();
         }
-
         function updateDashboardRMD() { renderKPIsRMD(); renderCalendarRMD(); renderAlertsRMD(); renderChartsRMD(); }
 
         function renderKPIsRMD() {
-            const today = dayjs();
-            let countAte = 0, countLima = 0, vencidos = 0, prox7 = 0;
-            let dateCounts = {};
+            const today = dayjs(); let countAte = 0, countLima = 0, vencidos = 0, prox7 = 0; let dateCounts = {};
             productsRMD.forEach(p => {
                 const planta = String(p.planta).toUpperCase();
-                if (planta.includes("ATE")) countAte++;
-                else if (planta.includes("LIMA")) countLima++;
+                if (planta.includes("ATE")) countAte++; else if (planta.includes("LIMA")) countLima++;
                 const critStr = getCriticalDate(p);
-                if (critStr) {
-                    const diff = dayjs(formatToIso(critStr)).diff(today, 'day');
-                    if (diff < 0) vencidos++;
-                    else if (diff <= 7) prox7++;
-                }
+                if (critStr) { const diff = dayjs(formatToIso(critStr)).diff(today, 'day'); if (diff < 0) vencidos++; else if (diff <= 7) prox7++; }
                 p.dates.forEach(d => { dateCounts[d] = (dateCounts[d] || 0) + 1; });
             });
-
             let maxDay = "-", maxVal = 0;
             for (const [date, count] of Object.entries(dateCounts)) { if (count > maxVal) { maxVal = count; maxDay = date; } }
-
-            animateCounter('kpi-total', productsRMD.length, 3);
-            animateCounter('kpi-ate', countAte, 3);
-            animateCounter('kpi-lima', countLima, 3);
-            animateCounter('kpi-vencidos', vencidos, 3);
+            animateCounter('kpi-total', productsRMD.length, 3); animateCounter('kpi-ate', countAte, 3); animateCounter('kpi-lima', countLima, 3); animateCounter('kpi-vencidos', vencidos, 3);
             document.getElementById('kpi-prox7').textContent = prox7;
             document.getElementById('kpi-max-day').textContent = maxVal > 0 ? `${maxDay} (${maxVal})` : '-';
             renderComparisonRMD(countAte, countLima);
@@ -713,48 +971,30 @@
 
         function renderComparisonRMD(countAte, countLima) {
             const total = countAte + countLima;
-            const pctAte = total === 0 ? 0 : (countAte / total) * 100;
-            const pctLima = total === 0 ? 0 : (countLima / total) * 100;
-            document.getElementById('comp-ate-text').textContent = `ATE: ${countAte} (${Math.round(pctAte)}%)`;
-            document.getElementById('comp-lima-text').textContent = `LIMA: ${countLima} (${Math.round(pctLima)}%)`;
-            document.getElementById('comp-ate-bar').style.width = total === 0 ? '50%' : `${pctAte}%`;
-            document.getElementById('comp-lima-bar').style.width = total === 0 ? '50%' : `${pctLima}%`;
+            document.getElementById('comp-ate-text').textContent = `ATE: ${countAte} (${Math.round(total === 0 ? 0 : (countAte / total) * 100)}%)`;
+            document.getElementById('comp-lima-text').textContent = `LIMA: ${countLima} (${Math.round(total === 0 ? 0 : (countLima / total) * 100)}%)`;
+            document.getElementById('comp-ate-bar').style.width = total === 0 ? '50%' : `${(countAte / total) * 100}%`;
+            document.getElementById('comp-lima-bar').style.width = total === 0 ? '50%' : `${(countLima / total) * 100}%`;
         }
 
         function renderCalendarRMD() {
-            if (!calendarRMD) return;
-            calendarRMD.removeAllEvents();
-            const events = [];
+            if (!calendarRMD) return; calendarRMD.removeAllEvents(); const events = [];
             productsRMD.forEach(p => {
                 const planta = String(p.planta).toUpperCase();
                 if (currentPlantFilter === 'ATE' && !planta.includes("ATE")) return;
                 if (currentPlantFilter === 'LIMA' && !planta.includes("LIMA")) return;
                 let color = planta.includes("ATE") ? '#3b82f6' : (planta.includes("LIMA") ? '#8b5cf6' : '#475569');
                 const firstWord = p.descripcion.trim() ? p.descripcion.trim().split(/\s+/)[0] : p.orden;
-                p.dates.forEach(d => {
-                    events.push({
-                        id: p.orden,
-                        title: firstWord,
-                        start: formatToIso(d),
-                        backgroundColor: color,
-                        borderColor: color,
-                        extendedProps: { ...p }
-                    });
-                });
+                p.dates.forEach(d => { events.push({ id: p.orden, title: firstWord, start: formatToIso(d), backgroundColor: color, borderColor: color, extendedProps: { ...p } }); });
             });
             calendarRMD.addEventSource(events);
             if (events.length > 0 && currentPlantFilter === 'ALL') calendarRMD.gotoDate(events.map(e => e.start).sort()[0]);
         }
 
         function initCalendarRMD() {
-            const calendarEl = document.getElementById('calendarRMD');
-            calendarRMD = new FullCalendar.Calendar(calendarEl, {
-                initialView: 'dayGridMonth',
-                locale: 'es',
-                headerToolbar: { left: 'prev,next today', center: 'title', right: 'dayGridMonth,dayGridWeek' },
-                buttonText: { today: 'Hoy', month: 'Mes', week: 'Semana' },
-                firstDay: 1,
-                height: 550,
+            calendarRMD = new FullCalendar.Calendar(document.getElementById('calendarRMD'), {
+                initialView: 'dayGridMonth', locale: 'es', headerToolbar: { left: 'prev,next today', center: 'title', right: 'dayGridMonth,dayGridWeek' },
+                buttonText: { today: 'Hoy', month: 'Mes', week: 'Semana' }, firstDay: 1, height: 500,
                 eventClick: (info) => showProductModalRMD(info.event.extendedProps),
                 eventMouseEnter: (info) => info.el.setAttribute('title', `${info.event.extendedProps.descripcion}\nEtapa: ${getEtapaNombre(info.event.extendedProps.etapa)}`)
             });
@@ -762,65 +1002,45 @@
         }
 
         function renderAlertsRMD() {
-            const alertsList = document.getElementById('alertsListRMD');
-            alertsList.innerHTML = '';
-            const today = dayjs();
-            const alerts = [];
+            const alertsList = document.getElementById('alertsListRMD'); alertsList.innerHTML = '';
+            const today = dayjs(); const alerts = [];
             productsRMD.forEach(p => {
-                const critStr = getCriticalDate(p);
-                if (!critStr) return;
+                const critStr = getCriticalDate(p); if (!critStr) return;
                 const diff = dayjs(formatToIso(critStr)).diff(today, 'day');
                 let priority, badgeClass, label;
-                if (diff < 0) { priority = 1; badgeClass = 'badge-red'; label = 'Vencido'; } else if (diff <= 3) { priority = 2; badgeClass = 'badge-orange'; label = '≤ 3 días'; } else if (diff <= 7) { priority = 3; badgeClass = 'badge-yellow'; label = '≤ 7 días'; } else { priority = 4; badgeClass = 'badge-green'; label = '> 7 días'; }
+                if (diff < 0) { priority = 1; badgeClass = 'badge-red'; label = 'Vencido'; }
+                else if (diff <= 3) { priority = 2; badgeClass = 'badge-orange'; label = '≤ 3 días'; }
+                else if (diff <= 7) { priority = 3; badgeClass = 'badge-yellow'; label = '≤ 7 días'; }
+                else { priority = 4; badgeClass = 'badge-green'; label = '> 7 días'; }
                 alerts.push({ product: p, diff, priority, badgeClass, label, critStr });
             });
             alerts.sort((a, b) => a.priority !== b.priority ? a.priority - b.priority : a.diff - b.diff);
-
-            if (alerts.length === 0) { alertsList.innerHTML = '<p class="text-sm text-slate-500 text-center mt-10">Sin alertas</p>'; return; }
+            if (alerts.length === 0) { alertsList.innerHTML = '<p class="text-xs text-slate-500 text-center mt-8">Sin alertas</p>'; return; }
             alerts.forEach(a => {
                 const el = document.createElement('div');
-                el.className = 'p-4 rounded-lg bg-slate-800/40 border border-slate-700/50 cursor-pointer hover:bg-slate-700/60 hover:-translate-y-0.5 transition-all shadow-sm';
+                el.className = 'p-3 rounded-lg bg-slate-800/40 border border-slate-700/50 cursor-pointer hover:bg-slate-700/60 transition-all shadow-sm';
                 el.onclick = () => showProductModalRMD(a.product);
-                el.innerHTML = `<div class="flex justify-between items-start mb-2"><span class="text-sm font-bold text-slate-200">#${a.product.orden}</span><span class="badge ${a.badgeClass}">${a.label}</span></div>
-                    <p class="text-xs text-slate-300 truncate mb-3" title="${a.product.descripcion}">${a.product.descripcion}</p>
-                    <div class="flex justify-between items-center text-xs"><span class="text-slate-400 border border-slate-600 px-2 py-1 rounded bg-slate-900/50">${getEtapaNombre(a.product.etapa)}</span><span class="text-slate-400">Fecha: <span class="font-medium text-slate-200">${a.critStr}</span></span></div>`;
+                el.innerHTML = `<div class="flex justify-between items-start mb-1.5"><span class="text-xs font-bold text-slate-200">#${a.product.orden}</span><span class="badge ${a.badgeClass} text-xs">${a.label}</span></div><p class="text-xs text-slate-300 truncate mb-2">${a.product.descripcion}</p><div class="flex justify-between items-center text-xs"><span class="text-slate-400 border border-slate-600 px-2 py-0.5 rounded bg-slate-900/50">${getEtapaNombre(a.product.etapa)}</span><span class="text-slate-400">Fecha: <span class="font-medium text-slate-200">${a.critStr}</span></span></div>`;
                 alertsList.appendChild(el);
             });
         }
 
         function renderChartsRMD() {
-            const weekCounts = {};
-            const dateCounts = {};
+            const weekCounts = {}, dateCounts = {};
             productsRMD.forEach(p => {
                 const critStr = getCriticalDate(p);
-                if (critStr) { const week = `Semana ${dayjs(formatToIso(critStr)).week()}`; weekCounts[week] = (weekCounts[week] || 0) + 1; }
+                if (critStr) { const week = `S${dayjs(formatToIso(critStr)).week()}`; weekCounts[week] = (weekCounts[week] || 0) + 1; }
                 p.dates.forEach(d => { const fmt = formatToIso(d); dateCounts[fmt] = (dateCounts[fmt] || 0) + 1; });
             });
-
-            Chart.defaults.color = '#94a3b8';
-            Chart.defaults.font.family = 'Inter';
-            
+            Chart.defaults.color = '#94a3b8'; Chart.defaults.font.family = 'Inter';
             const ctxWeekly = document.getElementById('chartWeeklyRMD').getContext('2d');
             if (chartWeeklyInst) chartWeeklyInst.destroy();
-            let gradW = ctxWeekly.createLinearGradient(0, 0, 0, 400);
-            gradW.addColorStop(0, 'rgba(59, 130, 246, 0.8)');
-            gradW.addColorStop(1, 'rgba(59, 130, 246, 0.1)');
-            chartWeeklyInst = new Chart(ctxWeekly, {
-                type: 'bar',
-                data: { labels: Object.keys(weekCounts).sort(), datasets: [{ data: Object.keys(weekCounts).sort().map(w => weekCounts[w]), backgroundColor: gradW, borderRadius: 6 }] },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { grid: { color: 'rgba(255,255,255,0.05)' } }, x: { grid: { display: false } } } }
-            });
-
+            let gradW = ctxWeekly.createLinearGradient(0, 0, 0, 400); gradW.addColorStop(0, 'rgba(59, 130, 246, 0.8)'); gradW.addColorStop(1, 'rgba(59, 130, 246, 0.1)');
+            chartWeeklyInst = new Chart(ctxWeekly, { type: 'bar', data: { labels: Object.keys(weekCounts).sort(), datasets: [{ data: Object.keys(weekCounts).sort().map(w => weekCounts[w]), backgroundColor: gradW, borderRadius: 6 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { grid: { color: 'rgba(255,255,255,0.05)' } }, x: { grid: { display: false } } } } });
             const ctxTime = document.getElementById('chartTimelineRMD').getContext('2d');
             if (chartTimelineInst) chartTimelineInst.destroy();
-            let gradT = ctxTime.createLinearGradient(400, 0, 0, 0);
-            gradT.addColorStop(0, 'rgba(16, 185, 129, 0.8)');
-            gradT.addColorStop(1, 'rgba(16, 185, 129, 0.1)');
-            chartTimelineInst = new Chart(ctxTime, {
-                type: 'bar',
-                data: { labels: Object.keys(dateCounts).sort().map(d => dayjs(d).format('DD MMM')), datasets: [{ data: Object.keys(dateCounts).sort().map(d => dateCounts[d]), backgroundColor: gradT, borderRadius: 6 }] },
-                options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { color: 'rgba(255,255,255,0.05)' } }, y: { grid: { display: false } } } }
-            });
+            let gradT = ctxTime.createLinearGradient(400, 0, 0, 0); gradT.addColorStop(0, 'rgba(16, 185, 129, 0.8)'); gradT.addColorStop(1, 'rgba(16, 185, 129, 0.1)');
+            chartTimelineInst = new Chart(ctxTime, { type: 'bar', data: { labels: Object.keys(dateCounts).sort().map(d => dayjs(d).format('DD MMM')), datasets: [{ data: Object.keys(dateCounts).sort().map(d => dateCounts[d]), backgroundColor: gradT, borderRadius: 6 }] }, options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { color: 'rgba(255,255,255,0.05)' } }, y: { grid: { display: false } } } } });
         }
 
         function getNotesRMD(orden) { return JSON.parse(localStorage.getItem(`notes_rmd_${orden}`) || '[]'); }
@@ -829,78 +1049,39 @@
 
         function showProductModalRMD(product) {
             Swal.fire({
-                title: `<div class="text-xl font-bold text-left text-white border-b border-slate-700/50 pb-3 mb-2 flex justify-between items-center"><span>Detalle de Orden</span><span class="text-sm bg-blue-500/20 text-blue-400 px-3 py-1 rounded-full border border-blue-500/30">#${product.orden}</span></div>`,
-                html: `
-                    <div class="text-left space-y-4 text-sm px-1">
-                        <div class="grid grid-cols-2 gap-4 bg-slate-800/30 p-4 rounded-lg border border-slate-700/50">
-                            <div><span class="text-slate-400 block text-xs mb-1 uppercase tracking-wider">Planta</span> <span class="font-semibold text-slate-200 text-base">${product.planta}</span></div>
-                            <div><span class="text-slate-400 block text-xs mb-1 uppercase tracking-wider">Código</span> <span class="font-semibold text-slate-200 text-base">${product.codigo}</span></div>
-                        </div>
-                        <div class="bg-indigo-900/20 border border-indigo-500/30 p-3 rounded-lg flex items-center justify-between"><span class="text-indigo-300 font-medium text-xs uppercase tracking-wider">Etapa Actual</span><span class="font-bold text-indigo-400 bg-indigo-500/10 px-3 py-1 rounded shadow-inner">${getEtapaNombre(product.etapa)}</span></div>
-                        <div><span class="text-slate-400 text-xs uppercase tracking-wider">Descripción Original</span><br><span class="font-medium text-slate-200 mt-1 block">${product.descripcion}</span></div>
-                        <div><span class="text-slate-400 text-xs uppercase tracking-wider">Fechas Programadas</span><br><div class="mt-2">${product.dates.map(d => `<span class="inline-block bg-slate-700/50 border border-slate-600 px-2 py-1 rounded text-xs text-slate-200 mr-2 mb-2 shadow-sm">${d}</span>`).join('')}</div></div>
-                        <div class="mt-6 pt-4 border-t border-slate-700/50"><h4 class="font-semibold text-slate-200 mb-3 text-xs uppercase tracking-wider">Observaciones</h4>
-                            <div class="flex gap-2 mb-3"><input type="text" id="swal-note-input-rmd" class="flex-1 bg-slate-900/50 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500" placeholder="Añadir nota..."><button onclick="handleAddNoteRMD('${product.orden}')" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow-md">Guardar</button></div>
-                            <div id="swal-notes-list-rmd" class="space-y-2 max-h-40 overflow-y-auto custom-scrollbar pr-1"></div>
-                        </div>
-                    </div>
-                `,
-                showConfirmButton: false,
-                showCloseButton: true,
-                width: '600px',
-                didOpen: () => renderModalNotesRMD(product.orden)
+                title: `<div class="text-lg font-bold text-left text-white border-b border-slate-700/50 pb-2 mb-2 flex justify-between"><span>Detalle de Orden</span><span class="text-xs bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded-full">#${product.orden}</span></div>`,
+                html: `<div class="text-left space-y-3 text-sm px-1"><div class="grid grid-cols-2 gap-3 bg-slate-800/30 p-3 rounded-lg"><div><span class="text-slate-400 block text-xs uppercase">Planta</span><span class="font-semibold text-slate-200">${product.planta}</span></div><div><span class="text-slate-400 block text-xs uppercase">Código</span><span class="font-semibold text-slate-200">${product.codigo}</span></div></div><div class="bg-indigo-900/20 border border-indigo-500/30 p-2.5 rounded-lg flex justify-between"><span class="text-indigo-300 text-xs uppercase">Etapa</span><span class="font-bold text-indigo-400 text-xs">${getEtapaNombre(product.etapa)}</span></div><div><span class="text-slate-400 text-xs uppercase">Descripción</span><br><span class="font-medium text-slate-200">${product.descripcion}</span></div><div><span class="text-slate-400 text-xs uppercase">Fechas</span><br><div class="mt-1.5">${product.dates.map(d => `<span class="inline-block bg-slate-700/50 border border-slate-600 px-2 py-0.5 rounded text-xs text-slate-200 mr-1.5 mb-1.5">${d}</span>`).join('')}</div></div><div class="mt-4 pt-3 border-t border-slate-700/50"><h4 class="font-semibold text-slate-200 mb-2 text-xs uppercase">Observaciones</h4><div class="flex gap-1.5 mb-2"><input type="text" id="swal-note-input-rmd" class="flex-1 bg-slate-900/50 border border-slate-600 rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none" placeholder="Añadir nota..."><button onclick="handleAddNoteRMD('${product.orden}')" class="bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 rounded-lg text-xs">Guardar</button></div><div id="swal-notes-list-rmd" class="space-y-1.5 max-h-32 overflow-y-auto"></div></div></div>`,
+                showConfirmButton: false, showCloseButton: true, width: '550px', didOpen: () => renderModalNotesRMD(product.orden)
             });
         }
 
         function renderModalNotesRMD(orden) {
-            const container = document.getElementById('swal-notes-list-rmd');
-            if (!container) return;
+            const container = document.getElementById('swal-notes-list-rmd'); if(!container) return;
             const notes = getNotesRMD(orden);
-            if (notes.length === 0) { container.innerHTML = '<p class="text-slate-500 text-xs italic text-center py-2">No hay notas registradas.</p>'; return; }
-            container.innerHTML = notes.map(n => `<div class="bg-slate-800/50 p-3 rounded-lg border border-slate-700/50 flex justify-between items-start group"><div><p class="text-sm text-slate-300">${n.text}</p><p class="text-[10px] text-slate-500 mt-1.5">${n.date}</p></div><button onclick="handleDeleteNoteRMD('${orden}', ${n.id})" class="text-slate-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button></div>`).join('');
+            container.innerHTML = notes.length === 0 ? '<p class="text-slate-500 text-xs italic text-center py-2">Sin notas.</p>' : notes.map(n => `<div class="bg-slate-800/50 p-2.5 rounded-lg border border-slate-700/50 flex justify-between items-start group"><div><p class="text-xs text-slate-300">${n.text}</p><p class="text-[10px] text-slate-500 mt-1">${n.date}</p></div><button onclick="handleDeleteNoteRMD('${orden}', ${n.id})" class="text-slate-500 hover:text-red-400 opacity-0 group-hover:opacity-100"><svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button></div>`).join('');
         }
 
-        window.handleAddNoteRMD = function(orden) { const input = document.getElementById('swal-note-input-rmd'); if (input && input.value.trim()) { saveNoteRMD(orden, input.value.trim()); input.value = ''; renderModalNotesRMD(orden); } };
+        window.handleAddNoteRMD = function(orden) { const input = document.getElementById('swal-note-input-rmd'); if(input && input.value.trim()) { saveNoteRMD(orden, input.value.trim()); input.value = ''; renderModalNotesRMD(orden); } };
         window.handleDeleteNoteRMD = function(orden, id) { deleteNoteRMD(orden, id); renderModalNotesRMD(orden); };
 
         function logActivityRMD(message) {
             const logs = JSON.parse(localStorage.getItem('dashboard_activity_rmd') || '[]');
-            logs.unshift({ time: dayjs().format('DD/MM HH:mm'), message });
-            if (logs.length > 50) logs.pop();
-            localStorage.setItem('dashboard_activity_rmd', JSON.stringify(logs));
-            renderActivityRMD();
+            logs.unshift({ time: dayjs().format('DD/MM HH:mm'), message }); if(logs.length > 50) logs.pop();
+            localStorage.setItem('dashboard_activity_rmd', JSON.stringify(logs)); renderActivityRMD();
         }
 
         function renderActivityRMD() {
             const logs = JSON.parse(localStorage.getItem('dashboard_activity_rmd') || '[]');
             const container = document.getElementById('activityListRMD');
-            if (logs.length === 0) { container.innerHTML = '<p class="text-slate-500 text-center mt-4">Sin actividad</p>'; return; }
-            container.innerHTML = logs.map(l => `<div class="flex items-start gap-3 p-2 hover:bg-slate-800/30 rounded transition border-b border-slate-700/30 last:border-0"><span class="text-blue-400/70 font-medium min-w-[75px]">${l.time}</span><span class="text-slate-300">${l.message}</span></div>`).join('');
+            container.innerHTML = logs.length === 0 ? '<p class="text-slate-500 text-center mt-3">Sin actividad</p>' : logs.map(l => `<div class="flex items-start gap-2 p-1.5 hover:bg-slate-800/30 rounded border-b border-slate-700/30 last:border-0"><span class="text-blue-400/70 font-medium min-w-[65px] text-xs">${l.time}</span><span class="text-slate-300 text-xs">${l.message}</span></div>`).join('');
         }
 
         function saveRMDataToLocalStorage() { localStorage.setItem('dashboard_products_rmd', JSON.stringify(productsRMD)); }
-        function loadRMDataFromLocalStorage() { const saved = localStorage.getItem('dashboard_products_rmd'); if (saved) { productsRMD = JSON.parse(saved); updateDashboardRMD(); } renderActivityRMD(); }
+        function loadRMDataFromLocalStorage() { const saved = localStorage.getItem('dashboard_products_rmd'); if(saved) { productsRMD = JSON.parse(saved); updateDashboardRMD(); document.getElementById('rmdStatusBadge').style.display = 'inline'; } renderActivityRMD(); }
 
         function clearRMData() {
-            Swal.fire({
-                title: '¿Limpiar datos RMD?',
-                text: "Se borrarán todas las órdenes y notas.",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Sí, borrar',
-                cancelButtonText: 'Cancelar',
-                background: '#0f172a',
-                color: '#f8fafc',
-                customClass: { confirmButton: 'bg-red-600 px-4 py-2 rounded text-white mr-2', cancelButton: 'bg-slate-600 px-4 py-2 rounded text-white' },
-                buttonsStyling: false
-            }).then((res) => {
-                if (res.isConfirmed) {
-                    localStorage.removeItem('dashboard_products_rmd');
-                    localStorage.removeItem('dashboard_activity_rmd');
-                    productsRMD = [];
-                    updateDashboardRMD();
-                    Swal.fire({ icon: 'success', title: 'Limpio', text: 'Los datos RMD han sido eliminados.', timer: 1500, showConfirmButton: false, background: 'rgba(15, 23, 42, 0.95)', color: '#f8fafc' });
-                }
+            Swal.fire({ title: '¿Limpiar datos RMD?', icon: 'warning', showCancelButton: true, confirmButtonText: 'Sí', cancelButtonText: 'No', background: '#0f172a', color: '#f8fafc', customClass: { confirmButton: 'bg-red-600 px-3 py-1.5 rounded text-white mr-2 text-xs', cancelButton: 'bg-slate-600 px-3 py-1.5 rounded text-white text-xs' }, buttonsStyling: false }).then((res) => {
+                if(res.isConfirmed) { localStorage.removeItem('dashboard_products_rmd'); localStorage.removeItem('dashboard_activity_rmd'); productsRMD = []; document.getElementById('rmdStatusBadge').style.display = 'none'; updateDashboardRMD(); Swal.fire({ icon: 'success', title: 'Limpio', timer: 1500, showConfirmButton: false, background: '#0f172a' }); }
             });
         }
 
@@ -909,306 +1090,194 @@
         let availableAreas = new Set();
         let currentAreaFilter = 'TODAS';
         let calendarProd;
+        let chartAreaDist = null;
+        let chartPie3D = null;
 
-        const colorMap = {
-            'SOL': '#3b82f6', 'PEF': '#8b5cf6', 'ACO': '#ec4899', 'SOL HORM': '#f43f5e',
-            'SOL COLOR': '#f97316', 'CAP BLAN': '#eab308', 'INY': '#10b981', 'SEM HORM': '#06b6d4',
-            'COS': '#6366f1', 'SEM': '#14b8a6', 'MEN': '#84cc16', 'REA': '#64748b'
-        };
+        const areaOrderPriority = { 'SOL': 1, 'SOL HORM': 2, 'SOL COLOR': 3, 'ACO': 4, 'COS': 5, 'CAP BLAN': 6, 'MEN': 99 };
+        function getAreaPriority(n) { const c = String(n).trim().toUpperCase(); for(const k in areaOrderPriority) if(c.includes(k)) return areaOrderPriority[k]; return 50; }
+        function sortAreas(a) { return a.sort((x,y) => { const px = getAreaPriority(x), py = getAreaPriority(y); return px !== py ? px - py : x.localeCompare(y); }); }
 
-        function getAreaColor(area) {
-            const cleanArea = String(area).trim().toUpperCase();
-            for (const key in colorMap) {
-                if (cleanArea.includes(key)) return colorMap[key];
-            }
-            return '#475569';
-        }
+        const colorMap = { 'SOL': '#3b82f6', 'PEF': '#8b5cf6', 'ACO': '#ec4899', 'SOL HORM': '#f43f5e', 'SOL COLOR': '#f97316', 'CAP BLAN': '#eab308', 'INY': '#10b981', 'SEM HORM': '#06b6d4', 'COS': '#6366f1', 'SEM': '#14b8a6', 'MEN': '#84cc16', 'REA': '#64748b' };
+        function getAreaColor(a) { const c = String(a).trim().toUpperCase(); for(const k in colorMap) if(c.includes(k)) return colorMap[k]; return '#475569'; }
 
-        function setupDragAndDropProd() {
-            const dropZone = document.getElementById('dropZoneProd');
-            dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover', 'prod-dragover'); });
-            dropZone.addEventListener('dragleave', () => { dropZone.classList.remove('dragover', 'prod-dragover'); });
-            dropZone.addEventListener('drop', (e) => { e.preventDefault(); dropZone.classList.remove('dragover', 'prod-dragover'); handleFileProd({ target: { files: e.dataTransfer.files } }); });
-        }
-
-        function parseExcelDate(val) {
-            if (!val) return null;
-            if (val instanceof Date) return dayjs(val).format('YYYY-MM-DD');
-            if (typeof val === 'number') return dayjs(new Date(Math.round((val - 25569) * 86400 * 1000))).format('YYYY-MM-DD');
-            const strDate = dayjs(val);
-            if (strDate.isValid()) return strDate.format('YYYY-MM-DD');
-            return null;
-        }
+        function filtrarFechasFuturas(f) { const h = dayjs().startOf('day'); return f.filter(d => { const fd = dayjs(d); return fd.isValid() && (fd.isSame(h,'day') || fd.isAfter(h)); }); }
+        function parseExcelDate(v) { if(!v) return null; if(v instanceof Date) return dayjs(v).format('YYYY-MM-DD'); if(typeof v === 'number') return dayjs(new Date(Math.round((v-25569)*86400*1000))).format('YYYY-MM-DD'); const s = dayjs(v); return s.isValid() ? s.format('YYYY-MM-DD') : null; }
 
         function handleFileProd(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-            Swal.fire({ title: 'Analizando Programa...', text: 'Leyendo pestañas y agrupando códigos.', allowOutsideClick: false, didOpen: () => Swal.showLoading(), background: '#0f172a', color: '#f8fafc' });
-
+            const file = e.target.files[0]; if(!file) return;
+            Swal.fire({ title: 'Analizando...', allowOutsideClick: false, didOpen: () => Swal.showLoading(), background: '#0f172a' });
             const reader = new FileReader();
-            reader.onload = (e) => {
+            reader.onload = (ev) => {
                 try {
-                    const data = new Uint8Array(e.target.result);
-                    const workbook = XLSX.read(data, { type: 'array', cellDates: true });
-                    const productsMap = new Map();
-                    availableAreas.clear();
-
-                    workbook.SheetNames.forEach(sheetName => {
-                        const sheet = workbook.Sheets[sheetName];
-                        const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: "" });
-
-                        let headerIdx = -1;
-                        for (let i = 0; i < Math.min(15, rows.length); i++) {
-                            const firstCell = String(rows[i][0]).trim().toUpperCase();
-                            if (firstCell.includes("CÓDIGO") || firstCell.includes("CODIGO")) {
-                                headerIdx = i;
-                                break;
-                            }
-                        }
-
-                        if (headerIdx === -1) return;
-                        availableAreas.add(sheetName);
-
-                        const dateMap = {};
-                        for (let c = 5; c <= 25; c++) {
-                            const parsedDate = parseExcelDate(rows[headerIdx][c]);
-                            if (parsedDate) dateMap[c] = parsedDate;
-                        }
-
-                        for (let i = headerIdx + 1; i < rows.length; i++) {
-                            const row = rows[i];
-                            if (!row || row.length === 0) continue;
-                            const codigo = String(row[0] || "").trim();
-                            if (/^[56]\d{9}$/.test(codigo)) {
-                                const producto = String(row[1] || "").trim();
-                                const scheduledDates = [];
-                                for (let c = 5; c <= 25; c++) {
-                                    if (dateMap[c] && row[c] !== undefined && String(row[c]).trim() !== "") {
-                                        scheduledDates.push(dateMap[c]);
-                                    }
-                                }
-                                if (scheduledDates.length > 0) {
-                                    const key = `${codigo}_${sheetName}`;
-                                    if (!productsMap.has(key)) {
-                                        productsMap.set(key, { codigo, producto, area: sheetName, fechas: new Set(scheduledDates) });
-                                    } else {
-                                        const p = productsMap.get(key);
-                                        scheduledDates.forEach(d => p.fechas.add(d));
-                                    }
-                                }
+                    const data = new Uint8Array(ev.target.result);
+                    const wb = XLSX.read(data, { type: 'array', cellDates: true });
+                    const pmap = new Map(); availableAreas.clear(); let totalLeidos = 0, excluidos = 0;
+                    wb.SheetNames.forEach(sn => {
+                        const sh = wb.Sheets[sn]; const rows = XLSX.utils.sheet_to_json(sh, { header: 1, defval: "" });
+                        let hi = -1;
+                        for(let i=0; i<Math.min(15,rows.length); i++) { const fc = String(rows[i][0]).trim().toUpperCase(); if(fc.includes("CÓDIGO")||fc.includes("CODIGO")) { hi=i; break; } }
+                        if(hi===-1) return; availableAreas.add(sn);
+                        const dm = {}; for(let c=5; c<=25; c++) { const pd = parseExcelDate(rows[hi][c]); if(pd) dm[c]=pd; }
+                        for(let i=hi+1; i<rows.length; i++) {
+                            const row = rows[i]; if(!row||row.length===0) continue;
+                            const cod = String(row[0]||"").trim(); if(!/^[56]\d{9}$/.test(cod)) continue;
+                            totalLeidos++; const prod = String(row[1]||"").trim(); const sd = [];
+                            for(let c=5; c<=25; c++) { if(dm[c] && row[c]!==undefined && String(row[c]).trim()!=="") sd.push(dm[c]); }
+                            if(sd.length>0) {
+                                const ff = filtrarFechasFuturas(sd);
+                                if(ff.length>0) { const key = `${cod}_${sn}`; if(!pmap.has(key)) pmap.set(key,{codigo:cod,producto:prod,area:sn,fechas:new Set(ff)}); else { const p=pmap.get(key); ff.forEach(d=>p.fechas.add(d)); } }
+                                else excluidos++;
                             }
                         }
                     });
-
-                    productionData = Array.from(productsMap.values()).map(p => ({
-                        ...p,
-                        fechas: Array.from(p.fechas).sort((a, b) => new Date(a) - new Date(b))
-                    }));
-
+                    productionData = Array.from(pmap.values()).map(p=>({...p,fechas:Array.from(p.fechas).sort((a,b)=>new Date(a)-new Date(b))}));
                     localStorage.setItem('prod_data', JSON.stringify({ data: productionData, areas: Array.from(availableAreas) }));
-                    Swal.fire({ icon: 'success', title: 'Completado', text: `Se cargaron ${productionData.length} productos agrupados.`, timer: 2000, showConfirmButton: false, background: '#0f172a', color: '#f8fafc' });
+                    document.getElementById('prodStatusBadge').style.display = 'inline';
+                    const ib = document.getElementById('dateFilterInfo'); if(productionData.length>0) { ib.style.display='flex'; document.getElementById('dateFilterText').textContent=`${productionData.length} productos desde ${dayjs().format('DD/MM/YYYY')}.`; }
+                    Swal.fire({ icon:'success', title:'Completado', text:`${productionData.length} productos.`, timer:2000, showConfirmButton:false, background:'#0f172a' });
                     updateDashboardProd();
-                } catch (error) {
-                    console.error(error);
-                    Swal.fire({ icon: 'error', title: 'Error', text: 'El formato del Excel no es el esperado.', background: '#0f172a' });
-                }
+                } catch(err) { console.error(err); Swal.fire({ icon:'error', title:'Error', background:'#0f172a' }); }
             };
-            reader.readAsArrayBuffer(file);
-            e.target.value = '';
+            reader.readAsArrayBuffer(file); e.target.value = '';
         }
 
-        function loadProdDataFromLocalStorage() {
-            const saved = localStorage.getItem('prod_data');
-            if (saved) {
-                const parsed = JSON.parse(saved);
-                productionData = parsed.data;
-                availableAreas = new Set(parsed.areas);
-                updateDashboardProd();
+        function loadProdDataFromLocalStorage() { const saved = localStorage.getItem('prod_data'); if(saved) { const p = JSON.parse(saved); productionData = p.data; availableAreas = new Set(p.areas); document.getElementById('prodStatusBadge').style.display='inline'; updateDashboardProd(); } }
+
+        function updateDashboardProd() { renderFiltersProd(); renderKPIsProd(); renderCalendarProd(); renderUpcomingProd(); renderAreaDistributionChart(); renderPie3DChart(); const ib=document.getElementById('dateFilterInfo'); if(productionData.length>0){ib.style.display='flex';document.getElementById('dateFilterText').textContent=`${productionData.length} productos desde ${dayjs().format('DD/MM/YYYY')}.`;}else{ib.style.display='none';} }
+
+        function renderFiltersProd() { const c=document.getElementById('areaFiltersContainer'); const sa=sortAreas(Array.from(availableAreas)); c.innerHTML=`<button class="filter-pill ${currentAreaFilter==='TODAS'?'active':''} px-3 py-1 rounded-full text-xs font-medium" onclick="setAreaFilter('TODAS')">TODAS</button>`+sa.map(a=>`<button class="filter-pill ${currentAreaFilter===a?'active':''} px-3 py-1 rounded-full text-xs font-medium" onclick="setAreaFilter('${a}')">${a}</button>`).join(''); }
+        window.setAreaFilter = function(a) { currentAreaFilter = a; updateDashboardProd(); }
+
+        function renderKPIsProd() { let tp=0,td=0; const ac={}; productionData.forEach(p=>{if(currentAreaFilter!=='TODAS'&&p.area!==currentAreaFilter)return;tp++;td+=p.fechas.length;ac[p.area]=(ac[p.area]||0)+p.fechas.length;}); animateCounter('kpi-productos',tp); animateCounter('kpi-dias',td); animateCounter('kpi-pestanas',availableAreas.size); let ta="-",mx=0; for(const[a,c]of Object.entries(ac)){if(c>mx){mx=c;ta=a;}} document.getElementById('kpi-area-top').textContent=currentAreaFilter==='TODAS'?ta:currentAreaFilter; }
+
+        function initCalendarProd() { calendarProd = new FullCalendar.Calendar(document.getElementById('calendarProd'), { initialView:'dayGridMonth',locale:'es',headerToolbar:{left:'prev,next today',center:'title',right:'dayGridMonth,dayGridWeek'},firstDay:1,height:500,eventClick:(i)=>showModalProd(i.event.extendedProps),eventMouseEnter:(i)=>i.el.setAttribute('title',`${i.event.extendedProps.producto}\nÁrea: ${i.event.extendedProps.area}`) }); calendarProd.render(); }
+
+        function renderCalendarProd() { if(!calendarProd)return; calendarProd.removeAllEvents(); const ev=[]; productionData.forEach(p=>{if(currentAreaFilter!=='TODAS'&&p.area!==currentAreaFilter)return;const c=getAreaColor(p.area);const sn=p.producto.split(' ').slice(0,2).join(' ');p.fechas.forEach(d=>{ev.push({title:sn,start:d,backgroundColor:c,borderColor:c,extendedProps:p});});}); calendarProd.addEventSource(ev); if(ev.length>0) calendarProd.gotoDate(ev.map(e=>e.start).sort()[0]); }
+
+        function renderUpcomingProd() { const l=document.getElementById('upcomingListProd');l.innerHTML='';let u=[];const h=dayjs().startOf('day').valueOf();productionData.forEach(p=>{if(currentAreaFilter!=='TODAS'&&p.area!==currentAreaFilter)return;p.fechas.forEach(d=>{if(dayjs(d).valueOf()>=h)u.push({date:d,...p});});});u.sort((a,b)=>new Date(a.date)-new Date(b.date));u=u.slice(0,15);if(u.length===0){l.innerHTML='<p class="text-xs text-slate-500 text-center mt-8">Sin programaciones</p>';return;}u.forEach(i=>{const c=getAreaColor(i.area);const e=document.createElement('div');e.className='p-2.5 rounded-lg bg-slate-800/40 border border-slate-700/50 cursor-pointer hover:bg-slate-700/60 transition-all';e.onclick=()=>showModalProd(i);e.innerHTML=`<div class="flex justify-between items-center mb-1"><span class="text-xs font-bold px-1.5 py-0.5 rounded text-white" style="background-color:${c}">${i.area}</span><span class="text-xs text-slate-400">${dayjs(i.date).format('DD MMM')}</span></div><p class="text-xs font-medium text-slate-200 truncate">${i.producto}</p><p class="text-xs text-slate-500 mt-0.5">Cód: ${i.codigo}</p>`;l.appendChild(e);}); }
+
+        function renderAreaDistributionChart() {
+            const ctx = document.getElementById('chartAreaDistribution'); if(!ctx) return;
+            const apc = {}; productionData.forEach(p => { if(currentAreaFilter !== 'TODAS' && p.area !== currentAreaFilter) return; apc[p.area] = (apc[p.area] || 0) + 1; });
+            const sa = sortAreas(Object.keys(apc)); const lb = sa, dt = sa.map(a => apc[a]), cl = sa.map(a => getAreaColor(a));
+            const tot = dt.reduce((s,v) => s+v, 0); const pct = dt.map(v => tot>0 ? ((v/tot)*100).toFixed(1) : 0);
+            if(chartAreaDist) chartAreaDist.destroy();
+            Chart.defaults.color = '#94a3b8'; Chart.defaults.font.family = 'Inter';
+            chartAreaDist = new Chart(ctx, {
+                type: 'bar', data: { labels: lb, datasets: [{ label: 'Productos', data: dt, backgroundColor: cl.map(c => c+'99'), borderColor: cl, borderWidth: 2, borderRadius: 6 }] },
+                options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(c) { return `${c.raw} productos (${pct[c.dataIndex]}%)`; } } } }, scales: { x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { stepSize: 1 } }, y: { grid: { display: false } } } }
+            });
+        }
+
+        // ==================== GRÁFICO CIRCULAR 3D INTERACTIVO ====================
+        function renderPie3DChart() {
+            const ctx = document.getElementById('chartPie3D'); if(!ctx) return;
+            const pieCard = document.getElementById('pieChartCard');
+            
+            // Solo mostrar cuando el filtro es "TODAS"
+            if (currentAreaFilter !== 'TODAS') {
+                pieCard.style.display = 'none';
+                if(chartPie3D) { chartPie3D.destroy(); chartPie3D = null; }
+                return;
             }
-        }
-
-        function updateDashboardProd() {
-            renderFiltersProd();
-            renderKPIsProd();
-            renderCalendarProd();
-            renderUpcomingProd();
-        }
-
-        function renderFiltersProd() {
-            const container = document.getElementById('areaFiltersContainer');
-            let html = `<button class="filter-pill ${currentAreaFilter === 'TODAS' ? 'active' : ''} px-4 py-1.5 rounded-full text-sm font-medium" onclick="setAreaFilter('TODAS')">TODAS</button>`;
-            Array.from(availableAreas).sort().forEach(area => {
-                html += `<button class="filter-pill ${currentAreaFilter === area ? 'active' : ''} px-4 py-1.5 rounded-full text-sm font-medium" onclick="setAreaFilter('${area}')">${area}</button>`;
-            });
-            container.innerHTML = html;
-        }
-
-        window.setAreaFilter = function(area) {
-            currentAreaFilter = area;
-            updateDashboardProd();
-        }
-
-        function renderKPIsProd() {
-            let totalProds = 0;
-            let totalDates = 0;
-            const areaCount = {};
-            productionData.forEach(p => {
-                if (currentAreaFilter !== 'TODAS' && p.area !== currentAreaFilter) return;
-                totalProds++;
-                totalDates += p.fechas.length;
-                areaCount[p.area] = (areaCount[p.area] || 0) + p.fechas.length;
-            });
-
-            animateCounter('kpi-productos', totalProds);
-            animateCounter('kpi-dias', totalDates);
-            animateCounter('kpi-pestanas', availableAreas.size);
-
-            let topArea = "-", max = 0;
-            for (const [area, count] of Object.entries(areaCount)) { if (count > max) { max = count; topArea = area; } }
-            document.getElementById('kpi-area-top').textContent = currentAreaFilter === 'TODAS' ? topArea : currentAreaFilter;
-        }
-
-        function initCalendarProd() {
-            const calendarEl = document.getElementById('calendarProd');
-            calendarProd = new FullCalendar.Calendar(calendarEl, {
-                initialView: 'dayGridMonth',
-                locale: 'es',
-                headerToolbar: { left: 'prev,next today', center: 'title', right: 'dayGridMonth,dayGridWeek' },
-                firstDay: 1,
-                height: 550,
-                eventClick: (info) => showModalProd(info.event.extendedProps),
-                eventMouseEnter: (info) => info.el.setAttribute('title', `${info.event.extendedProps.producto}\nÁrea: ${info.event.extendedProps.area}`)
-            });
-            calendarProd.render();
-        }
-
-        function renderCalendarProd() {
-            if (!calendarProd) return;
-            calendarProd.removeAllEvents();
-            const events = [];
-            productionData.forEach(p => {
-                if (currentAreaFilter !== 'TODAS' && p.area !== currentAreaFilter) return;
-                const color = getAreaColor(p.area);
-                const shortName = p.producto.split(' ').slice(0, 2).join(' ');
-                p.fechas.forEach(d => {
-                    events.push({ title: shortName, start: d, backgroundColor: color, borderColor: color, extendedProps: p });
-                });
-            });
-            calendarProd.addEventSource(events);
-            if (events.length > 0) calendarProd.gotoDate(events.map(e => e.start).sort()[0]);
-        }
-
-        function renderUpcomingProd() {
-            const list = document.getElementById('upcomingListProd');
-            list.innerHTML = '';
-            let upcoming = [];
-            const today = dayjs().startOf('day').valueOf();
-            productionData.forEach(p => {
-                if (currentAreaFilter !== 'TODAS' && p.area !== currentAreaFilter) return;
-                p.fechas.forEach(d => {
-                    if (dayjs(d).valueOf() >= today) {
-                        upcoming.push({ date: d, ...p });
+            pieCard.style.display = 'block';
+            
+            const apc = {};
+            productionData.forEach(p => { apc[p.area] = (apc[p.area] || 0) + 1; });
+            const sa = sortAreas(Object.keys(apc));
+            const labels = sa, data = sa.map(a => apc[a]), colors = sa.map(a => getAreaColor(a));
+            const total = data.reduce((s,v) => s+v, 0);
+            
+            if(chartPie3D) chartPie3D.destroy();
+            Chart.defaults.color = '#94a3b8'; Chart.defaults.font.family = 'Inter';
+            
+            chartPie3D = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: colors.map(c => c+'CC'),
+                        borderColor: colors,
+                        borderWidth: 3,
+                        hoverBorderWidth: 5,
+                        hoverBorderColor: '#ffffff',
+                        borderRadius: 4,
+                        spacing: 6,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '55%',
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: {
+                                padding: 15,
+                                usePointStyle: true,
+                                pointStyleWidth: 12,
+                                font: { size: 11 },
+                                generateLabels: function(chart) {
+                                    const data = chart.data;
+                                    return data.labels.map((label, i) => ({
+                                        text: `${label} (${((data.datasets[0].data[i] / total) * 100).toFixed(1)}%)`,
+                                        fillStyle: data.datasets[0].backgroundColor[i],
+                                        strokeStyle: data.datasets[0].borderColor[i],
+                                        lineWidth: 2,
+                                        hidden: false,
+                                        index: i,
+                                        pointStyle: 'circle'
+                                    }));
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const value = context.raw;
+                                    const pct = ((value / total) * 100).toFixed(1);
+                                    return ` ${context.label}: ${value} productos (${pct}%)`;
+                                }
+                            }
+                        }
+                    },
+                    animation: {
+                        animateRotate: true,
+                        animateScale: true,
+                        duration: 1500,
+                        easing: 'easeInOutQuart'
                     }
-                });
-            });
-            upcoming.sort((a, b) => new Date(a.date) - new Date(b.date));
-            upcoming = upcoming.slice(0, 15);
-
-            if (upcoming.length === 0) { list.innerHTML = '<p class="text-sm text-slate-500 text-center mt-10">No hay programaciones futuras</p>'; return; }
-
-            upcoming.forEach(item => {
-                const color = getAreaColor(item.area);
-                const el = document.createElement('div');
-                el.className = 'p-3 rounded-lg bg-slate-800/40 border border-slate-700/50 cursor-pointer hover:bg-slate-700/60 transition-all';
-                el.onclick = () => showModalProd(item);
-                el.innerHTML = `
-                    <div class="flex justify-between items-center mb-1">
-                        <span class="text-xs font-bold px-2 py-0.5 rounded shadow-sm text-white" style="background-color: ${color}">${item.area}</span>
-                        <span class="text-xs text-slate-400">${dayjs(item.date).format('DD MMM')}</span>
-                    </div>
-                    <p class="text-sm font-medium text-slate-200 truncate" title="${item.producto}">${item.producto}</p>
-                    <p class="text-xs text-slate-500 mt-1">Cód: ${item.codigo}</p>
-                `;
-                list.appendChild(el);
-            });
-        }
-
-        function showModalProd(item) {
-            const color = getAreaColor(item.area);
-            Swal.fire({
-                title: `<div class="text-lg font-bold text-left text-white border-b border-slate-700/50 pb-2 flex justify-between items-center"><span>Detalle de Producción</span><span class="text-xs px-2 py-1 rounded text-white" style="background-color: ${color}">${item.area}</span></div>`,
-                html: `
-                    <div class="text-left space-y-4 text-sm mt-3">
-                        <div><span class="text-slate-400 block text-xs uppercase">Código</span> <span class="font-bold text-slate-200 text-base">${item.codigo}</span></div>
-                        <div><span class="text-slate-400 block text-xs uppercase">Producto</span> <span class="font-medium text-slate-200 block">${item.producto}</span></div>
-                        <div><span class="text-slate-400 block text-xs uppercase mb-2">Días Programados</span>
-                            <div class="flex flex-wrap gap-2">${item.fechas.map(d => `<span class="bg-slate-800 border border-slate-600 px-2 py-1 rounded text-xs text-emerald-400 font-medium">${d}</span>`).join('')}</div>
-                        </div>
-                    </div>
-                `,
-                showConfirmButton: true,
-                confirmButtonText: 'Cerrar',
-                customClass: { confirmButton: 'bg-slate-700 hover:bg-slate-600 text-white px-5 py-2 rounded-lg transition-all' },
-                buttonsStyling: false,
-                background: '#0f172a'
-            });
-        }
-
-        function clearProdData() {
-            Swal.fire({
-                title: '¿Limpiar información?',
-                text: "Se borrará el programa actual.",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Sí, borrar',
-                cancelButtonText: 'Cancelar',
-                background: '#0f172a',
-                color: '#f8fafc',
-                customClass: { confirmButton: 'bg-red-600 px-4 py-2 rounded text-white mr-2', cancelButton: 'bg-slate-600 px-4 py-2 rounded text-white' },
-                buttonsStyling: false
-            }).then((res) => {
-                if (res.isConfirmed) {
-                    localStorage.removeItem('prod_data');
-                    productionData = [];
-                    availableAreas.clear();
-                    currentAreaFilter = 'TODAS';
-                    updateDashboardProd();
-                    Swal.fire({ icon: 'success', title: 'Limpio', text: 'El programa de producción ha sido eliminado.', timer: 1500, showConfirmButton: false, background: 'rgba(15, 23, 42, 0.95)', color: '#f8fafc' });
                 }
             });
         }
+
+        function showModalProd(item) { const c=getAreaColor(item.area); Swal.fire({ title:`<div class="text-base font-bold text-left text-white border-b border-slate-700/50 pb-2 flex justify-between"><span>Detalle</span><span class="text-xs px-2 py-0.5 rounded text-white" style="background-color:${c}">${item.area}</span></div>`, html:`<div class="text-left space-y-3 text-sm mt-2"><div><span class="text-slate-400 block text-xs uppercase">Código</span><span class="font-bold text-slate-200">${item.codigo}</span></div><div><span class="text-slate-400 block text-xs uppercase">Producto</span><span class="font-medium text-slate-200">${item.producto}</span></div><div><span class="text-slate-400 block text-xs uppercase mb-1.5">Días</span><div class="flex flex-wrap gap-1.5">${item.fechas.map(d=>`<span class="bg-slate-800 border border-slate-600 px-2 py-0.5 rounded text-xs text-emerald-400">${dayjs(d).format('DD/MM/YYYY')}</span>`).join('')}</div></div></div>`, showConfirmButton:true,confirmButtonText:'Cerrar',customClass:{confirmButton:'bg-slate-700 hover:bg-slate-600 text-white px-4 py-1.5 rounded-lg text-xs'},buttonsStyling:false,background:'#0f172a' }); }
+
+        function clearProdData() { Swal.fire({ title:'¿Limpiar?',text:'Se borrará el programa.',icon:'warning',showCancelButton:true,confirmButtonText:'Sí',cancelButtonText:'No',background:'#0f172a',color:'#f8fafc',customClass:{confirmButton:'bg-red-600 px-3 py-1.5 rounded text-white mr-2 text-xs',cancelButton:'bg-slate-600 px-3 py-1.5 rounded text-white text-xs'},buttonsStyling:false }).then(r=>{if(r.isConfirmed){localStorage.removeItem('prod_data');productionData=[];availableAreas.clear();currentAreaFilter='TODAS';document.getElementById('dateFilterInfo').style.display='none';document.getElementById('prodStatusBadge').style.display='none';updateDashboardProd();Swal.fire({icon:'success',title:'Limpio',timer:1500,showConfirmButton:false,background:'#0f172a'});}}); }
 
         // ==================== INITIALIZATION ====================
         document.addEventListener('DOMContentLoaded', () => {
-            // Initialize both calendars
             initCalendarRMD();
             initCalendarProd();
-            
-            // Load saved data
+            initGooeyNav();
             loadRMDataFromLocalStorage();
             loadProdDataFromLocalStorage();
-            
-            // Setup drag and drop
-            setupDragAndDropRMD();
-            setupDragAndDropProd();
-            
-            // Initialize background
             initReactiveBackground();
             
-            // Initial animations
+            document.getElementById('inlineUploadRMD').style.display = 'flex';
+            document.getElementById('inlineUploadProd').style.display = 'none';
+            
             gsap.registerPlugin(ScrollTrigger);
-            gsap.fromTo('.gsap-header', { y: -30, opacity: 0 }, { y: 0, opacity: 1, duration: 1, ease: "power3.out" });
-            
-            // Animate tab nav
-            gsap.fromTo('#tab-nav', { y: 20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, delay: 0.3, ease: "power2.out" });
-            
-            // Animate initial tab cards
+            gsap.fromTo('.gsap-header', { y: -20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, ease: "power3.out" });
+            gsap.fromTo('#tab-nav-row', { y: 15, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, delay: 0.2, ease: "power2.out" });
             animateCurrentTabCards();
             
-            // Handle window resize for calendars
             window.addEventListener('resize', () => {
                 if (calendarRMD && currentTab === 'rmd') calendarRMD.updateSize();
                 if (calendarProd && currentTab === 'produccion') calendarProd.updateSize();
+                if (chartAreaDist && currentTab === 'produccion') chartAreaDist.update();
+                if (chartPie3D && currentTab === 'produccion') chartPie3D.update();
             });
         });
     </script>
