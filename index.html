@@ -629,12 +629,21 @@
 
         <!-- Main Grid Producción -->
         <div class="grid grid-cols-1 lg:grid-cols-4 gap-5 section-spacing">
-            <div class="card p-0 flex flex-col h-[420px] lg:h-[500px] opacity-0 lg:col-span-1">
-                <div class="p-3 border-b border-slate-700/50 bg-slate-800/30">
+            <div class="card p-0 flex flex-col h-[480px] lg:h-[560px] opacity-0 lg:col-span-1">
+                <div class="p-3 border-b border-slate-700/50 bg-slate-800/30 space-y-2.5">
                     <h2 class="font-semibold text-slate-200 text-sm flex items-center gap-1.5">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                         Próximas a Producir
+                        <span id="upcomingCountBadge" class="ml-auto text-[10px] font-bold text-slate-400 bg-slate-900/60 px-2 py-0.5 rounded-full border border-slate-700/50">0</span>
                     </h2>
+                    <div class="relative">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-slate-500 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                        <input type="text" id="upcomingSearchInput" placeholder="Buscar por código o producto..." class="w-full bg-slate-900/50 border border-slate-700/60 rounded-lg pl-8 pr-3 py-1.5 text-xs text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-blue-500/60 transition-colors">
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <label for="upcomingDateFromInput" class="text-[10px] text-slate-400 uppercase font-bold tracking-wider whitespace-nowrap">Desde</label>
+                        <input type="date" id="upcomingDateFromInput" class="flex-1 bg-slate-900/50 border border-slate-700/60 rounded-lg px-2 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500/60 transition-colors [color-scheme:dark]">
+                    </div>
                 </div>
                 <div class="overflow-y-auto p-3 space-y-2.5 flex-1 custom-scrollbar" id="upcomingListProd">
                     <p class="text-xs text-slate-500 text-center mt-8">Sube un Excel para visualizar</p>
@@ -1579,31 +1588,78 @@
             if (ev.length > 0) calendarProd.gotoDate(ev.map(e => e.start).sort()[0]);
         }
 
+        // Estado de los filtros del panel "Próximas a Producir"
+        let upcomingSearchTerm = '';
+        let upcomingDateFrom = null; // string 'YYYY-MM-DD' o null (null = usar hoy por defecto)
+
         function renderUpcomingProd() {
             const l = document.getElementById('upcomingListProd'); l.innerHTML = '';
-            let u = []; const h = dayjs().startOf('day').valueOf();
+            const badge = document.getElementById('upcomingCountBadge');
+
+            const fromValue = upcomingDateFrom || dayjs().format('YYYY-MM-DD');
+            const fromTs = dayjs(fromValue).startOf('day').valueOf();
+            const term = upcomingSearchTerm.trim().toLowerCase();
+
+            let u = [];
             productionData.forEach(p => {
                 if (currentAreaFilter !== 'TODAS' && p.area !== currentAreaFilter) return;
-                p.fechas.forEach(d => { if (dayjs(d).valueOf() >= h) u.push({ date: d, ...p }); });
+                if (term) {
+                    const matches = p.codigo.toLowerCase().includes(term) || p.producto.toLowerCase().includes(term);
+                    if (!matches) return;
+                }
+                p.fechas.forEach(d => { if (dayjs(d).valueOf() >= fromTs) u.push({ date: d, ...p }); });
             });
             u.sort((a, b) => new Date(a.date) - new Date(b.date));
-            u = u.slice(0, 15);
-            if (u.length === 0) { l.innerHTML = '<p class="text-xs text-slate-500 text-center mt-8">Sin programaciones</p>'; return; }
+
+            if (badge) badge.textContent = u.length;
+
+            if (u.length === 0) {
+                l.innerHTML = '<p class="text-xs text-slate-500 text-center mt-8">Sin programaciones para los filtros aplicados</p>';
+                return;
+            }
+            // Sin límite de resultados: se muestra el total; el contenedor tiene scroll propio.
+            const frag = document.createDocumentFragment();
             u.forEach(i => {
                 const c = getAreaColor(i.area);
                 const e = document.createElement('div');
                 e.className = 'p-2.5 rounded-lg bg-slate-800/40 border border-slate-700/50 cursor-pointer hover:bg-slate-700/60 transition-all';
                 e.onclick = () => showModalProd(i);
                 e.innerHTML = `<div class="flex justify-between items-center mb-1"><span class="text-xs font-bold px-1.5 py-0.5 rounded text-white" style="background-color:${c}">${i.area}</span><span class="text-xs text-slate-400">${dayjs(i.date).format('DD MMM')}</span></div><p class="text-xs font-medium text-slate-200 truncate">${i.producto}</p><p class="text-xs text-slate-500 mt-0.5">Cód: ${i.codigo}</p>`;
-                l.appendChild(e);
+                frag.appendChild(e);
             });
+            l.appendChild(frag);
+        }
+
+        function initUpcomingFilters() {
+            const searchInput = document.getElementById('upcomingSearchInput');
+            const dateFromInput = document.getElementById('upcomingDateFromInput');
+            if (dateFromInput) dateFromInput.value = dayjs().format('YYYY-MM-DD');
+
+            let debounceTimer = null;
+            if (searchInput) {
+                searchInput.addEventListener('input', (e) => {
+                    clearTimeout(debounceTimer);
+                    debounceTimer = setTimeout(() => {
+                        upcomingSearchTerm = e.target.value;
+                        renderUpcomingProd();
+                    }, 150);
+                });
+            }
+            if (dateFromInput) {
+                dateFromInput.addEventListener('change', (e) => {
+                    upcomingDateFrom = e.target.value || null;
+                    renderUpcomingProd();
+                });
+            }
         }
 
         function renderAreaDistributionChart() {
             const ctx = document.getElementById('chartAreaDistribution'); if (!ctx) return;
             const apc = {};
             productionData.forEach(p => { if (currentAreaFilter !== 'TODAS' && p.area !== currentAreaFilter) return; apc[p.area] = (apc[p.area] || 0) + 1; });
-            const sa = sortAreas(Object.keys(apc)); const lb = sa, dt = sa.map(a => apc[a]), cl = sa.map(a => getAreaColor(a));
+            // Ordenado por volumen de mayor a menor (no por prioridad de área).
+            const sa = Object.keys(apc).sort((a, b) => apc[b] - apc[a]);
+            const lb = sa, dt = sa.map(a => apc[a]), cl = sa.map(a => getAreaColor(a));
             const tot = dt.reduce((s, v) => s + v, 0); const pct = dt.map(v => tot > 0 ? ((v / tot) * 100).toFixed(1) : 0);
             if (chartAreaDist) chartAreaDist.destroy();
             Chart.defaults.color = '#94a3b8'; Chart.defaults.font.family = 'Inter';
@@ -1620,7 +1676,7 @@
                             callbacks: { label: function (c) { return ` ${c.raw} productos (${pct[c.dataIndex]}%)`; } }
                         }
                     },
-                    scales: { x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { stepSize: 1, precision: 0 } }, y: { grid: { display: false } } }
+                    scales: { x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { stepSize: 1, precision: 0 } }, y: { grid: { display: false }, reverse: true } }
                 }
             });
         }
@@ -1839,10 +1895,9 @@
 
             subtitleEl.textContent = `Basado en ${productionData.length} productos programados desde ${dayjs().format('DD/MM/YYYY')}`;
 
-            const areaTotals = {}; const dateCounts = {}; let totalDias = 0;
+            const areaTotals = {}; const dateCounts = {};
             productionData.forEach(p => {
                 areaTotals[p.area] = (areaTotals[p.area] || 0) + p.fechas.length;
-                totalDias += p.fechas.length;
                 p.fechas.forEach(d => { dateCounts[d] = (dateCounts[d] || 0) + 1; });
             });
             let areaTop = '-', areaTopVal = 0;
@@ -1853,7 +1908,7 @@
 
             let text = `Para los próximos días, el área con mayor volumen es ${areaTop} con ${areaTopVal} unidades programadas. `;
             text += `El pico de producción será el día ${peakDateFmt}, con ${peakCount} productos programados para esa fecha. `;
-            text += `En total, se registran ${productionData.length} productos únicos distribuidos en ${availableAreas.size} áreas, sumando ${totalDias} días-producto programados.`;
+            text += `En total, se registran ${productionData.length} productos únicos distribuidos en ${availableAreas.size} áreas.`;
             textEl.textContent = text;
 
             statsEl.innerHTML = [
@@ -2031,6 +2086,7 @@
             initGooeyNav();
             initSummaryModules();
             initDragDrop();
+            initUpcomingFilters();
             await loadRMData();
             await loadProdData();
             initReactiveBackground();
