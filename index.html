@@ -111,7 +111,7 @@
             width: 800px;
             height: 800px;
             border-radius: 50%;
-            background: radial-gradient(circle, rgba(59, 130, 246, 0.15) 0%, rgba(139, 92, 246, 0.1) 40%, rgba(0, 0, 0, 0) 70%);
+            background: radial-gradient(circle, rgba(16, 185, 129, 0.15) 0%, rgba(59, 130, 246, 0.1) 40%, rgba(0, 0, 0, 0) 70%);
             filter: blur(80px);
             top: 50%;
             left: 50%;
@@ -169,6 +169,29 @@
             transform: translateY(-2px);
         }
 
+        /* ---------- RMD Pendientes de Autorización: destacado bajo el calendario ---------- */
+        .card-rmd-highlight {
+            background: linear-gradient(150deg, rgba(120, 53, 15, 0.16), rgba(15, 23, 42, 0.94) 55%);
+            border: 1px solid rgba(245, 158, 11, 0.28);
+            box-shadow:
+                0 1px 0 0 rgba(255,255,255,0.05) inset,
+                0 24px 48px -14px rgba(0, 0, 0, 0.5),
+                0 0 0 1px rgba(245, 158, 11, 0.08),
+                0 0 40px -12px rgba(245, 158, 11, 0.22);
+        }
+        .card-rmd-highlight::before {
+            background: linear-gradient(160deg, rgba(245, 158, 11, 0.22), rgba(255,255,255,0) 45%);
+        }
+        .rmd-icon-badge {
+            display: flex; align-items: center; justify-content: center;
+            width: 2.05rem; height: 2.05rem; flex-shrink: 0; border-radius: 0.65rem;
+            color: #fbbf24;
+            background: linear-gradient(150deg, rgba(245,158,11,0.24), rgba(245,158,11,0.06));
+            border: 1px solid rgba(245,158,11,0.3);
+            box-shadow: 0 0 16px -4px rgba(245,158,11,0.35);
+        }
+        .rmd-icon-badge svg { width: 1.1rem; height: 1.1rem; }
+
         .kpi-filter.active-filter {
             background: linear-gradient(145deg, rgba(59, 130, 246, 0.22), rgba(30, 41, 59, 0.92));
             border-color: #3b82f6;
@@ -196,6 +219,82 @@
             box-shadow: 0 0 15px rgba(16, 185, 129, 0.35), 0 2px 8px rgba(0,0,0,0.3);
         }
 
+        /* ---------- Header / Título premium ---------- */
+        .brand-mark {
+            display: flex; align-items: center; justify-content: center;
+            width: 2.5rem; height: 2.5rem; flex-shrink: 0;
+            border-radius: 0.85rem;
+            background: linear-gradient(155deg, rgba(59,130,246,0.22), rgba(139,92,246,0.14));
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 1px 0 0 rgba(255,255,255,0.08) inset, 0 8px 20px -8px rgba(59,130,246,0.5);
+            position: relative;
+            overflow: hidden;
+        }
+        .brand-mark::before {
+            content: '';
+            position: absolute; inset: 0;
+            background: linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.16) 48%, transparent 66%);
+            transform: translateX(-120%);
+            animation: brandSheen 5s ease-in-out infinite;
+        }
+        @keyframes brandSheen {
+            0%, 60% { transform: translateX(-120%); }
+            85%, 100% { transform: translateX(120%); }
+        }
+        .brand-mark svg { width: 1.3rem; height: 1.3rem; color: #93c5fd; position: relative; z-index: 1; }
+
+        .title-heading { display: flex; flex-direction: column; gap: 0.05em; }
+        .title-line {
+            font-weight: 800; text-transform: uppercase;
+            letter-spacing: 0.05em; line-height: 1.05;
+            font-size: 1.05rem;
+        }
+        .title-line-primary {
+            color: #f8fafc;
+            text-shadow: 0 1px 16px rgba(148, 163, 184, 0.18);
+        }
+        .title-line-accent {
+            background: linear-gradient(100deg, #7dd3fc 0%, #93c5fd 35%, #c4b5fd 70%, #7dd3fc 100%);
+            background-size: 220% auto;
+            -webkit-background-clip: text; background-clip: text; color: transparent;
+            animation: titleShimmer 7s linear infinite;
+        }
+        @keyframes titleShimmer { to { background-position: -220% center; } }
+
+        .area-badge {
+            display: inline-flex; align-items: center; gap: 0.5rem;
+            margin-top: 0.35rem; padding: 0.22rem 0.65rem;
+            border-radius: 0.4rem;
+            border: 1px solid rgba(148, 163, 184, 0.18);
+            background: linear-gradient(150deg, rgba(148, 163, 184, 0.07), rgba(148, 163, 184, 0.02));
+            width: fit-content;
+        }
+        .area-badge-seg {
+            font-size: 0.62rem; font-weight: 700; letter-spacing: 0.22em;
+            color: #94a3b8; text-transform: uppercase;
+        }
+        .area-badge-sep {
+            width: 1px; height: 0.7rem;
+            background: linear-gradient(180deg, transparent, rgba(147, 197, 253, 0.55), transparent);
+        }
+
+        @media (min-width: 768px) {
+            .title-line { font-size: 1.55rem; }
+        }
+
+        .btn-clear {
+            background: linear-gradient(145deg, rgba(30,41,59,0.85), rgba(15,23,42,0.9));
+            color: #cbd5e1; border: 1px solid rgba(255,255,255,0.09);
+            box-shadow: 0 1px 0 0 rgba(255,255,255,0.05) inset, 0 6px 16px -8px rgba(0,0,0,0.5);
+            backdrop-filter: blur(10px);
+            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.25s ease, background 0.25s ease, color 0.25s ease;
+        }
+        .btn-clear:hover {
+            color: #fff; border-color: rgba(239, 68, 68, 0.4);
+            background: linear-gradient(145deg, rgba(51,65,85,0.9), rgba(30,41,59,0.95));
+            transform: translateY(-1px);
+        }
+
         /* ---------- Gooey Nav ---------- */
         .gooey-nav-container {
             position: relative;
@@ -215,6 +314,7 @@
             border-radius: 0.85rem;
             border: 1px solid rgba(255, 255, 255, 0.08);
             backdrop-filter: blur(10px);
+            overflow: hidden;
         }
         .gooey-nav-container nav ul li {
             border-radius: 0.6rem;
@@ -246,14 +346,28 @@
         .gooey-nav-container nav ul li.active { color: white; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3); }
         .gooey-nav-container nav ul li.active a {
             background: linear-gradient(145deg, rgba(59, 130, 246, 0.95), rgba(139, 92, 246, 0.95));
-            box-shadow: 0 4px 14px -2px rgba(59,130,246,0.5), 0 0 0 1px rgba(255,255,255,0.08) inset;
+            box-shadow: 0 2px 8px -2px rgba(59,130,246,0.45), 0 0 0 1px rgba(255,255,255,0.08) inset;
         }
 
+        /* El elemento .effect solo existe para la ráfaga de partículas gooey al cambiar de pestaña.
+           Su filtro pesado (blur+contrast) se activa exclusivamente durante esa breve animación
+           y se apaga después; dejarlo encendido de forma permanente es lo que generaba el halo
+           borroso "sucio" pegado al botón activo. */
         .gooey-nav-container .effect {
             position: absolute; left: 0; top: 0; width: 0; height: 0;
             opacity: 0; pointer-events: none; z-index: 1; border-radius: 0.6rem;
         }
-        .gooey-nav-container .effect.filter { filter: blur(7px) contrast(100) blur(0); mix-blend-mode: lighten; opacity: 1; }
+        .gooey-nav-container .effect.filter {
+            filter: none;
+            mix-blend-mode: normal;
+            opacity: 0;
+            transition: opacity 0.15s ease;
+        }
+        .gooey-nav-container .effect.filter.is-bursting {
+            filter: blur(7px) contrast(100) blur(0);
+            mix-blend-mode: lighten;
+            opacity: 1;
+        }
         .gooey-nav-container .effect.filter::before { display: none; }
         .gooey-nav-container .effect.filter::after {
             content: ''; position: absolute; inset: 0;
@@ -312,6 +426,59 @@
             box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
         }
 
+        /* ---------- Base de Datos: componente unificado ---------- */
+        .db-group {
+            display: flex; align-items: stretch; gap: 0;
+            border-radius: 0.7rem;
+            border: 1px solid rgba(34, 211, 238, 0.18);
+            background: linear-gradient(160deg, rgba(8, 47, 73, 0.35), rgba(30, 41, 59, 0.55));
+            overflow: hidden;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+        }
+        .db-group:hover {
+            border-color: rgba(34, 211, 238, 0.4);
+            box-shadow: 0 0 0 1px rgba(34,211,238,0.08), 0 8px 20px -10px rgba(34,211,238,0.35);
+        }
+        .db-group-icon {
+            display: flex; align-items: center; justify-content: center;
+            width: 2.1rem; flex-shrink: 0;
+            color: #22d3ee;
+            border-right: 1px solid rgba(34, 211, 238, 0.15);
+            background: rgba(34, 211, 238, 0.06);
+        }
+        .db-group-icon svg { width: 1rem; height: 1rem; }
+        .db-group-action {
+            display: flex; flex-direction: column; justify-content: center; gap: 0.05rem;
+            padding: 0.4rem 0.85rem; cursor: pointer; flex: 1;
+            transition: background 0.25s ease;
+        }
+        .db-group-action:hover { background: rgba(34, 211, 238, 0.08); }
+        .db-group-label { font-size: 0.78rem; font-weight: 600; color: #e2e8f0; line-height: 1.15; white-space: nowrap; }
+        .db-group-sub { font-size: 0.62rem; color: #64748b; font-weight: 500; letter-spacing: 0.01em; white-space: nowrap; }
+        .db-group-cloud-btn {
+            display: flex; align-items: center; gap: 0.35rem;
+            padding: 0.4rem 0.8rem; flex-shrink: 0;
+            font-size: 0.72rem; font-weight: 600; color: #22d3ee;
+            border-left: 1px solid rgba(34, 211, 238, 0.15);
+            background: rgba(34, 211, 238, 0.05);
+            cursor: pointer; white-space: nowrap;
+            transition: background 0.25s ease, color 0.25s ease;
+        }
+        .db-group-cloud-btn:hover { background: rgba(34, 211, 238, 0.16); color: #67e8f9; }
+        .db-group-cloud-btn:active { transform: scale(0.97); }
+        .db-group-status {
+            display: inline-flex; align-items: center; gap: 0.3rem;
+            padding: 0.4rem 0.75rem; flex-shrink: 0;
+            font-size: 0.7rem; font-weight: 600; color: #67e8f9;
+            border-left: 1px solid rgba(34, 211, 238, 0.15);
+            background: rgba(34, 211, 238, 0.1);
+            animation: dbStatusIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+        }
+        .db-group-status svg { width: 0.9rem; height: 0.9rem; stroke-dasharray: 20; stroke-dashoffset: 20; animation: checkDraw 0.4s ease-out 0.1s forwards; }
+        @keyframes dbStatusIn { from { opacity: 0; transform: scale(0.9) translateX(-4px); } to { opacity: 1; transform: scale(1) translateX(0); } }
+        @keyframes checkDraw { to { stroke-dashoffset: 0; } }
+
         /* ---------- FullCalendar Overrides ---------- */
         .fc-theme-standard td, .fc-theme-standard th, .fc-theme-standard .fc-scrollgrid {
             border-color: rgba(255, 255, 255, 0.05) !important;
@@ -360,8 +527,17 @@
         ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
         ::-webkit-scrollbar-thumb:hover { background: #475569; }
 
-        .tab-content { display: none; }
+        .tab-content { display: none; will-change: transform, opacity, filter; }
         .tab-content.active { display: block; }
+
+        /* Evita interacción y refleja estado "en tránsito" mientras GSAP anima la salida/entrada */
+        body.is-tab-switching #tab-rmd,
+        body.is-tab-switching #tab-produccion {
+            pointer-events: none;
+        }
+        body.is-tab-switching .gooey-nav-container nav ul li a {
+            cursor: progress;
+        }
 
         .info-badge {
             background: rgba(16, 185, 129, 0.15);
@@ -395,6 +571,58 @@
         }
         .swal2-title { color: #f8fafc !important; }
         .swal2-html-container { color: #cbd5e1 !important; }
+
+        /* ---------- Diálogo: origen de Base de Datos ---------- */
+        .bd-dialog-popup.swal2-popup { padding: 1.5rem 1.4rem 1.6rem !important; }
+        .bd-dialog-popup .swal2-title {
+            font-size: 1.05rem !important; font-weight: 800 !important;
+            padding: 0 0 0.15rem !important; margin: 0 !important;
+        }
+        .bd-dialog-sub {
+            font-size: 0.78rem; color: #94a3b8; margin: 0 0 1.1rem; text-align: left;
+        }
+        .bd-dialog-options { display: flex; flex-direction: column; gap: 0.6rem; }
+        .bd-dialog-option {
+            display: flex; align-items: center; gap: 0.75rem;
+            width: 100%; text-align: left; cursor: pointer;
+            padding: 0.7rem 0.85rem; border-radius: 0.85rem;
+            border: 1px solid rgba(255,255,255,0.08);
+            background: linear-gradient(150deg, rgba(51,65,85,0.55), rgba(30,41,59,0.6));
+            transition: border-color 0.25s ease, background 0.25s ease, transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .bd-dialog-option:hover {
+            transform: translateY(-1px);
+            border-color: rgba(59, 130, 246, 0.4);
+            background: linear-gradient(150deg, rgba(59,130,246,0.14), rgba(30,41,59,0.7));
+        }
+        .bd-dialog-option:active { transform: translateY(0) scale(0.985); }
+        .bd-dialog-option-cloud:hover {
+            border-color: rgba(34, 211, 238, 0.45);
+            background: linear-gradient(150deg, rgba(34,211,238,0.14), rgba(30,41,59,0.7));
+        }
+        .bd-dialog-option-icon {
+            display: flex; align-items: center; justify-content: center;
+            width: 2.3rem; height: 2.3rem; flex-shrink: 0; border-radius: 0.65rem;
+        }
+        .bd-dialog-option-icon svg { width: 1.15rem; height: 1.15rem; }
+        .bd-icon-local {
+            color: #93c5fd;
+            background: linear-gradient(150deg, rgba(59,130,246,0.22), rgba(59,130,246,0.06));
+            border: 1px solid rgba(59,130,246,0.25);
+        }
+        .bd-icon-cloud {
+            color: #67e8f9;
+            background: linear-gradient(150deg, rgba(34,211,238,0.22), rgba(34,211,238,0.06));
+            border: 1px solid rgba(34,211,238,0.25);
+        }
+        .bd-dialog-option-text { display: flex; flex-direction: column; gap: 0.1rem; flex: 1; min-width: 0; }
+        .bd-dialog-option-title { font-size: 0.85rem; font-weight: 700; color: #f1f5f9; }
+        .bd-dialog-option-desc { font-size: 0.7rem; color: #94a3b8; line-height: 1.3; }
+        .bd-dialog-option-chevron {
+            width: 1rem; height: 1rem; flex-shrink: 0; color: #64748b;
+            transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.25s ease;
+        }
+        .bd-dialog-option:hover .bd-dialog-option-chevron { transform: translateX(3px); color: #cbd5e1; }
 
         /* ---------- Skeleton loaders ---------- */
         .skeleton {
@@ -466,6 +694,72 @@
             .card { border-radius: 0.85rem; }
             .section-spacing { margin-bottom: 1.1rem; }
         }
+
+        /* ---------- Backup discreto (exportar/importar JSON) ---------- */
+        .backup-corner {
+            position: fixed;
+            right: 0.65rem;
+            bottom: 0.65rem;
+            z-index: 60;
+        }
+        .backup-dot {
+            display: flex; align-items: center; justify-content: center;
+            width: 1.6rem; height: 1.6rem;
+            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            background: rgba(30, 41, 59, 0.35);
+            color: rgba(148, 163, 184, 0.35);
+            opacity: 0.35;
+            cursor: pointer;
+            transition: opacity 0.35s ease, color 0.35s ease, background 0.35s ease, transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.35s ease;
+        }
+        .backup-dot svg { width: 0.85rem; height: 0.85rem; }
+        .backup-corner:hover .backup-dot,
+        .backup-dot:focus-visible,
+        .backup-corner.is-open .backup-dot {
+            opacity: 1;
+            color: #67e8f9;
+            background: rgba(34, 211, 238, 0.12);
+            border-color: rgba(34, 211, 238, 0.3);
+            transform: scale(1.08);
+        }
+        .backup-dot:focus-visible { outline: 2px solid #60a5fa; outline-offset: 2px; }
+
+        .backup-panel {
+            position: absolute;
+            right: 0;
+            bottom: calc(100% + 0.6rem);
+            min-width: 220px;
+            background: linear-gradient(160deg, rgba(30, 41, 59, 0.97), rgba(15, 23, 42, 0.98));
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 0.85rem;
+            box-shadow: 0 20px 45px -15px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.03) inset;
+            backdrop-filter: blur(14px);
+            padding: 0.5rem;
+            display: flex; flex-direction: column; gap: 0.15rem;
+            opacity: 0; visibility: hidden; pointer-events: none;
+            transform: translateY(6px) scale(0.97);
+            transform-origin: bottom right;
+            transition: opacity 0.2s ease, transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), visibility 0.2s;
+        }
+        .backup-corner.is-open .backup-panel {
+            opacity: 1; visibility: visible; pointer-events: auto;
+            transform: translateY(0) scale(1);
+        }
+        .backup-action {
+            display: flex; align-items: center; gap: 0.55rem;
+            padding: 0.5rem 0.6rem; border-radius: 0.55rem;
+            font-size: 0.72rem; font-weight: 600; color: #cbd5e1;
+            text-align: left; cursor: pointer; white-space: nowrap;
+            transition: background 0.2s ease, color 0.2s ease;
+        }
+        .backup-action svg { width: 0.9rem; height: 0.9rem; flex-shrink: 0; color: #64748b; transition: color 0.2s ease; }
+        .backup-action:hover { background: rgba(34, 211, 238, 0.1); color: #f8fafc; }
+        .backup-action:hover svg { color: #67e8f9; }
+        .backup-hint {
+            font-size: 0.6rem; color: #475569; padding: 0.4rem 0.6rem 0.1rem;
+            line-height: 1.35; border-top: 1px solid rgba(255,255,255,0.05); margin-top: 0.2rem;
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col p-3 md:p-5 space-y-4 relative">
@@ -477,15 +771,24 @@
     <div id="grain-overlay"></div>
 
     <!-- Header -->
-    <header class="gsap-header flex flex-col md:flex-row justify-between items-start md:items-center gap-2 md:gap-0 relative z-10 opacity-0" style="padding: 0.25rem 0;">
-        <div class="flex items-center gap-3">
-            <h1 class="text-lg md:text-2xl font-extrabold uppercase" style="letter-spacing: 0.06em;">
-                <span class="text-transparent bg-clip-text bg-gradient-to-r from-slate-100 via-blue-200 to-slate-300" style="text-shadow: 0 1px 12px rgba(59,130,246,0.15);">
-                    RMD Pendientes de Autorización
-                </span>
-            </h1>
+    <header class="gsap-header flex flex-col md:flex-row justify-between items-start md:items-center gap-3 md:gap-0 relative z-10 opacity-0" style="padding: 0.25rem 0;">
+        <div class="flex items-center gap-3.5">
+            <div class="brand-mark" aria-hidden="true">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+            </div>
+            <div class="flex flex-col leading-none">
+                <h1 class="title-heading">
+                    <span class="title-line title-line-primary">RMD Pendientes</span>
+                    <span class="title-line title-line-accent">de Autorización</span>
+                </h1>
+                <div class="area-badge" aria-label="Área QA - DOC">
+                    <span class="area-badge-seg">QA</span>
+                    <span class="area-badge-sep" aria-hidden="true"></span>
+                    <span class="area-badge-seg">DOC</span>
+                </div>
+            </div>
         </div>
-        <button onclick="clearCurrentTabData()" class="w-full md:w-auto justify-center bg-slate-800/80 hover:bg-slate-700 text-slate-300 border border-slate-600 hover:text-white px-4 py-2 rounded-lg text-xs font-medium transition-all shadow-lg flex items-center gap-1.5 backdrop-blur-sm active:scale-95">
+        <button onclick="clearCurrentTabData()" class="btn-clear w-full md:w-auto justify-center px-4 py-2 rounded-lg text-xs font-medium flex items-center gap-1.5 active:scale-95">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
             Limpiar
         </button>
@@ -497,16 +800,16 @@
         <div class="gooey-nav-container" id="gooeyNavContainer">
             <nav>
                 <ul id="gooeyNavList">
-                    <li class="active" data-tab="rmd">
-                        <a href="#" onclick="return false;">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                            OP sin RMD
-                        </a>
-                    </li>
-                    <li data-tab="produccion">
+                    <li class="active" data-tab="produccion">
                         <a href="#" onclick="return false;">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
                             Producción
+                        </a>
+                    </li>
+                    <li data-tab="rmd">
+                        <a href="#" onclick="return false;">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                            OP sin RMD
                         </a>
                     </li>
                 </ul>
@@ -534,16 +837,24 @@
             <span class="text-xs text-emerald-400 font-medium" id="prodStatusBadge" style="display:none;">✓ Cargado</span>
 
             <!-- Base de Datos (ahora con diálogo unificado) -->
-            <div class="drop-zone-mini" id="dropZoneBaseDatos" onclick="showBaseDatosOptions()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();showBaseDatosOptions();}" role="button" tabindex="0" title="Cargar Base de Datos de materiales" aria-label="Cargar Base de Datos de materiales">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-cyan-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 7v10c0 1.657 3.582 3 8 3s8-1.343 8-3V7M4 7c0 1.657 3.582 3 8 3s8-1.343 8-3M4 7c0-1.657 3.582-3 8-3s8 1.343 8 3" /></svg>
-                <span>Base de Datos</span>
+            <div class="db-group" id="dbGroup">
+                <div class="db-group-icon" aria-hidden="true">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M4 7v10c0 1.657 3.582 3 8 3s8-1.343 8-3V7M4 7c0 1.657 3.582 3 8 3s8-1.343 8-3M4 7c0-1.657 3.582-3 8-3s8 1.343 8 3" /></svg>
+                </div>
+                <div class="db-group-action" id="dropZoneBaseDatos" onclick="showBaseDatosOptions()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();showBaseDatosOptions();}" role="button" tabindex="0" title="Cargar Base de Datos de materiales" aria-label="Cargar Base de Datos de materiales">
+                    <span class="db-group-label">Base de Datos</span>
+                    <span class="db-group-sub">Excel local o nube</span>
+                </div>
+                <input type="file" id="fileInputBaseDatos" class="hidden" accept=".xlsx, .xls" onchange="handleFileBaseDatos(event)">
+                <button type="button" id="btnDescargarBaseDatosNube" style="display:none;" title="Descargar automáticamente la Base de Datos desde la nube" aria-label="Descargar Base de Datos desde la nube" class="db-group-cloud-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3" /></svg>
+                    <span>Nube</span>
+                </button>
+                <span class="db-group-status" id="baseDatosStatusBadge" style="display:none;">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M5 13l4 4L19 7" /></svg>
+                    Cargado
+                </span>
             </div>
-            <input type="file" id="fileInputBaseDatos" class="hidden" accept=".xlsx, .xls" onchange="handleFileBaseDatos(event)">
-            <button type="button" id="btnDescargarBaseDatosNube" style="display:none;" title="Descargar automáticamente la Base de Datos desde la nube" aria-label="Descargar Base de Datos desde la nube" class="drop-zone-mini">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-cyan-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3" /></svg>
-                <span>Descargar de la nube</span>
-            </button>
-            <span class="text-xs text-cyan-400 font-medium" id="baseDatosStatusBadge" style="display:none;">✓ Cargado</span>
 
             <!-- Carga de RMD Autorizados -->
             <div class="drop-zone-mini" id="dropZoneRmdAutorizados" onclick="document.getElementById('fileInputRmdAutorizados').click()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();document.getElementById('fileInputRmdAutorizados').click();}" role="button" tabindex="0" title="Cargar RMD Autorizados" aria-label="Cargar RMD Autorizados">
@@ -556,7 +867,7 @@
     </div>
 
     <!-- ==================== TAB 1: RMD ==================== -->
-    <div class="tab-content active" id="tab-rmd">
+    <div class="tab-content" id="tab-rmd">
         <!-- (Mismo contenido que el original para la pestaña RMD, se mantiene íntegro) -->
         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4 section-spacing">
             <div class="card card-hover p-4 cursor-pointer transition-all kpi-filter active-filter opacity-0" onclick="setFilterRMD('ALL')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();setFilterRMD('ALL');}" role="button" tabindex="0" aria-label="Filtrar: todas las plantas" id="kpi-card-total">
@@ -647,7 +958,7 @@
     </div>
 
     <!-- ==================== TAB 2: Programa de Producción ==================== -->
-    <div class="tab-content" id="tab-produccion">
+    <div class="tab-content active" id="tab-produccion">
         <!-- (Mismo contenido que el original para producción, sin cambios relevantes) -->
         <div class="info-badge opacity-0 section-spacing" id="dateFilterInfo" style="display: none;">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
@@ -706,46 +1017,14 @@
             </div>
         </div>
 
-        <!-- Gráficos de Distribución -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 section-spacing">
-            <div class="card p-4 md:p-5 opacity-0">
-                <h2 class="font-semibold text-slate-200 mb-4 text-sm flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" /></svg>
-                    Distribución de Carga por Área
-                </h2>
-                <div class="h-[280px] md:h-[300px] w-full">
-                    <canvas id="chartAreaDistribution"></canvas>
-                </div>
-            </div>
-
-            <div class="card p-4 md:p-5 opacity-0" id="pieChartCard">
-                <h2 class="font-semibold text-slate-200 mb-4 text-sm flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" /></svg>
-                    Comparativa de Carga entre Secciones (%)
-                </h2>
-                <div class="h-[280px] md:h-[300px] w-full">
-                    <canvas id="chartPie3D"></canvas>
-                </div>
-            </div>
-        </div>
-
-        <!-- Tendencia de producción por día -->
-        <div class="card p-4 md:p-5 opacity-0 section-spacing">
-            <h2 class="font-semibold text-slate-200 mb-4 text-sm flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>
-                Tendencia de Producción por Día (próximos 21 días)
-            </h2>
-            <div class="h-[260px] md:h-[280px] w-full">
-                <canvas id="chartTrendProd"></canvas>
-            </div>
-        </div>
-
-        <!-- Panel de Validación de Materiales (cruce BASE DE DATOS + RMD Autorizados) -->
-        <div class="card p-4 md:p-5 opacity-0 section-spacing" id="cardValidacionMateriales">
+        <!-- Panel de Validación de Materiales (cruce BASE DE DATOS + RMD Autorizados): destacado justo debajo del calendario -->
+        <div class="card card-rmd-highlight p-4 md:p-5 opacity-0 section-spacing" id="cardValidacionMateriales">
             <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
-                <h2 class="font-semibold text-slate-200 text-sm flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
-                    Validación de Materiales (RMD)
+                <h2 class="font-bold text-slate-100 text-base flex items-center gap-2.5">
+                    <span class="rmd-icon-badge">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4.5 w-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                    </span>
+                    RMD Pendientes de Autorización
                 </h2>
                 <div class="flex items-center gap-2">
                     <button onclick="exportPendientesToExcel()" class="bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-600 px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 active:scale-95">
@@ -825,6 +1104,40 @@
             </div>
         </div>
 
+        <!-- Gráficos de Distribución -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 section-spacing">
+            <div class="card p-4 md:p-5 opacity-0">
+                <h2 class="font-semibold text-slate-200 mb-4 text-sm flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" /></svg>
+                    Distribución de Carga por Área
+                </h2>
+                <div class="h-[280px] md:h-[300px] w-full">
+                    <canvas id="chartAreaDistribution"></canvas>
+                </div>
+            </div>
+
+            <div class="card p-4 md:p-5 opacity-0" id="pieChartCard">
+                <h2 class="font-semibold text-slate-200 mb-4 text-sm flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" /></svg>
+                    Comparativa de Carga entre Secciones (%)
+                </h2>
+                <div class="h-[280px] md:h-[300px] w-full">
+                    <canvas id="chartPie3D"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tendencia de producción por día -->
+        <div class="card p-4 md:p-5 opacity-0 section-spacing">
+            <h2 class="font-semibold text-slate-200 mb-4 text-sm flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>
+                Tendencia de Producción por Día (próximos 21 días)
+            </h2>
+            <div class="h-[260px] md:h-[280px] w-full">
+                <canvas id="chartTrendProd"></canvas>
+            </div>
+        </div>
+
         <!-- Resumen Producción -->
         <div id="summarySectionProd"></div>
     </div>
@@ -863,7 +1176,7 @@
         dayjs.extend(window.dayjs_plugin_customParseFormat);
         dayjs.locale('es');
 
-        let currentTab = 'rmd';
+        let currentTab = 'produccion';
 
         // ==================== STORAGE LAYER (solo almacenamiento local en el navegador, sin nube) ====================
         const dbStore = localforage.createInstance({ name: 'programaProduccionDB', storeName: 'datos_app' });
@@ -905,8 +1218,11 @@
             const makeParticles = (element) => {
                 const d = particleDistances, r = particleR;
                 element.classList.remove('active');
+                element.classList.add('is-bursting');
+                let maxDuration = 0;
                 for (let i = 0; i < particleCount; i++) {
                     const t = animationTime * 2 + noise(timeVariance * 2);
+                    maxDuration = Math.max(maxDuration, t);
                     const p = createParticle(i, t, d, r);
                     setTimeout(() => {
                         const particle = document.createElement('span');
@@ -927,6 +1243,9 @@
                         setTimeout(() => { try { element.removeChild(particle); } catch {} }, t);
                     }, 30);
                 }
+                // Apaga el filtro gooey en cuanto la última partícula termina, para que no quede
+                // un halo borroso permanente detrás del botón activo.
+                setTimeout(() => { element.classList.remove('is-bursting', 'active'); }, maxDuration + 60);
             };
 
             const updateEffectPosition = (element) => {
@@ -1005,8 +1324,13 @@
         }
 
         // ==================== TAB SWITCHING ====================
+        let tabSwitchTimeline = null;
+        const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
         function switchTab(tab) {
             if (currentTab === tab) return;
+            const previousTab = currentTab;
+            const direction = tab === 'produccion' ? 1 : -1; // hacia la derecha al ir a Producción, izquierda al volver
             currentTab = tab;
             const outgoing = document.querySelector('.tab-content.active');
             const incoming = document.getElementById(`tab-${tab}`);
@@ -1015,14 +1339,13 @@
             document.getElementById('inlineUploadProd').style.display = tab === 'produccion' ? 'flex' : 'none';
 
             const glowOrb = document.getElementById('glow-orb');
-            glowOrb.style.background = tab === 'rmd'
+            const targetGlow = tab === 'rmd'
                 ? 'radial-gradient(circle, rgba(59, 130, 246, 0.15) 0%, rgba(139, 92, 246, 0.1) 40%, rgba(0, 0, 0, 0) 70%)'
                 : 'radial-gradient(circle, rgba(16, 185, 129, 0.15) 0%, rgba(59, 130, 246, 0.1) 40%, rgba(0, 0, 0, 0) 70%)';
 
-            if (outgoing && outgoing !== incoming) outgoing.classList.remove('active');
-            incoming.classList.add('active');
+            if (tabSwitchTimeline) tabSwitchTimeline.kill();
 
-            requestAnimationFrame(() => {
+            const resizeCharts = () => {
                 if (tab === 'rmd') {
                     if (calendarRMD) calendarRMD.updateSize();
                 } else {
@@ -1031,8 +1354,45 @@
                     if (chartPie3D) chartPie3D.resize();
                     if (chartTrendProd) chartTrendProd.resize();
                 }
-                animateCurrentTabCards();
+            };
+
+            if (prefersReducedMotion || !outgoing || outgoing === incoming) {
+                // Camino accesible / directo: solo cross-fade suave, sin desplazamiento
+                glowOrb.style.background = targetGlow;
+                if (outgoing && outgoing !== incoming) outgoing.classList.remove('active');
+                incoming.classList.add('active');
+                requestAnimationFrame(() => { resizeCharts(); animateCurrentTabCards(); });
+                return;
+            }
+
+            document.body.classList.add('is-tab-switching');
+            const dist = 26 * direction;
+
+            tabSwitchTimeline = gsap.timeline({
+                defaults: { ease: 'power3.inOut' },
+                onComplete: () => document.body.classList.remove('is-tab-switching')
             });
+
+            // Salida: el contenido actual se desliza y se difumina hacia la dirección de navegación
+            tabSwitchTimeline.to(outgoing, {
+                x: -dist, opacity: 0, filter: 'blur(6px)', duration: 0.28, ease: 'power2.in'
+            });
+
+            // Cambio de fondo ambiental a mitad de camino, sincronizado con el "vacío" entre paneles
+            tabSwitchTimeline.call(() => {
+                gsap.to(glowOrb, { duration: 0.5, ease: 'sine.inOut', onStart: () => { glowOrb.style.background = targetGlow; } });
+                outgoing.classList.remove('active');
+                incoming.classList.add('active');
+                gsap.set(incoming, { x: dist, opacity: 0, filter: 'blur(6px)' });
+                resizeCharts();
+            });
+
+            // Entrada: el nuevo panel llega desde el lado opuesto con nitidez creciente
+            tabSwitchTimeline.to(incoming, {
+                x: 0, opacity: 1, filter: 'blur(0px)', duration: 0.42, ease: 'power3.out',
+                clearProps: 'transform,filter,opacity',
+                onComplete: animateCurrentTabCards
+            }, '+=0.01');
         }
 
         let tabFadeTimeline = null;
@@ -1040,8 +1400,8 @@
             const activeTab = document.getElementById(`tab-${currentTab}`);
             const cards = activeTab.querySelectorAll('.card, #areaFiltersContainer, .info-badge, .summary-card');
             if (tabFadeTimeline) tabFadeTimeline.kill();
-            gsap.set(cards, { y: 18, opacity: 0 });
-            tabFadeTimeline = gsap.to(cards, { y: 0, opacity: 1, duration: 0.45, ease: "power2.out", stagger: 0.035, overwrite: true, clearProps: "transform" });
+            gsap.set(cards, { y: 14, opacity: 0 });
+            tabFadeTimeline = gsap.to(cards, { y: 0, opacity: 1, duration: 0.4, ease: "power2.out", stagger: 0.03, overwrite: true, clearProps: "transform" });
         }
 
         function clearCurrentTabData() { if (currentTab === 'rmd') clearRMData(); else clearProdData(); }
@@ -1849,24 +2209,46 @@
         function showBaseDatosOptions() {
             Swal.fire({
                 title: 'Cargar Base de Datos',
-                text: 'Selecciona el origen del archivo',
-                showDenyButton: true,
-                confirmButtonText: 'Desde mi equipo',
-                denyButtonText: 'Desde la nube',
+                html: `
+                    <p class="bd-dialog-sub">Selecciona el origen del archivo de materiales</p>
+                    <div class="bd-dialog-options">
+                        <button type="button" class="bd-dialog-option" id="bdOptLocal">
+                            <span class="bd-dialog-option-icon bd-icon-local">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                            </span>
+                            <span class="bd-dialog-option-text">
+                                <span class="bd-dialog-option-title">Desde mi equipo</span>
+                                <span class="bd-dialog-option-desc">Sube un archivo .xlsx guardado en tu dispositivo</span>
+                            </span>
+                            <svg class="bd-dialog-option-chevron" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                        </button>
+                        <button type="button" class="bd-dialog-option bd-dialog-option-cloud" id="bdOptCloud">
+                            <span class="bd-dialog-option-icon bd-icon-cloud">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3" /></svg>
+                            </span>
+                            <span class="bd-dialog-option-text">
+                                <span class="bd-dialog-option-title">Desde la nube</span>
+                                <span class="bd-dialog-option-desc">Descarga la última versión desde SharePoint</span>
+                            </span>
+                            <svg class="bd-dialog-option-chevron" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                        </button>
+                    </div>
+                `,
                 background: '#0f172a',
                 color: '#f8fafc',
-                customClass: {
-                    confirmButton: 'bg-slate-700 hover:bg-slate-600 text-white px-4 py-2.5 rounded-lg text-xs min-w-[44px]',
-                    denyButton: 'bg-cyan-700 hover:bg-cyan-600 text-white px-4 py-2.5 rounded-lg text-xs min-w-[44px]'
-                },
-                buttonsStyling: false
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    // Abre el selector de archivos local
-                    document.getElementById('fileInputBaseDatos').click();
-                } else if (result.isDenied) {
-                    // Descarga desde la nube (sin CORS)
-                    downloadBaseDatosFromCloud();
+                showConfirmButton: false,
+                showCloseButton: true,
+                width: 420,
+                customClass: { popup: 'bd-dialog-popup', htmlContainer: 'bd-dialog-container' },
+                didOpen: () => {
+                    document.getElementById('bdOptLocal').addEventListener('click', () => {
+                        Swal.close();
+                        document.getElementById('fileInputBaseDatos').click();
+                    });
+                    document.getElementById('bdOptCloud').addEventListener('click', () => {
+                        Swal.close();
+                        downloadBaseDatosFromCloud();
+                    });
                 }
             });
         }
@@ -1967,7 +2349,7 @@
                 agrupadorEtapasMap = etapasByAgr;
                 databaseMaterialsLoaded = true;
                 saveValidacionData();
-                document.getElementById('baseDatosStatusBadge').style.display = 'inline';
+                document.getElementById('baseDatosStatusBadge').style.display = 'inline-flex';
                 Swal.fire({ icon: 'success', title: '¡Listo!', text: `${parsed.size} materiales cargados desde Base de Datos.`, timer: 2000, showConfirmButton: false, background: '#0f172a' });
                 runValidacionMateriales();
                 return true;
@@ -2079,7 +2461,7 @@
             databaseMaterialsLoaded = !!flags.databaseMaterialsLoaded;
             rmdAutorizadosLoaded = !!flags.rmdAutorizadosLoaded;
 
-            if (databaseMaterialsLoaded) document.getElementById('baseDatosStatusBadge').style.display = 'inline';
+            if (databaseMaterialsLoaded) document.getElementById('baseDatosStatusBadge').style.display = 'inline-flex';
             if (rmdAutorizadosLoaded) document.getElementById('rmdAutorizadosStatusBadge').style.display = 'inline';
         }
 
@@ -2110,6 +2492,7 @@
                 animateCounter('kpi-val-autorizados', 0);
                 animateCounter('kpi-val-pendientes', 0);
                 ultimoResultadoValidacion = { revisados: 0, autorizados: 0, pendientes: [] };
+                renderSummaryProd();
                 return;
             }
 
@@ -2187,6 +2570,7 @@
                 if (toolbar) toolbar.style.display = 'flex';
                 renderTablaPendientes(todasLasFilas);
             }
+            renderSummaryProd();
         }
 
         function refiltrarValidacionFiltros() {
@@ -2383,7 +2767,7 @@
 
             const areaTotals = {}; const dateCounts = {};
             productionData.forEach(p => {
-                areaTotals[p.area] = (areaTotals[p.area] || 0) + p.fechas.length;
+                areaTotals[p.area] = (areaTotals[p.area] || 0) + 1;
                 p.fechas.forEach(d => { dateCounts[d] = (dateCounts[d] || 0) + 1; });
             });
             let areaTop = '-', areaTopVal = 0;
@@ -2392,9 +2776,29 @@
             for (const [d, c] of Object.entries(dateCounts)) { if (c > peakCount) { peakCount = c; peakDate = d; } }
             const peakDateFmt = peakDate ? dayjs(peakDate).format('DD [de] MMMM') : 'sin definir';
 
-            let text = `Para los próximos días, el área con mayor volumen es ${areaTop} con ${areaTopVal} unidades programadas. `;
+            let text = `Para los próximos días, el área con mayor volumen es ${areaTop} con ${areaTopVal} productos. `;
             text += `El pico de producción será el día ${peakDateFmt}, con ${peakCount} productos programados para esa fecha. `;
             text += `En total, se registran ${productionData.length} productos únicos distribuidos en ${availableAreas.size} áreas.`;
+
+            // ---- RMD Pendientes de Autorización: se suma al resumen solo cuando las 3 fuentes
+            // (Producción, Base de Datos y RMD Autorizados) ya fueron cargadas ----
+            const readyBase = databaseMaterialsLoaded && databaseMaterials.size > 0;
+            const readyRmd = rmdAutorizadosLoaded && rmdAutorizadosEtapasPorAgrupador.size > 0;
+            const rmdListo = readyBase && readyRmd && ultimoResultadoValidacion;
+            let rmdStatCard = '';
+
+            if (rmdListo) {
+                const numPendientes = ultimoResultadoValidacion.pendientes.length;
+                if (numPendientes === 0) {
+                    text += ` En cuanto a autorizaciones, todos los materiales programados (${ultimoResultadoValidacion.revisados}) están autorizados: no hay RMD pendientes. ✅`;
+                } else {
+                    text += ` Actualmente hay ${numPendientes} RMD ${numPendientes === 1 ? 'pendiente' : 'pendientes'} de autorización de un total de ${ultimoResultadoValidacion.revisados} materiales revisados.`;
+                }
+                rmdStatCard = `<div class="bg-slate-900/50 border ${numPendientes > 0 ? 'border-red-700/30' : 'border-emerald-700/30'} rounded-lg px-3 py-2.5"><p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">RMD Pendientes</p><p class="text-lg font-bold mt-0.5 ${numPendientes > 0 ? 'text-red-400' : 'text-emerald-400'}">${numPendientes}</p></div>`;
+            }
+            // Si aún faltan la Base de Datos o los RMD Autorizados, el resumen se mantiene
+            // enfocado solo en producción: no se menciona nada sobre RMD pendientes todavía.
+
             textEl.textContent = text;
 
             statsEl.innerHTML = [
@@ -2402,7 +2806,7 @@
                 { label: 'Área top', value: areaTop },
                 { label: 'Día pico', value: peakDate ? dayjs(peakDate).format('DD/MM') : '-' },
                 { label: 'Áreas activas', value: availableAreas.size }
-            ].map(s => `<div class="bg-slate-900/50 border border-slate-700/50 rounded-lg px-3 py-2.5"><p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">${s.label}</p><p class="text-lg font-bold text-slate-100 mt-0.5">${s.value}</p></div>`).join('');
+            ].map(s => `<div class="bg-slate-900/50 border border-slate-700/50 rounded-lg px-3 py-2.5"><p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">${s.label}</p><p class="text-lg font-bold text-slate-100 mt-0.5">${s.value}</p></div>`).join('') + rmdStatCard;
         }
 
         function wireSummaryCopyButton(host, getCanvases) {
@@ -2518,6 +2922,113 @@
             return canvas;
         }
 
+        // ==================== BACKUP: EXPORTAR / IMPORTAR JSON ====================
+        const BACKUP_FORMAT_VERSION = 1;
+
+        async function exportAllDataAsJson() {
+            try {
+                const keys = await dbStore.keys();
+                const payload = {};
+                for (const key of keys) {
+                    payload[key] = await dbStore.getItem(key);
+                }
+                const backup = {
+                    __app: 'RMD Pendientes de Autorización',
+                    __formatVersion: BACKUP_FORMAT_VERSION,
+                    __exportedAt: new Date().toISOString(),
+                    data: payload
+                };
+                const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                const stamp = dayjs().format('YYYY-MM-DD_HHmm');
+                a.href = url;
+                a.download = `rmd-backup_${stamp}.json`;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                setTimeout(() => URL.revokeObjectURL(url), 1000);
+                Swal.fire({ icon: 'success', title: 'Datos exportados', text: `${keys.length} registros incluidos en el archivo.`, timer: 2000, showConfirmButton: false, background: '#0f172a' });
+            } catch (err) {
+                console.error('Error exportando backup:', err);
+                Swal.fire({ icon: 'error', title: 'No se pudo exportar', text: 'Ocurrió un problema al generar el archivo JSON.', background: '#0f172a' });
+            }
+        }
+
+        function handleBackupImportFile(e) {
+            const file = e.target.files[0];
+            e.target.value = '';
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = async (ev) => {
+                let parsed;
+                try {
+                    parsed = JSON.parse(ev.target.result);
+                } catch (err) {
+                    Swal.fire({ icon: 'error', title: 'Archivo inválido', text: 'El archivo no contiene un JSON válido.', background: '#0f172a' });
+                    return;
+                }
+                const payload = parsed && parsed.data && typeof parsed.data === 'object' ? parsed.data : null;
+                if (!payload) {
+                    Swal.fire({ icon: 'error', title: 'Formato no reconocido', text: 'Este JSON no parece ser una copia de seguridad válida de esta aplicación.', background: '#0f172a' });
+                    return;
+                }
+
+                const keyCount = Object.keys(payload).length;
+                const result = await Swal.fire({
+                    title: '¿Restaurar copia de seguridad?',
+                    html: `Se reemplazarán los datos actuales con <b>${keyCount}</b> registros del archivo${parsed.__exportedAt ? `<br><small>Exportado el ${dayjs(parsed.__exportedAt).format('DD/MM/YYYY HH:mm')}</small>` : ''}.`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Restaurar',
+                    cancelButtonText: 'Cancelar',
+                    background: '#0f172a', color: '#f8fafc',
+                    customClass: { confirmButton: 'bg-cyan-600 hover:bg-cyan-500 px-4 py-2.5 rounded-lg text-white mr-2 text-xs min-w-[44px]', cancelButton: 'bg-slate-600 hover:bg-slate-500 px-4 py-2.5 rounded-lg text-white text-xs min-w-[44px]' },
+                    buttonsStyling: false
+                });
+                if (!result.isConfirmed) return;
+
+                try {
+                    Swal.fire({ title: 'Restaurando datos...', allowOutsideClick: false, didOpen: () => Swal.showLoading(), background: '#0f172a' });
+                    await dbStore.clear();
+                    for (const [key, value] of Object.entries(payload)) {
+                        await dbStore.setItem(key, value);
+                    }
+                    await Swal.fire({ icon: 'success', title: 'Datos restaurados', text: 'La página se recargará para aplicar los cambios.', timer: 1800, showConfirmButton: false, background: '#0f172a' });
+                    window.location.reload();
+                } catch (err) {
+                    console.error('Error restaurando backup:', err);
+                    Swal.fire({ icon: 'error', title: 'No se pudo restaurar', text: 'Ocurrió un problema al escribir los datos importados.', background: '#0f172a' });
+                }
+            };
+            reader.onerror = () => Swal.fire({ icon: 'error', title: 'Error', text: 'No se pudo leer el archivo.', background: '#0f172a' });
+            reader.readAsText(file);
+        }
+
+        function initBackupWidget() {
+            const corner = document.getElementById('backupCorner');
+            const toggleBtn = document.getElementById('backupToggleBtn');
+            const exportBtn = document.getElementById('backupExportBtn');
+            const importBtn = document.getElementById('backupImportBtn');
+            const importInput = document.getElementById('backupImportInput');
+            if (!corner || !toggleBtn) return;
+
+            const closePanel = () => { corner.classList.remove('is-open'); toggleBtn.setAttribute('aria-expanded', 'false'); };
+            const openPanel = () => { corner.classList.add('is-open'); toggleBtn.setAttribute('aria-expanded', 'true'); };
+
+            toggleBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                corner.classList.contains('is-open') ? closePanel() : openPanel();
+            });
+            document.addEventListener('click', (e) => { if (!corner.contains(e.target)) closePanel(); });
+            document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closePanel(); });
+
+            exportBtn.addEventListener('click', () => { closePanel(); exportAllDataAsJson(); });
+            importBtn.addEventListener('click', () => { closePanel(); importInput.click(); });
+            importInput.addEventListener('change', handleBackupImportFile);
+        }
+
         // ==================== DRAG & DROP EN ZONAS DE CARGA ====================
         function initDragDrop() {
             const setupZone = (zoneId, inputId, handler) => {
@@ -2545,6 +3056,7 @@
             initGooeyNav();
             initSummaryModules();
             initDragDrop();
+            initBackupWidget();
             initUpcomingFilters();
             await loadRMData();
             await loadValidacionData();
@@ -2552,8 +3064,8 @@
             initReactiveBackground();
             initTiltCards();
 
-            document.getElementById('inlineUploadRMD').style.display = 'flex';
-            document.getElementById('inlineUploadProd').style.display = 'none';
+            document.getElementById('inlineUploadRMD').style.display = 'none';
+            document.getElementById('inlineUploadProd').style.display = 'flex';
 
             gsap.fromTo('.gsap-header', { y: -20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, ease: "power3.out" });
             gsap.fromTo('#tab-nav-row', { y: 15, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, delay: 0.2, ease: "power2.out" });
@@ -2567,6 +3079,24 @@
                 if (chartTrendProd && currentTab === 'produccion') chartTrendProd.update();
             });
         });
-    </script>
+    </script>    <!-- ==================== Backup discreto (exportar / importar JSON) ==================== -->
+    <div id="backupCorner" class="backup-corner" title="Copia de seguridad de los datos cargados">
+        <button type="button" id="backupToggleBtn" class="backup-dot" aria-label="Opciones de copia de seguridad" aria-expanded="false">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M4 7v10c0 1.657 3.582 3 8 3s8-1.343 8-3V7M4 7c0 1.657 3.582 3 8 3s8-1.343 8-3M4 7c0-1.657 3.582-3 8-3s8 1.343 8 3" /></svg>
+        </button>
+        <div class="backup-panel" id="backupPanel" role="menu">
+            <button type="button" class="backup-action" id="backupExportBtn" role="menuitem">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3" /></svg>
+                <span>Exportar datos (JSON)</span>
+            </button>
+            <button type="button" class="backup-action" id="backupImportBtn" role="menuitem">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M17 8l-5-5-5 5M12 3v12" /></svg>
+                <span>Importar datos (JSON)</span>
+            </button>
+            <input type="file" id="backupImportInput" class="hidden" accept="application/json,.json">
+            <p class="backup-hint">Copia de seguridad local de todo lo cargado en la app</p>
+        </div>
+    </div>
+
 </body>
 </html>
