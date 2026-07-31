@@ -2,8 +2,8 @@
 <html lang="es" class="dark">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-    <title>Programa de Producción</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RMD Pendientes de Autorización</title>
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -71,6 +71,8 @@
 
         * { -webkit-tap-highlight-color: transparent; }
 
+        html { -webkit-text-size-adjust: 100%; }
+
         body {
             font-family: 'Inter', sans-serif;
             background-color: #0b1120;
@@ -78,6 +80,22 @@
             color: #f8fafc;
             background-attachment: fixed;
             overflow-x: hidden;
+            padding-left: max(0.75rem, env(safe-area-inset-left));
+            padding-right: max(0.75rem, env(safe-area-inset-right));
+            padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+        }
+
+        /* Scroll con inercia en paneles con overflow (listas, tablas, calendario) */
+        .custom-scrollbar, #tablaPendientesWrapper, #areaFiltersContainer {
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* Objetivo táctil mínimo recomendado (44x44px) en controles interactivos, sobre todo en móvil */
+        @media (max-width: 768px) {
+            .drop-zone-mini { min-height: 44px; padding: 0.6rem 0.9rem; }
+            .filter-pill { min-height: 40px; display: inline-flex; align-items: center; }
+            .gooey-nav-container nav ul li a { min-height: 40px; }
+            button, .drop-zone-mini, [role="button"] { touch-action: manipulation; }
         }
 
         #ambient-bg {
@@ -329,6 +347,14 @@
             .fc-daygrid-event { white-space: normal !important; }
         }
 
+        /* Foco visible y accesible para navegación por teclado (tarjetas KPI, zonas de carga, filas de alerta) */
+        [role="button"]:focus-visible,
+        .drop-zone-mini:focus-visible,
+        .kpi-filter:focus-visible {
+            outline: 2px solid #60a5fa;
+            outline-offset: 2px;
+        }
+
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
@@ -428,6 +454,14 @@
         }
         .tilt-card:hover .spotlight { opacity: 1; }
 
+        /* ---------- Validación RMD (nuevo módulo) ---------- */
+        .badge-auth { background: linear-gradient(145deg, rgba(34,197,94,0.2), rgba(22,101,52,0.3)); color:#86efac; border:1px solid rgba(34,197,94,0.25); }
+        .badge-pending { background: linear-gradient(145deg, rgba(239,68,68,0.2), rgba(153,27,27,0.3)); color:#fca5a5; border:1px solid rgba(239,68,68,0.25); }
+        .badge-unknown { background: linear-gradient(145deg, rgba(148,163,184,0.18), rgba(51,65,85,0.3)); color:#cbd5e1; border:1px solid rgba(148,163,184,0.25); }
+        #tablaPendientes tbody tr:hover { background: rgba(51,65,85,0.35); }
+        #tablaPendientes th, #tablaPendientes td { padding: 0.55rem 0.75rem; }
+        #tablaPendientes thead th { position: sticky; top: 0; background: rgba(15,23,42,0.96); z-index: 1; }
+
         @media (max-width: 768px) {
             .card { border-radius: 0.85rem; }
             .section-spacing { margin-bottom: 1.1rem; }
@@ -445,9 +479,9 @@
     <!-- Header -->
     <header class="gsap-header flex flex-col md:flex-row justify-between items-start md:items-center gap-2 md:gap-0 relative z-10 opacity-0" style="padding: 0.25rem 0;">
         <div class="flex items-center gap-3">
-            <h1 class="text-xl md:text-2xl font-bold tracking-tight">
-                <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-emerald-400">
-                    Programa de Producción
+            <h1 class="text-lg md:text-2xl font-extrabold uppercase" style="letter-spacing: 0.06em;">
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-slate-100 via-blue-200 to-slate-300" style="text-shadow: 0 1px 12px rgba(59,130,246,0.15);">
+                    RMD Pendientes de Autorización
                 </span>
             </h1>
         </div>
@@ -482,8 +516,8 @@
 
         <!-- Inline Upload Zone RMD -->
         <div class="flex items-center gap-2" id="inlineUploadRMD">
-            <div class="drop-zone-mini" id="dropZoneRMD" onclick="document.getElementById('fileInputRMD').click()" title="Cargar Excel RMD">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+            <div class="drop-zone-mini" id="dropZoneRMD" onclick="document.getElementById('fileInputRMD').click()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();document.getElementById('fileInputRMD').click();}" role="button" tabindex="0" title="Cargar Excel RMD" aria-label="Cargar Excel RMD">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
                 <span>Cargar Excel</span>
             </div>
             <input type="file" id="fileInputRMD" class="hidden" accept=".xlsx, .xls" onchange="handleFileRMD(event)">
@@ -491,30 +525,49 @@
         </div>
 
         <!-- Inline Upload Zone Prod -->
-        <div class="flex items-center gap-2" id="inlineUploadProd" style="display:none;">
-            <div class="drop-zone-mini prod-style" id="dropZoneProd" onclick="document.getElementById('fileInputProd').click()" title="Cargar Excel Producción">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+        <div class="flex items-center gap-2 flex-wrap" id="inlineUploadProd" style="display:none;">
+            <div class="drop-zone-mini prod-style" id="dropZoneProd" onclick="document.getElementById('fileInputProd').click()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();document.getElementById('fileInputProd').click();}" role="button" tabindex="0" title="Cargar Excel Producción" aria-label="Cargar Excel Producción">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-emerald-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
                 <span>Cargar Excel</span>
             </div>
             <input type="file" id="fileInputProd" class="hidden" accept=".xlsx, .xls" onchange="handleFileProd(event)">
             <span class="text-xs text-emerald-400 font-medium" id="prodStatusBadge" style="display:none;">✓ Cargado</span>
+
+            <!-- Base de Datos (ahora con diálogo unificado) -->
+            <div class="drop-zone-mini" id="dropZoneBaseDatos" onclick="showBaseDatosOptions()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();showBaseDatosOptions();}" role="button" tabindex="0" title="Cargar Base de Datos de materiales" aria-label="Cargar Base de Datos de materiales">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-cyan-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 7v10c0 1.657 3.582 3 8 3s8-1.343 8-3V7M4 7c0 1.657 3.582 3 8 3s8-1.343 8-3M4 7c0-1.657 3.582-3 8-3s8 1.343 8 3" /></svg>
+                <span>Base de Datos</span>
+            </div>
+            <input type="file" id="fileInputBaseDatos" class="hidden" accept=".xlsx, .xls" onchange="handleFileBaseDatos(event)">
+            <button type="button" id="btnDescargarBaseDatosNube" style="display:none;" title="Descargar automáticamente la Base de Datos desde la nube" aria-label="Descargar Base de Datos desde la nube" class="drop-zone-mini">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-cyan-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3" /></svg>
+                <span>Descargar de la nube</span>
+            </button>
+            <span class="text-xs text-cyan-400 font-medium" id="baseDatosStatusBadge" style="display:none;">✓ Cargado</span>
+
+            <!-- Carga de RMD Autorizados -->
+            <div class="drop-zone-mini" id="dropZoneRmdAutorizados" onclick="document.getElementById('fileInputRmdAutorizados').click()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();document.getElementById('fileInputRmdAutorizados').click();}" role="button" tabindex="0" title="Cargar RMD Autorizados" aria-label="Cargar RMD Autorizados">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-amber-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>RMD Autorizados</span>
+            </div>
+            <input type="file" id="fileInputRmdAutorizados" class="hidden" accept=".xlsx, .xls" onchange="handleFileRmdAutorizados(event)">
+            <span class="text-xs text-amber-400 font-medium" id="rmdAutorizadosStatusBadge" style="display:none;">✓ Cargado</span>
         </div>
     </div>
 
     <!-- ==================== TAB 1: RMD ==================== -->
     <div class="tab-content active" id="tab-rmd">
-
-        <!-- KPIs RMD -->
+        <!-- (Mismo contenido que el original para la pestaña RMD, se mantiene íntegro) -->
         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4 section-spacing">
-            <div class="card card-hover p-4 cursor-pointer transition-all kpi-filter active-filter opacity-0" onclick="setFilterRMD('ALL')" id="kpi-card-total">
+            <div class="card card-hover p-4 cursor-pointer transition-all kpi-filter active-filter opacity-0" onclick="setFilterRMD('ALL')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();setFilterRMD('ALL');}" role="button" tabindex="0" aria-label="Filtrar: todas las plantas" id="kpi-card-total">
                 <p class="text-xs text-slate-400 uppercase font-bold tracking-wider">Total Productos</p>
                 <p id="kpi-total" class="text-2xl font-bold mt-1.5 text-white">0</p>
             </div>
-            <div class="card card-hover p-4 cursor-pointer transition-all kpi-filter opacity-0" onclick="setFilterRMD('ATE')" id="kpi-card-ate">
+            <div class="card card-hover p-4 cursor-pointer transition-all kpi-filter opacity-0" onclick="setFilterRMD('ATE')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();setFilterRMD('ATE');}" role="button" tabindex="0" aria-label="Filtrar: Planta ATE" id="kpi-card-ate">
                 <p class="text-xs text-slate-400 uppercase font-bold tracking-wider">Planta ATE</p>
                 <p id="kpi-ate" class="text-2xl font-bold mt-1.5 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400">0</p>
             </div>
-            <div class="card card-hover p-4 cursor-pointer transition-all kpi-filter opacity-0" onclick="setFilterRMD('LIMA')" id="kpi-card-lima">
+            <div class="card card-hover p-4 cursor-pointer transition-all kpi-filter opacity-0" onclick="setFilterRMD('LIMA')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();setFilterRMD('LIMA');}" role="button" tabindex="0" aria-label="Filtrar: Planta LIMA" id="kpi-card-lima">
                 <p class="text-xs text-slate-400 uppercase font-bold tracking-wider">Planta LIMA</p>
                 <p id="kpi-lima" class="text-2xl font-bold mt-1.5 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-fuchsia-400">0</p>
             </div>
@@ -595,8 +648,7 @@
 
     <!-- ==================== TAB 2: Programa de Producción ==================== -->
     <div class="tab-content" id="tab-produccion">
-
-        <!-- Info Badge -->
+        <!-- (Mismo contenido que el original para producción, sin cambios relevantes) -->
         <div class="info-badge opacity-0 section-spacing" id="dateFilterInfo" style="display: none;">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
             <span id="dateFilterText" class="text-xs"></span>
@@ -604,7 +656,7 @@
 
         <!-- Filtros de Áreas -->
         <div class="opacity-0 flex gap-1.5 overflow-x-auto pb-2 custom-scrollbar section-spacing -mx-3 px-3 md:mx-0 md:px-0" id="areaFiltersContainer">
-            <button class="filter-pill active px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap" onclick="setAreaFilter('TODAS')">TODAS</button>
+            <button class="filter-pill active px-3 py-1 rounded-full text-xs font-medium" onclick="setAreaFilter('TODAS')">TODAS</button>
         </div>
 
         <!-- KPIs Producción -->
@@ -677,7 +729,7 @@
             </div>
         </div>
 
-        <!-- Nuevo: Tendencia de producción por día -->
+        <!-- Tendencia de producción por día -->
         <div class="card p-4 md:p-5 opacity-0 section-spacing">
             <h2 class="font-semibold text-slate-200 mb-4 text-sm flex items-center gap-2">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>
@@ -688,11 +740,96 @@
             </div>
         </div>
 
+        <!-- Panel de Validación de Materiales (cruce BASE DE DATOS + RMD Autorizados) -->
+        <div class="card p-4 md:p-5 opacity-0 section-spacing" id="cardValidacionMateriales">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
+                <h2 class="font-semibold text-slate-200 text-sm flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                    Validación de Materiales (RMD)
+                </h2>
+                <div class="flex items-center gap-2">
+                    <button onclick="exportPendientesToExcel()" class="bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-600 px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 active:scale-95">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3" /></svg>
+                        Exportar Excel
+                    </button>
+                    <button onclick="copyPendientesToClipboard()" class="bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-600 px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 active:scale-95" id="copyPendientesBtn">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                        <span id="copyPendientesLabel">Copiar tabla</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Estado de carga de las 3 fuentes -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 mb-4" id="validacionFuentesStatus">
+                <div class="bg-slate-900/40 border border-slate-700/50 rounded-lg px-3 py-2 flex items-center justify-between text-xs">
+                    <span class="text-slate-400">Programa de Producción</span>
+                    <span id="fuenteStatusProd" class="text-slate-500 font-semibold">Pendiente</span>
+                </div>
+                <div class="bg-slate-900/40 border border-slate-700/50 rounded-lg px-3 py-2 flex items-center justify-between text-xs">
+                    <span class="text-slate-400">Base de Datos</span>
+                    <span id="fuenteStatusBase" class="text-slate-500 font-semibold">Pendiente</span>
+                </div>
+                <div class="bg-slate-900/40 border border-slate-700/50 rounded-lg px-3 py-2 flex items-center justify-between text-xs">
+                    <span class="text-slate-400">RMD Autorizados</span>
+                    <span id="fuenteStatusRmd" class="text-slate-500 font-semibold">Pendiente</span>
+                </div>
+            </div>
+
+            <!-- KPIs de validación -->
+            <div class="grid grid-cols-3 gap-2.5 mb-4">
+                <div class="bg-slate-900/50 border border-slate-700/50 rounded-lg px-3 py-2.5 text-center">
+                    <p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Revisados</p>
+                    <p id="kpi-val-revisados" class="text-xl font-bold mt-0.5 text-slate-100">0</p>
+                </div>
+                <div class="bg-slate-900/50 border border-emerald-700/30 rounded-lg px-3 py-2.5 text-center">
+                    <p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Autorizados</p>
+                    <p id="kpi-val-autorizados" class="text-xl font-bold mt-0.5 text-emerald-400">0</p>
+                </div>
+                <div class="bg-slate-900/50 border border-red-700/30 rounded-lg px-3 py-2.5 text-center">
+                    <p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Pendientes</p>
+                    <p id="kpi-val-pendientes" class="text-xl font-bold mt-0.5 text-red-400">0</p>
+                </div>
+            </div>
+
+            <div id="validacionEmptyState" class="text-xs text-slate-500 text-center py-8">
+                Carga los tres archivos (Programa de Producción, Base de Datos y RMD Autorizados) para generar la validación de materiales.
+            </div>
+
+            <div id="validacionToolbar" class="flex flex-col sm:flex-row sm:items-center gap-2.5 mb-3" style="display:none;">
+                <div class="relative flex-1 min-w-[160px]">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-slate-500 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M17 10a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                    <input id="validacionBuscador" type="text" placeholder="Buscar por código o descripción..." oninput="validacionBusqueda = this.value; refiltrarTablaPendientes();" class="w-full bg-slate-900/60 border border-slate-700/50 rounded-lg pl-8 pr-3 py-1.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500/60 transition-colors">
+                </div>
+                <div class="flex items-center gap-1.5 flex-wrap">
+                    <button onclick="validacionFiltroEstado='todos'; refiltrarValidacionFiltros();" id="filtroValTodos" class="filter-pill active px-3 py-1.5 rounded-lg text-[11px] font-medium">Todos</button>
+                    <button onclick="validacionFiltroEstado='pendientes'; refiltrarValidacionFiltros();" id="filtroValPendientes" class="filter-pill px-3 py-1.5 rounded-lg text-[11px] font-medium">Pendientes</button>
+                    <button onclick="validacionFiltroEstado='autorizados'; refiltrarValidacionFiltros();" id="filtroValAutorizados" class="filter-pill px-3 py-1.5 rounded-lg text-[11px] font-medium">Autorizados manual</button>
+                </div>
+                <span id="validacionContadorFilas" class="text-[11px] text-slate-500 whitespace-nowrap sm:ml-auto"></span>
+            </div>
+
+            <div class="overflow-x-auto overflow-y-auto max-h-96 rounded-lg border border-slate-700/50 custom-scrollbar" id="tablaPendientesWrapper" style="display:none;">
+                <table class="w-full text-xs" id="tablaPendientes">
+                    <thead class="sticky top-0 bg-slate-900/95 backdrop-blur z-10">
+                        <tr class="text-left text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-700/50">
+                            <th class="py-2">Material</th>
+                            <th class="py-2">Descripción</th>
+                            <th class="py-2">Área(s)</th>
+                            <th class="py-2">Etapa(s) Pendiente(s)</th>
+                            <th class="py-2">Estado</th>
+                            <th class="py-2 text-right">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaPendientesBody"></tbody>
+                </table>
+            </div>
+        </div>
+
         <!-- Resumen Producción -->
         <div id="summarySectionProd"></div>
     </div>
 
-    <!-- Template reutilizable para el módulo Resumen (clonado por JS en ambas pestañas) -->
+    <!-- Template reutilizable para el módulo Resumen -->
     <template id="summaryTemplate">
         <div class="summary-card p-4 md:p-6 pb-6">
             <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-4 relative z-10">
@@ -728,25 +865,12 @@
 
         let currentTab = 'rmd';
 
-        // ==================== STORAGE LAYER (IndexedDB vía localForage) ====================
-        // Sustituye localStorage: sin límite práctico de 5MB y no bloquea el hilo principal.
-        const dbStore = localforage.createInstance({
-            name: 'programaProduccionDB',
-            storeName: 'datos_app'
-        });
+        // ==================== STORAGE LAYER (solo almacenamiento local en el navegador, sin nube) ====================
+        const dbStore = localforage.createInstance({ name: 'programaProduccionDB', storeName: 'datos_app' });
 
-        async function storeSet(key, value) {
-            try { await dbStore.setItem(key, value); return true; }
-            catch (err) { console.error('IndexedDB set error:', key, err); return false; }
-        }
-        async function storeGet(key) {
-            try { const v = await dbStore.getItem(key); return v; }
-            catch (err) { console.error('IndexedDB get error:', key, err); return null; }
-        }
-        async function storeRemove(key) {
-            try { await dbStore.removeItem(key); return true; }
-            catch (err) { console.error('IndexedDB remove error:', key, err); return false; }
-        }
+        async function storeSet(key, value) { try { await dbStore.setItem(key, value); } catch (err) { console.error('IndexedDB set error:', key, err); } return true; }
+        async function storeGet(key) { try { return await dbStore.getItem(key); } catch (err) { console.error('IndexedDB get error:', key, err); return null; } }
+        async function storeRemove(key) { try { await dbStore.removeItem(key); } catch (err) { console.error('IndexedDB remove error:', key, err); } return true; }
 
         // ==================== GOOEY NAV ====================
         function initGooeyNav() {
@@ -764,33 +888,26 @@
             let activeIndex = 0;
 
             const noise = (n = 1) => n / 2 - Math.random() * n;
-
             const getXY = (distance, pointIndex, totalPoints) => {
                 const angle = ((360 + noise(8)) / totalPoints) * pointIndex * (Math.PI / 180);
                 return [distance * Math.cos(angle), distance * Math.sin(angle)];
             };
-
             const createParticle = (i, t, d, r) => {
                 let rotate = noise(r / 10);
                 return {
                     start: getXY(d[0], particleCount - i, particleCount),
                     end: getXY(d[1] + noise(7), particleCount - i, particleCount),
-                    time: t,
-                    scale: 1 + noise(0.2),
-                    color: colors[Math.floor(Math.random() * colors.length)],
+                    time: t, scale: 1 + noise(0.2), color: colors[Math.floor(Math.random() * colors.length)],
                     rotate: rotate > 0 ? (rotate + r / 20) * 10 : (rotate - r / 20) * 10
                 };
             };
 
             const makeParticles = (element) => {
-                const d = particleDistances;
-                const r = particleR;
+                const d = particleDistances, r = particleR;
                 element.classList.remove('active');
-
                 for (let i = 0; i < particleCount; i++) {
                     const t = animationTime * 2 + noise(timeVariance * 2);
                     const p = createParticle(i, t, d, r);
-
                     setTimeout(() => {
                         const particle = document.createElement('span');
                         const point = document.createElement('span');
@@ -803,16 +920,11 @@
                         particle.style.setProperty('--scale', `${p.scale}`);
                         particle.style.setProperty('--color', `var(--color-${p.color}, white)`);
                         particle.style.setProperty('--rotate', `${p.rotate}deg`);
-
                         point.classList.add('point');
                         particle.appendChild(point);
                         element.appendChild(particle);
-                        requestAnimationFrame(() => {
-                            element.classList.add('active');
-                        });
-                        setTimeout(() => {
-                            try { element.removeChild(particle); } catch {}
-                        }, t);
+                        requestAnimationFrame(() => { element.classList.add('active'); });
+                        setTimeout(() => { try { element.removeChild(particle); } catch {} }, t);
                     }, 30);
                 }
             };
@@ -821,12 +933,7 @@
                 if (!container || !filterEl) return;
                 const containerRect = container.getBoundingClientRect();
                 const pos = element.getBoundingClientRect();
-                Object.assign(filterEl.style, {
-                    left: `${pos.x - containerRect.x}px`,
-                    top: `${pos.y - containerRect.y}px`,
-                    width: `${pos.width}px`,
-                    height: `${pos.height}px`
-                });
+                Object.assign(filterEl.style, { left: `${pos.x - containerRect.x}px`, top: `${pos.y - containerRect.y}px`, width: `${pos.width}px`, height: `${pos.height}px` });
             };
 
             const handleNavClick = (index, liEl) => {
@@ -841,15 +948,16 @@
                     makeParticles(filterEl);
                 }
                 gsap.fromTo(liEl.querySelector('a'), { scale: 0.85 }, { scale: 1, duration: 0.45, ease: "elastic.out(1, 0.5)" });
-                const tab = liEl.getAttribute('data-tab');
-                switchTab(tab);
+                switchTab(liEl.getAttribute('data-tab'));
             };
 
             const activeLi = items[activeIndex];
             if (activeLi) setTimeout(() => updateEffectPosition(activeLi), 100);
-
             items.forEach((li, index) => {
                 li.addEventListener('click', () => handleNavClick(index, li));
+                li.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleNavClick(index, li); }
+                });
             });
 
             const resizeObserver = new ResizeObserver(() => {
@@ -865,9 +973,7 @@
             if (!glowOrb) return;
             let mouseX = window.innerWidth / 2, mouseY = window.innerHeight / 2, orbX = mouseX, orbY = mouseY;
             const isTouch = window.matchMedia('(pointer: coarse)').matches;
-            if (!isTouch) {
-                window.addEventListener('mousemove', (e) => { mouseX = e.clientX; mouseY = e.clientY; });
-            }
+            if (!isTouch) window.addEventListener('mousemove', (e) => { mouseX = e.clientX; mouseY = e.clientY; });
             function animate() {
                 orbX += (mouseX - orbX) * 0.04; orbY += (mouseY - orbY) * 0.04;
                 glowOrb.style.transform = `translate(calc(-50% + ${orbX - window.innerWidth / 2}px), calc(-50% + ${orbY - window.innerHeight / 2}px))`;
@@ -877,7 +983,6 @@
         }
 
         // ==================== TILT/SPOTLIGHT (signature micro-interaction) ====================
-        // Aplica un spotlight sutil + tilt 3D a las tarjetas KPI principales (desktop only).
         function initTiltCards() {
             if (window.matchMedia('(pointer: coarse)').matches) return;
             const cards = document.querySelectorAll('.kpi-filter');
@@ -895,9 +1000,7 @@
                     const ry = ((x / rect.width) - 0.5) * 6;
                     gsap.to(card, { rotateX: rx, rotateY: ry, duration: 0.4, ease: "power2.out", transformPerspective: 600 });
                 });
-                card.addEventListener('mouseleave', () => {
-                    gsap.to(card, { rotateX: 0, rotateY: 0, duration: 0.6, ease: "power3.out" });
-                });
+                card.addEventListener('mouseleave', () => { gsap.to(card, { rotateX: 0, rotateY: 0, duration: 0.6, ease: "power3.out" }); });
             });
         }
 
@@ -905,7 +1008,6 @@
         function switchTab(tab) {
             if (currentTab === tab) return;
             currentTab = tab;
-
             const outgoing = document.querySelector('.tab-content.active');
             const incoming = document.getElementById(`tab-${tab}`);
 
@@ -917,13 +1019,9 @@
                 ? 'radial-gradient(circle, rgba(59, 130, 246, 0.15) 0%, rgba(139, 92, 246, 0.1) 40%, rgba(0, 0, 0, 0) 70%)'
                 : 'radial-gradient(circle, rgba(16, 185, 129, 0.15) 0%, rgba(59, 130, 246, 0.1) 40%, rgba(0, 0, 0, 0) 70%)';
 
-            // Se activa la pestaña ANTES de medir/animar, para que el navegador ya tenga el layout
-            // final calculado cuando FullCalendar/Chart.js consulten el tamaño del contenedor.
             if (outgoing && outgoing !== incoming) outgoing.classList.remove('active');
             incoming.classList.add('active');
 
-            // Espera un frame a que el DOM recién visible tenga dimensiones reales antes de
-            // redimensionar calendario/gráficos: evita el "salto" al medir un contenedor en 0x0.
             requestAnimationFrame(() => {
                 if (tab === 'rmd') {
                     if (calendarRMD) calendarRMD.updateSize();
@@ -937,25 +1035,16 @@
             });
         }
 
-        // Animación de entrada simple y directa (sin ScrollTrigger) para evitar parpadeos al
-        // cambiar de pestaña: ScrollTrigger está pensado para scroll, no para contenido que
-        // pasa de display:none a visible, y producía saltos al medir posiciones a destiempo.
         let tabFadeTimeline = null;
         function animateCurrentTabCards() {
             const activeTab = document.getElementById(`tab-${currentTab}`);
             const cards = activeTab.querySelectorAll('.card, #areaFiltersContainer, .info-badge, .summary-card');
             if (tabFadeTimeline) tabFadeTimeline.kill();
             gsap.set(cards, { y: 18, opacity: 0 });
-            tabFadeTimeline = gsap.to(cards, {
-                y: 0, opacity: 1, duration: 0.45, ease: "power2.out",
-                stagger: 0.035, overwrite: true, clearProps: "transform"
-            });
+            tabFadeTimeline = gsap.to(cards, { y: 0, opacity: 1, duration: 0.45, ease: "power2.out", stagger: 0.035, overwrite: true, clearProps: "transform" });
         }
 
-        function clearCurrentTabData() {
-            if (currentTab === 'rmd') clearRMData();
-            else clearProdData();
-        }
+        function clearCurrentTabData() { if (currentTab === 'rmd') clearRMData(); else clearProdData(); }
 
         // ==================== UTILITY FUNCTIONS ====================
         function animateCounter(elementId, endValue, duration = 1.5) {
@@ -979,26 +1068,19 @@
             return map[cleanAbbr] || (cleanAbbr === '' ? 'No definida' : cleanAbbr);
         }
 
-        // Utilidad compartida: ¿esta fecha (string parseable por dayjs) es hoy o futura?
         function isTodayOrFuture(dateLike) {
             const d = dayjs(dateLike);
-            if (!d.isValid()) return false;
-            return d.isSameOrAfter(dayjs().startOf('day'), 'day');
+            return d.isValid() && d.isSameOrAfter(dayjs().startOf('day'), 'day');
         }
 
-        // Lee una hoja de cálculo respetando filas/columnas ocultas del Excel.
-        // sheet['!rows'][i].hidden / sheet['!cols'][i].hidden son las banderas que SheetJS
-        // expone cuando el archivo original marcó esa fila/columna como oculta.
         function getHiddenRowSet(sheet) {
             const hidden = new Set();
-            const rowsMeta = sheet['!rows'] || [];
-            rowsMeta.forEach((r, idx) => { if (r && r.hidden) hidden.add(idx); });
+            (sheet['!rows'] || []).forEach((r, idx) => { if (r && r.hidden) hidden.add(idx); });
             return hidden;
         }
         function getHiddenColSet(sheet) {
             const hidden = new Set();
-            const colsMeta = sheet['!cols'] || [];
-            colsMeta.forEach((c, idx) => { if (c && c.hidden) hidden.add(idx); });
+            (sheet['!cols'] || []).forEach((c, idx) => { if (c && c.hidden) hidden.add(idx); });
             return hidden;
         }
 
@@ -1018,8 +1100,7 @@
                 try {
                     const data = new Uint8Array(e.target.result);
                     const workbook = XLSX.read(data, { type: 'array', cellDates: true });
-                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-                    parseExcelDataRMD(firstSheet);
+                    parseExcelDataRMD(workbook.Sheets[workbook.SheetNames[0]]);
                     document.getElementById('rmdStatusBadge').style.display = 'inline';
                 } catch (error) {
                     console.error(error);
@@ -1029,15 +1110,8 @@
             reader.readAsArrayBuffer(file);
         }
 
-        // "OP sin RMD": la cabecera real está en la PRIMERA fila (índice 0), sin saltos.
-        // Columnas fijas: Orden, Planta, Código, Descripción, Versión, Etapa, Línea, Área, + fechas dd-mm-aaaa.
-        // La "Planta" puede venir vacía en muchas filas legítimas: no se usa como filtro obligatorio,
-        // solo "Orden" es indispensable para identificar el registro.
         const RMD_HEADER_ROW_INDEX = 0;
 
-        // Regla estricta de "OP sin RMD": solo se consideran productos con Planta = ATE o LIMA
-        // (explícitamente). Cualquier otro valor (vacío, "Sin Planta", u otra planta) se excluye
-        // por completo: no se cuenta, no se lista, no entra en cálculos ni en el resumen.
         function isPlantaValidaRMD(plantaRaw) {
             const p = String(plantaRaw ?? "").trim().toUpperCase();
             return p.includes("ATE") || p.includes("LIMA");
@@ -1055,7 +1129,6 @@
 
             const headerRow = rows[RMD_HEADER_ROW_INDEX];
             const keys = headerRow.map((h, idx) => hiddenCols.has(idx) ? null : String(h || '').trim());
-
             const colIndexByName = {};
             keys.forEach((k, idx) => { if (k) colIndexByName[k.toLowerCase()] = idx; });
 
@@ -1073,11 +1146,8 @@
             const descCol = findCol('descripci');
             const etapaCol = findCol('etapa');
 
-            // Columnas de fecha: cabeceras con formato dd-mm-aaaa, excluyendo columnas ocultas
             const dateColIdxs = [];
-            keys.forEach((k, idx) => {
-                if (k && /^\d{2}-\d{2}-\d{4}$/.test(k) && !hiddenCols.has(idx)) dateColIdxs.push(idx);
-            });
+            keys.forEach((k, idx) => { if (k && /^\d{2}-\d{2}-\d{4}$/.test(k) && !hiddenCols.has(idx)) dateColIdxs.push(idx); });
 
             const dataRows = rows.slice(RMD_HEADER_ROW_INDEX + 1);
             const newProductsMap = new Map();
@@ -1085,19 +1155,13 @@
 
             dataRows.forEach((row, relIdx) => {
                 const absoluteRowIdx = RMD_HEADER_ROW_INDEX + 1 + relIdx;
-                if (hiddenRows.has(absoluteRowIdx)) return; // ignora filas ocultas
-                if (!row || row.length === 0) return;
+                if (hiddenRows.has(absoluteRowIdx) || !row || row.length === 0) return;
 
                 const orden = row[ordenCol];
-                if (!orden) return; // debe existir número de orden
+                if (!orden) return;
                 const planta = String(row[plantaCol] ?? "").trim();
-
-                // Filtro estricto: solo Planta ATE o Planta LIMA. Vacíos, "Sin Planta" u otras
-                // plantas se excluyen por completo (no se cuentan ni se listan).
                 if (!isPlantaValidaRMD(planta)) { excluidosPorPlanta++; return; }
 
-                // Cruce fila/columna: si la celda bajo la fecha de cabecera dice "SI" (o "Si"),
-                // esa orden está programada para ese día. Se conserva solo si es hoy o futuro.
                 const dates = dateColIdxs
                     .filter(idx => String(row[idx] ?? "").trim().toUpperCase() === "SI")
                     .map(idx => keys[idx])
@@ -1105,11 +1169,8 @@
 
                 if (dates.length > 0) {
                     newProductsMap.set(String(orden), {
-                        orden: String(orden),
-                        planta,
-                        codigo: String(row[codigoCol] ?? ""),
-                        descripcion: row[descCol] ?? "",
-                        etapa: String(row[etapaCol] ?? ""),
+                        orden: String(orden), planta, codigo: String(row[codigoCol] ?? ""),
+                        descripcion: row[descCol] ?? "", etapa: String(row[etapaCol] ?? ""),
                         dates: dates.sort((a, b) => new Date(formatToIso(a)).getTime() - new Date(formatToIso(b)).getTime())
                     });
                 }
@@ -1174,9 +1235,9 @@
 
         function initCalendarRMD() {
             calendarRMD = new FullCalendar.Calendar(document.getElementById('calendarRMD'), {
-                initialView: 'dayGridMonth', locale: 'es',
-                headerToolbar: { left: 'prev,next today', center: 'title', right: 'dayGridMonth,dayGridWeek' },
-                buttonText: { today: 'Hoy', month: 'Mes', week: 'Semana' }, firstDay: 1, height: 'auto',
+                initialView: window.innerWidth < 768 ? 'listMonth' : 'dayGridMonth', locale: 'es',
+                headerToolbar: { left: 'prev,next today', center: 'title', right: window.innerWidth < 768 ? 'dayGridMonth,listMonth' : 'dayGridMonth,dayGridWeek' },
+                buttonText: { today: 'Hoy', month: 'Mes', week: 'Semana', list: 'Lista' }, firstDay: 1, height: 'auto',
                 contentHeight: window.innerWidth < 768 ? 420 : 500,
                 eventClick: (info) => showProductModalRMD(info.event.extendedProps),
                 eventMouseEnter: (info) => info.el.setAttribute('title', `${info.event.extendedProps.descripcion}\nEtapa: ${getEtapaNombre(info.event.extendedProps.etapa)}`)
@@ -1202,7 +1263,10 @@
             alerts.forEach(a => {
                 const el = document.createElement('div');
                 el.className = 'p-3 rounded-lg bg-slate-800/40 border border-slate-700/50 cursor-pointer hover:bg-slate-700/60 transition-all shadow-sm';
+                el.setAttribute('role', 'button');
+                el.setAttribute('tabindex', '0');
                 el.onclick = () => showProductModalRMD(a.product);
+                el.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); showProductModalRMD(a.product); } });
                 el.innerHTML = `<div class="flex justify-between items-start mb-1.5"><span class="text-xs font-bold text-slate-200">#${a.product.orden}</span><span class="badge ${a.badgeClass} text-xs">${a.label}</span></div><p class="text-xs text-slate-300 truncate mb-2">${a.product.descripcion}</p><div class="flex justify-between items-center text-xs"><span class="text-slate-400 border border-slate-600 px-2 py-0.5 rounded bg-slate-900/50">${getEtapaNombre(a.product.etapa)}</span><span class="text-slate-400">Fecha: <span class="font-medium text-slate-200">${a.critStr}</span></span></div>`;
                 alertsList.appendChild(el);
             });
@@ -1226,11 +1290,7 @@
                     responsive: true, maintainAspectRatio: false,
                     plugins: {
                         legend: { display: false },
-                        tooltip: {
-                            backgroundColor: 'rgba(15,23,42,0.95)', borderColor: 'rgba(59,130,246,0.4)', borderWidth: 1,
-                            padding: 10, titleColor: '#f8fafc', bodyColor: '#cbd5e1', displayColors: false,
-                            callbacks: { title: (items) => `Semana ${items[0].label.replace('S','')}`, label: (c) => `${c.raw} órdenes` }
-                        }
+                        tooltip: { backgroundColor: 'rgba(15,23,42,0.95)', borderColor: 'rgba(59,130,246,0.4)', borderWidth: 1, padding: 10, titleColor: '#f8fafc', bodyColor: '#cbd5e1', displayColors: false, callbacks: { title: (items) => `Semana ${items[0].label.replace('S','')}`, label: (c) => `${c.raw} órdenes` } }
                     },
                     scales: { y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { precision: 0 } }, x: { grid: { display: false } } }
                 }
@@ -1246,18 +1306,14 @@
                     indexAxis: 'y', responsive: true, maintainAspectRatio: false,
                     plugins: {
                         legend: { display: false },
-                        tooltip: {
-                            backgroundColor: 'rgba(15,23,42,0.95)', borderColor: 'rgba(16,185,129,0.4)', borderWidth: 1,
-                            padding: 10, titleColor: '#f8fafc', bodyColor: '#cbd5e1', displayColors: false,
-                            callbacks: { label: (c) => `${c.raw} órdenes programadas` }
-                        }
+                        tooltip: { backgroundColor: 'rgba(15,23,42,0.95)', borderColor: 'rgba(16,185,129,0.4)', borderWidth: 1, padding: 10, titleColor: '#f8fafc', bodyColor: '#cbd5e1', displayColors: false, callbacks: { label: (c) => `${c.raw} órdenes programadas` } }
                     },
                     scales: { x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { precision: 0 } }, y: { grid: { display: false } } }
                 }
             });
         }
 
-        async function getNotesRMD(orden) { const notes = await storeGet(`notes_rmd_${orden}`); return notes || []; }
+        async function getNotesRMD(orden) { return (await storeGet(`notes_rmd_${orden}`)) || []; }
         async function saveNoteRMD(orden, text) {
             const notes = await getNotesRMD(orden);
             notes.push({ id: Date.now(), text, date: dayjs().format('DD/MM/YY HH:mm') });
@@ -1271,15 +1327,15 @@
         function showProductModalRMD(product) {
             Swal.fire({
                 title: `<div class="text-lg font-bold text-left text-white border-b border-slate-700/50 pb-2 mb-2 flex justify-between"><span>Detalle de Orden</span><span class="text-xs bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded-full">#${product.orden}</span></div>`,
-                html: `<div class="text-left space-y-3 text-sm px-1"><div class="grid grid-cols-2 gap-3 bg-slate-800/30 p-3 rounded-lg"><div><span class="text-slate-400 block text-xs uppercase">Planta</span><span class="font-semibold text-slate-200">${product.planta}</span></div><div><span class="text-slate-400 block text-xs uppercase">Código</span><span class="font-semibold text-slate-200">${product.codigo}</span></div></div><div class="bg-indigo-900/20 border border-indigo-500/30 p-2.5 rounded-lg flex justify-between"><span class="text-indigo-300 text-xs uppercase">Etapa</span><span class="font-bold text-indigo-400 text-xs">${getEtapaNombre(product.etapa)}</span></div><div><span class="text-slate-400 text-xs uppercase">Descripción</span><br><span class="font-medium text-slate-200">${product.descripcion}</span></div><div><span class="text-slate-400 text-xs uppercase">Fechas</span><br><div class="mt-1.5">${product.dates.map(d => `<span class="inline-block bg-slate-700/50 border border-slate-600 px-2 py-0.5 rounded text-xs text-slate-200 mr-1.5 mb-1.5">${d}</span>`).join('')}</div></div><div class="mt-4 pt-3 border-t border-slate-700/50"><h4 class="font-semibold text-slate-200 mb-2 text-xs uppercase">Observaciones</h4><div class="flex gap-1.5 mb-2"><input type="text" id="swal-note-input-rmd" class="flex-1 bg-slate-900/50 border border-slate-600 rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none" placeholder="Añadir nota..."><button onclick="handleAddNoteRMD('${product.orden}')" class="bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 rounded-lg text-xs">Guardar</button></div><div id="swal-notes-list-rmd" class="space-y-1.5 max-h-32 overflow-y-auto"></div></div></div>`,
-                showConfirmButton: false, showCloseButton: true, width: '550px', didOpen: () => renderModalNotesRMD(product.orden)
+                html: `<div class="text-left space-y-3 text-sm px-1"><div class="grid grid-cols-2 gap-3 bg-slate-800/30 p-3 rounded-lg"><div><span class="text-slate-400 block text-xs uppercase">Planta</span><span class="font-semibold text-slate-200">${product.planta}</span></div><div><span class="text-slate-400 block text-xs uppercase">Código</span><span class="font-semibold text-slate-200">${product.codigo}</span></div></div><div class="bg-indigo-900/20 border border-indigo-500/30 p-2.5 rounded-lg flex justify-between"><span class="text-indigo-300 text-xs uppercase">Etapa</span><span class="font-bold text-indigo-400 text-xs">${getEtapaNombre(product.etapa)}</span></div><div><span class="text-slate-400 text-xs uppercase">Descripción</span><br><span class="font-medium text-slate-200">${product.descripcion}</span></div><div><span class="text-slate-400 text-xs uppercase">Fechas</span><br><div class="mt-1.5">${product.dates.map(d => `<span class="inline-block bg-slate-700/50 border border-slate-600 px-2 py-0.5 rounded text-xs text-slate-200 mr-1.5 mb-1.5">${d}</span>`).join('')}</div></div><div class="mt-4 pt-3 border-t border-slate-700/50"><h4 class="font-semibold text-slate-200 mb-2 text-xs uppercase">Observaciones</h4><div class="flex gap-1.5 mb-2"><input type="text" id="swal-note-input-rmd" class="flex-1 bg-slate-900/50 border border-slate-600 rounded-lg px-2.5 py-2 text-xs text-white focus:outline-none" placeholder="Añadir nota..." aria-label="Añadir observación"><button onclick="handleAddNoteRMD('${product.orden}')" class="bg-blue-600 hover:bg-blue-500 text-white px-3 py-2 rounded-lg text-xs min-w-[44px]">Guardar</button></div><div id="swal-notes-list-rmd" class="space-y-1.5 max-h-32 overflow-y-auto"></div></div></div>`,
+                showConfirmButton: false, showCloseButton: true, width: 'min(550px, 94vw)', didOpen: () => renderModalNotesRMD(product.orden)
             });
         }
 
         async function renderModalNotesRMD(orden) {
             const container = document.getElementById('swal-notes-list-rmd'); if (!container) return;
             const notes = await getNotesRMD(orden);
-            container.innerHTML = notes.length === 0 ? '<p class="text-slate-500 text-xs italic text-center py-2">Sin notas.</p>' : notes.map(n => `<div class="bg-slate-800/50 p-2.5 rounded-lg border border-slate-700/50 flex justify-between items-start group"><div><p class="text-xs text-slate-300">${n.text}</p><p class="text-[10px] text-slate-500 mt-1">${n.date}</p></div><button onclick="handleDeleteNoteRMD('${orden}', ${n.id})" class="text-slate-500 hover:text-red-400 opacity-0 group-hover:opacity-100"><svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button></div>`).join('');
+            container.innerHTML = notes.length === 0 ? '<p class="text-slate-500 text-xs italic text-center py-2">Sin notas.</p>' : notes.map(n => `<div class="bg-slate-800/50 p-2.5 rounded-lg border border-slate-700/50 flex justify-between items-start group"><div><p class="text-xs text-slate-300">${n.text}</p><p class="text-[10px] text-slate-500 mt-1">${n.date}</p></div><button onclick="handleDeleteNoteRMD('${orden}', ${n.id})" aria-label="Eliminar observación" title="Eliminar observación" class="text-slate-500 hover:text-red-400 opacity-100 md:opacity-0 md:group-hover:opacity-100 p-1.5 -m-1.5"><svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button></div>`).join('');
         }
 
         window.handleAddNoteRMD = async function (orden) {
@@ -1298,8 +1354,7 @@
 
         async function renderActivityRMD() {
             const logs = (await storeGet('dashboard_activity_rmd')) || [];
-            const container = document.getElementById('activityListRMD');
-            container.innerHTML = logs.length === 0 ? '<p class="text-slate-500 text-center mt-3">Sin actividad</p>' : logs.map(l => `<div class="flex items-start gap-2 p-1.5 hover:bg-slate-800/30 rounded border-b border-slate-700/30 last:border-0"><span class="text-blue-400/70 font-medium min-w-[65px] text-xs">${l.time}</span><span class="text-slate-300 text-xs">${l.message}</span></div>`).join('');
+            document.getElementById('activityListRMD').innerHTML = logs.length === 0 ? '<p class="text-slate-500 text-center mt-3">Sin actividad</p>' : logs.map(l => `<div class="flex items-start gap-2 p-1.5 hover:bg-slate-800/30 rounded border-b border-slate-700/30 last:border-0"><span class="text-blue-400/70 font-medium min-w-[65px] text-xs">${l.time}</span><span class="text-slate-300 text-xs">${l.message}</span></div>`).join('');
         }
 
         async function saveRMData() { await storeSet('dashboard_products_rmd', productsRMD); }
@@ -1314,7 +1369,7 @@
         }
 
         function clearRMData() {
-            Swal.fire({ title: '¿Limpiar datos RMD?', icon: 'warning', showCancelButton: true, confirmButtonText: 'Sí', cancelButtonText: 'No', background: '#0f172a', color: '#f8fafc', customClass: { confirmButton: 'bg-red-600 px-3 py-1.5 rounded text-white mr-2 text-xs', cancelButton: 'bg-slate-600 px-3 py-1.5 rounded text-white text-xs' }, buttonsStyling: false }).then(async (res) => {
+            Swal.fire({ title: '¿Limpiar datos RMD?', icon: 'warning', showCancelButton: true, confirmButtonText: 'Sí', cancelButtonText: 'No', background: '#0f172a', color: '#f8fafc', width: 'min(420px, 92vw)', customClass: { confirmButton: 'bg-red-600 px-4 py-2.5 rounded text-white mr-2 text-xs min-w-[44px]', cancelButton: 'bg-slate-600 px-4 py-2.5 rounded text-white text-xs min-w-[44px]' }, buttonsStyling: false }).then(async (res) => {
                 if (res.isConfirmed) {
                     await storeRemove('dashboard_products_rmd');
                     await storeRemove('dashboard_activity_rmd');
@@ -1335,10 +1390,8 @@
         let chartPie3D = null;
         let chartTrendProd = null;
 
-        // La cabecera real (Código, Producto, Cantidad/Lote, UM, + fechas diarias) está en la FILA 4 (índice 3)
-        // en todas las hojas de este libro. Encima (filas 1-3) hay títulos de mes/semana/día-de-semana.
         const PROD_HEADER_ROW_INDEX = 3;
-        const PROD_WEEK_LABEL_ROW_INDEX = 1; // fila 2: texto "SEMANA N° 30" / "SEM N° 30"
+        const PROD_WEEK_LABEL_ROW_INDEX = 1;
 
         const areaOrderPriority = { 'SOL': 1, 'SOL HORM': 2, 'SOL COLOR': 3, 'ACO': 4, 'COS': 5, 'CAP BLAN': 6, 'MEN': 99 };
         function getAreaPriority(n) { const c = String(n).trim().toUpperCase(); for (const k in areaOrderPriority) if (c.includes(k)) return areaOrderPriority[k]; return 50; }
@@ -1347,10 +1400,8 @@
         const colorMap = { 'SOL': '#3b82f6', 'PEF': '#8b5cf6', 'ACO': '#ec4899', 'SOL HORM': '#f43f5e', 'SOL COLOR': '#f97316', 'CAP BLAN': '#eab308', 'INY': '#10b981', 'SEM HORM': '#06b6d4', 'COS': '#6366f1', 'SEM': '#14b8a6', 'MEN': '#84cc16', 'REA': '#64748b' };
         function getAreaColor(a) { const c = String(a).trim().toUpperCase(); for (const k in colorMap) if (c.includes(k)) return colorMap[k]; return '#475569'; }
 
-        // Solo conserva fechas de hoy en adelante (descarta pasado, incl. semanas previas de 2025/2026)
         function filtrarFechasFuturas(f) { return f.filter(d => isTodayOrFuture(d)); }
 
-        // Convierte una celda de cabecera que YA es una fecha completa (Date o serial numérico de Excel).
         function parseExcelDateDirect(v) {
             if (v === null || v === undefined || v === '') return null;
             if (v instanceof Date) return dayjs(v);
@@ -1361,20 +1412,12 @@
             return explicit.isValid() ? explicit : null;
         }
 
-        // Extrae la clave de semana (tal cual la nombra la empresa, ej. "30") de un texto
-        // tipo "SEMANA N° 30" / "SEM N° 30". No se asume numeración ISO: algunas hojas usan
-        // una numeración interna que incluso excede 52 (se vio "SEMANA N° 54/55"), por lo que
-        // la única ancla confiable es cruzar esa misma etiqueta con hojas que sí traen fecha completa.
         function extractWeekLabelKey(text) {
             if (!text) return null;
             const m = String(text).match(/(\d{1,2})\s*$/);
             return m ? m[1] : null;
         }
 
-        // PASE 1 (global, sobre todo el libro): construye un mapa "etiqueta de semana" -> fecha del
-        // lunes de ese bloque, usando SOLO las hojas donde la cabecera ya trae fechas completas
-        // (SOL, ACO, PEF, COS, etc.). Estas hojas son la fuente de verdad para anclar las que no
-        // traen fecha completa (MENT, Rea), que comparten la misma etiqueta de semana.
         function buildGlobalWeekMondayMap(workbook) {
             const weekMondayMap = {};
             workbook.SheetNames.forEach(sn => {
@@ -1392,7 +1435,7 @@
                     }
                     const direct = parseExcelDateDirect(headerRow[idx]);
                     if (direct && currentWeekKey && !(currentWeekKey in weekMondayMap)) {
-                        const monday = direct.subtract((direct.day() + 6) % 7, 'day'); // retrocede al lunes (day(): 0=domingo)
+                        const monday = direct.subtract((direct.day() + 6) % 7, 'day');
                         weekMondayMap[currentWeekKey] = monday.format('YYYY-MM-DD');
                     }
                 }
@@ -1400,9 +1443,6 @@
             return weekMondayMap;
         }
 
-        // PASE 2 (por hoja): mapea cada columna de fecha, usando fecha directa si existe, o
-        // reconstruyéndola a partir del mapa global de semana->lunes + la posición de la
-        // columna dentro de su bloque de 7 días.
         function buildDateColumnMap(headerRow, weekLabelRow, globalWeekMondayMap, hiddenCols) {
             const dateColMap = {};
             let currentWeekKey = null;
@@ -1418,10 +1458,7 @@
 
                 const headerVal = headerRow[idx];
                 const direct = parseExcelDateDirect(headerVal);
-                if (direct) {
-                    dateColMap[idx] = direct.format('YYYY-MM-DD');
-                    continue;
-                }
+                if (direct) { dateColMap[idx] = direct.format('YYYY-MM-DD'); continue; }
 
                 if (currentWeekKey && globalWeekMondayMap[currentWeekKey] !== undefined &&
                     typeof headerVal === 'number' && headerVal >= 1 && headerVal <= 31) {
@@ -1445,8 +1482,6 @@
                     const pmap = new Map();
                     availableAreas.clear();
 
-                    // PASE 1: mapa global de "etiqueta de semana" -> lunes, construido a partir de
-                    // TODAS las hojas que traen fecha completa en su cabecera (fuente de verdad).
                     const globalWeekMondayMap = buildGlobalWeekMondayMap(wb);
 
                     wb.SheetNames.forEach(sn => {
@@ -1457,53 +1492,38 @@
                         if (rows.length <= PROD_HEADER_ROW_INDEX) return;
 
                         const headerRow = rows[PROD_HEADER_ROW_INDEX];
-                        // Verifica que la fila 4 realmente contenga "Código"; si no, se omite la hoja.
                         const codigoColIdx = headerRow.findIndex((h, idx) => !hiddenCols.has(idx) && /c[oó]digo/i.test(String(h || '')));
                         if (codigoColIdx === -1) return;
 
                         availableAreas.add(sn);
 
-                        // Detecta columnas clave por NOMBRE (el orden varía entre hojas: algunas usan
-                        // Código,Producto,Cantidad,UM,Lote y otras Código,Producto,Lote,Cantidad,UM...).
                         const productoColIdx = headerRow.findIndex((h, idx) => !hiddenCols.has(idx) && /produc/i.test(String(h || '')));
-
-                        // PASE 2: mapea columnas de fecha para ESTA hoja (fecha directa, o reconstrucción
-                        // vía el mapa global de semana->lunes para cabeceras que son solo el día suelto).
                         const weekLabelRow = rows[PROD_WEEK_LABEL_ROW_INDEX] || [];
                         const dateColMap = buildDateColumnMap(headerRow, weekLabelRow, globalWeekMondayMap, hiddenCols);
 
                         const dataRows = rows.slice(PROD_HEADER_ROW_INDEX + 1);
                         dataRows.forEach((row, relIdx) => {
                             const absoluteRowIdx = PROD_HEADER_ROW_INDEX + 1 + relIdx;
-                            if (hiddenRows.has(absoluteRowIdx)) return; // ignora filas ocultas
-                            if (!row || row.length === 0) return;
+                            if (hiddenRows.has(absoluteRowIdx) || !row || row.length === 0) return;
 
                             const rawCod = row[codigoColIdx];
                             if (rawCod === undefined || rawCod === null || rawCod === '') return;
                             const cod = String(rawCod).trim();
-                            // Código de material: 10 dígitos empezando en 5 o 6 (acepta que la celda
-                            // venga como número o como texto).
                             if (!/^[56]\d{9}$/.test(cod)) return;
 
                             const prod = productoColIdx !== -1 ? String(row[productoColIdx] || "").trim() : "";
                             const scheduledDates = [];
                             Object.keys(dateColMap).forEach(colIdx => {
                                 const cellVal = row[colIdx];
-                                if (cellVal !== undefined && cellVal !== null && String(cellVal).trim() !== "") {
-                                    scheduledDates.push(dateColMap[colIdx]);
-                                }
+                                if (cellVal !== undefined && cellVal !== null && String(cellVal).trim() !== "") scheduledDates.push(dateColMap[colIdx]);
                             });
 
                             if (scheduledDates.length > 0) {
                                 const futureDates = filtrarFechasFuturas(scheduledDates);
                                 if (futureDates.length > 0) {
                                     const key = `${cod}_${sn}`;
-                                    if (!pmap.has(key)) {
-                                        pmap.set(key, { codigo: cod, producto: prod, area: sn, fechas: new Set(futureDates) });
-                                    } else {
-                                        const p = pmap.get(key);
-                                        futureDates.forEach(d => p.fechas.add(d));
-                                    }
+                                    if (!pmap.has(key)) pmap.set(key, { codigo: cod, producto: prod, area: sn, fechas: new Set(futureDates) });
+                                    else futureDates.forEach(d => pmap.get(key).fechas.add(d));
                                 }
                             }
                         });
@@ -1541,6 +1561,7 @@
         function updateDashboardProd() {
             renderFiltersProd(); renderKPIsProd(); renderCalendarProd(); renderUpcomingProd();
             renderAreaDistributionChart(); renderPie3DChart(); renderTrendChartProd(); renderSummaryProd();
+            runValidacionMateriales();
             const ib = document.getElementById('dateFilterInfo');
             if (productionData.length > 0) {
                 ib.style.display = 'flex';
@@ -1568,8 +1589,9 @@
 
         function initCalendarProd() {
             calendarProd = new FullCalendar.Calendar(document.getElementById('calendarProd'), {
-                initialView: 'dayGridMonth', locale: 'es',
-                headerToolbar: { left: 'prev,next today', center: 'title', right: 'dayGridMonth,dayGridWeek' },
+                initialView: window.innerWidth < 768 ? 'listMonth' : 'dayGridMonth', locale: 'es',
+                headerToolbar: { left: 'prev,next today', center: 'title', right: window.innerWidth < 768 ? 'dayGridMonth,listMonth' : 'dayGridMonth,dayGridWeek' },
+                buttonText: { today: 'Hoy', month: 'Mes', week: 'Semana', list: 'Lista' },
                 firstDay: 1, height: 'auto', contentHeight: window.innerWidth < 768 ? 420 : 500,
                 eventClick: (i) => showModalProd(i.event.extendedProps),
                 eventMouseEnter: (i) => i.el.setAttribute('title', `${i.event.extendedProps.producto}\nÁrea: ${i.event.extendedProps.area}`)
@@ -1588,9 +1610,8 @@
             if (ev.length > 0) calendarProd.gotoDate(ev.map(e => e.start).sort()[0]);
         }
 
-        // Estado de los filtros del panel "Próximas a Producir"
         let upcomingSearchTerm = '';
-        let upcomingDateFrom = null; // string 'YYYY-MM-DD' o null (null = usar hoy por defecto)
+        let upcomingDateFrom = null;
 
         function renderUpcomingProd() {
             const l = document.getElementById('upcomingListProd'); l.innerHTML = '';
@@ -1603,10 +1624,7 @@
             let u = [];
             productionData.forEach(p => {
                 if (currentAreaFilter !== 'TODAS' && p.area !== currentAreaFilter) return;
-                if (term) {
-                    const matches = p.codigo.toLowerCase().includes(term) || p.producto.toLowerCase().includes(term);
-                    if (!matches) return;
-                }
+                if (term && !(p.codigo.toLowerCase().includes(term) || p.producto.toLowerCase().includes(term))) return;
                 p.fechas.forEach(d => { if (dayjs(d).valueOf() >= fromTs) u.push({ date: d, ...p }); });
             });
             u.sort((a, b) => new Date(a.date) - new Date(b.date));
@@ -1617,13 +1635,15 @@
                 l.innerHTML = '<p class="text-xs text-slate-500 text-center mt-8">Sin programaciones para los filtros aplicados</p>';
                 return;
             }
-            // Sin límite de resultados: se muestra el total; el contenedor tiene scroll propio.
             const frag = document.createDocumentFragment();
             u.forEach(i => {
                 const c = getAreaColor(i.area);
                 const e = document.createElement('div');
                 e.className = 'p-2.5 rounded-lg bg-slate-800/40 border border-slate-700/50 cursor-pointer hover:bg-slate-700/60 transition-all';
+                e.setAttribute('role', 'button');
+                e.setAttribute('tabindex', '0');
                 e.onclick = () => showModalProd(i);
+                e.addEventListener('keydown', (ev2) => { if (ev2.key === 'Enter' || ev2.key === ' ') { ev2.preventDefault(); showModalProd(i); } });
                 e.innerHTML = `<div class="flex justify-between items-center mb-1"><span class="text-xs font-bold px-1.5 py-0.5 rounded text-white" style="background-color:${c}">${i.area}</span><span class="text-xs text-slate-400">${dayjs(i.date).format('DD MMM')}</span></div><p class="text-xs font-medium text-slate-200 truncate">${i.producto}</p><p class="text-xs text-slate-500 mt-0.5">Cód: ${i.codigo}</p>`;
                 frag.appendChild(e);
             });
@@ -1639,17 +1659,11 @@
             if (searchInput) {
                 searchInput.addEventListener('input', (e) => {
                     clearTimeout(debounceTimer);
-                    debounceTimer = setTimeout(() => {
-                        upcomingSearchTerm = e.target.value;
-                        renderUpcomingProd();
-                    }, 150);
+                    debounceTimer = setTimeout(() => { upcomingSearchTerm = e.target.value; renderUpcomingProd(); }, 150);
                 });
             }
             if (dateFromInput) {
-                dateFromInput.addEventListener('change', (e) => {
-                    upcomingDateFrom = e.target.value || null;
-                    renderUpcomingProd();
-                });
+                dateFromInput.addEventListener('change', (e) => { upcomingDateFrom = e.target.value || null; renderUpcomingProd(); });
             }
         }
 
@@ -1657,7 +1671,6 @@
             const ctx = document.getElementById('chartAreaDistribution'); if (!ctx) return;
             const apc = {};
             productionData.forEach(p => { if (currentAreaFilter !== 'TODAS' && p.area !== currentAreaFilter) return; apc[p.area] = (apc[p.area] || 0) + 1; });
-            // Ordenado por volumen de mayor a menor (no por prioridad de área).
             const sa = Object.keys(apc).sort((a, b) => apc[b] - apc[a]);
             const lb = sa, dt = sa.map(a => apc[a]), cl = sa.map(a => getAreaColor(a));
             const tot = dt.reduce((s, v) => s + v, 0); const pct = dt.map(v => tot > 0 ? ((v / tot) * 100).toFixed(1) : 0);
@@ -1670,11 +1683,7 @@
                     indexAxis: 'y', responsive: true, maintainAspectRatio: false,
                     plugins: {
                         legend: { display: false },
-                        tooltip: {
-                            backgroundColor: 'rgba(15,23,42,0.95)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)',
-                            padding: 10, titleColor: '#f8fafc', bodyColor: '#cbd5e1', displayColors: true,
-                            callbacks: { label: function (c) { return ` ${c.raw} productos (${pct[c.dataIndex]}%)`; } }
-                        }
+                        tooltip: { backgroundColor: 'rgba(15,23,42,0.95)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)', padding: 10, titleColor: '#f8fafc', bodyColor: '#cbd5e1', displayColors: true, callbacks: { label: function (c) { return ` ${c.raw} productos (${pct[c.dataIndex]}%)`; } } }
                     },
                     scales: { x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { stepSize: 1, precision: 0 } }, y: { grid: { display: false }, reverse: true } }
                 }
@@ -1718,8 +1727,7 @@
                             }
                         },
                         tooltip: {
-                            backgroundColor: 'rgba(15,23,42,0.95)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)',
-                            padding: 10, titleColor: '#f8fafc', bodyColor: '#cbd5e1',
+                            backgroundColor: 'rgba(15,23,42,0.95)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)', padding: 10, titleColor: '#f8fafc', bodyColor: '#cbd5e1',
                             callbacks: { label: function (context) { const value = context.raw; const pct = ((value / total) * 100).toFixed(1); return ` ${context.label}: ${value} productos (${pct}%)`; } }
                         }
                     },
@@ -1728,7 +1736,6 @@
             });
         }
 
-        // Nuevo: tendencia diaria de producción (suma de productos programados por día, próximos 21 días)
         function renderTrendChartProd() {
             const ctx = document.getElementById('chartTrendProd'); if (!ctx) return;
             const dayCounts = {};
@@ -1738,9 +1745,7 @@
                 if (currentAreaFilter !== 'TODAS' && p.area !== currentAreaFilter) return;
                 p.fechas.forEach(d => {
                     const dd = dayjs(d);
-                    if (dd.isSameOrAfter(today, 'day') && dd.isBefore(horizonEnd, 'day')) {
-                        dayCounts[d] = (dayCounts[d] || 0) + 1;
-                    }
+                    if (dd.isSameOrAfter(today, 'day') && dd.isBefore(horizonEnd, 'day')) dayCounts[d] = (dayCounts[d] || 0) + 1;
                 });
             });
             const labels = [];
@@ -1756,25 +1761,13 @@
             Chart.defaults.color = '#94a3b8'; Chart.defaults.font.family = 'Inter';
             chartTrendProd = new Chart(ctx, {
                 type: 'line',
-                data: {
-                    labels: displayLabels,
-                    datasets: [{
-                        label: 'Productos programados', data: values,
-                        borderColor: '#60a5fa', backgroundColor: gradient, fill: true, tension: 0.35,
-                        pointRadius: 3, pointBackgroundColor: '#3b82f6', pointBorderColor: '#0b1120', pointBorderWidth: 2,
-                        pointHoverRadius: 6
-                    }]
-                },
+                data: { labels: displayLabels, datasets: [{ label: 'Productos programados', data: values, borderColor: '#60a5fa', backgroundColor: gradient, fill: true, tension: 0.35, pointRadius: 3, pointBackgroundColor: '#3b82f6', pointBorderColor: '#0b1120', pointBorderWidth: 2, pointHoverRadius: 6 }] },
                 options: {
                     responsive: true, maintainAspectRatio: false,
                     interaction: { mode: 'index', intersect: false },
                     plugins: {
                         legend: { display: false },
-                        tooltip: {
-                            backgroundColor: 'rgba(15,23,42,0.95)', borderWidth: 1, borderColor: 'rgba(59,130,246,0.4)',
-                            padding: 12, titleColor: '#f8fafc', bodyColor: '#cbd5e1', displayColors: false,
-                            callbacks: { label: (c) => `${c.raw} productos programados` }
-                        }
+                        tooltip: { backgroundColor: 'rgba(15,23,42,0.95)', borderWidth: 1, borderColor: 'rgba(59,130,246,0.4)', padding: 12, titleColor: '#f8fafc', bodyColor: '#cbd5e1', displayColors: false, callbacks: { label: (c) => `${c.raw} productos programados` } }
                     },
                     scales: {
                         y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { precision: 0 }, beginAtZero: true },
@@ -1789,14 +1782,14 @@
             Swal.fire({
                 title: `<div class="text-base font-bold text-left text-white border-b border-slate-700/50 pb-2 flex justify-between"><span>Detalle</span><span class="text-xs px-2 py-0.5 rounded text-white" style="background-color:${c}">${item.area}</span></div>`,
                 html: `<div class="text-left space-y-3 text-sm mt-2"><div><span class="text-slate-400 block text-xs uppercase">Código</span><span class="font-bold text-slate-200">${item.codigo}</span></div><div><span class="text-slate-400 block text-xs uppercase">Producto</span><span class="font-medium text-slate-200">${item.producto}</span></div><div><span class="text-slate-400 block text-xs uppercase mb-1.5">Días</span><div class="flex flex-wrap gap-1.5">${item.fechas.map(d => `<span class="bg-slate-800 border border-slate-600 px-2 py-0.5 rounded text-xs text-emerald-400">${dayjs(d).format('DD/MM/YYYY')}</span>`).join('')}</div></div></div>`,
-                showConfirmButton: true, confirmButtonText: 'Cerrar',
-                customClass: { confirmButton: 'bg-slate-700 hover:bg-slate-600 text-white px-4 py-1.5 rounded-lg text-xs' },
+                showConfirmButton: true, confirmButtonText: 'Cerrar', width: 'min(500px, 94vw)',
+                customClass: { confirmButton: 'bg-slate-700 hover:bg-slate-600 text-white px-4 py-2.5 rounded-lg text-xs min-w-[44px]' },
                 buttonsStyling: false, background: '#0f172a'
             });
         }
 
         function clearProdData() {
-            Swal.fire({ title: '¿Limpiar?', text: 'Se borrará el programa.', icon: 'warning', showCancelButton: true, confirmButtonText: 'Sí', cancelButtonText: 'No', background: '#0f172a', color: '#f8fafc', customClass: { confirmButton: 'bg-red-600 px-3 py-1.5 rounded text-white mr-2 text-xs', cancelButton: 'bg-slate-600 px-3 py-1.5 rounded text-white text-xs' }, buttonsStyling: false }).then(async r => {
+            Swal.fire({ title: '¿Limpiar?', text: 'Se borrará el programa.', icon: 'warning', showCancelButton: true, confirmButtonText: 'Sí', cancelButtonText: 'No', background: '#0f172a', color: '#f8fafc', width: 'min(420px, 92vw)', customClass: { confirmButton: 'bg-red-600 px-4 py-2.5 rounded text-white mr-2 text-xs min-w-[44px]', cancelButton: 'bg-slate-600 px-4 py-2.5 rounded text-white text-xs min-w-[44px]' }, buttonsStyling: false }).then(async r => {
                 if (r.isConfirmed) {
                     await storeRemove('prod_data');
                     productionData = []; availableAreas.clear(); currentAreaFilter = 'TODAS';
@@ -1808,8 +1801,506 @@
             });
         }
 
+        // ==================== MÓDULO VALIDACIÓN DE MATERIALES (BASE DE DATOS + RMD AUTORIZADOS) ====================
+        let databaseMaterials = new Map();
+        let agrupadorEtapasMap = new Map();
+        let rmdAutorizadosEtapasPorAgrupador = new Map();
+        let rmdAutorizadosRaw = [];
+        let databaseMaterialsLoaded = false;
+        let rmdAutorizadosLoaded = false;
+        let ultimoResultadoValidacion = { revisados: 0, autorizados: 0, pendientes: [] };
+        let manualAutorizados = new Set();
+        let validacionFiltroEstado = 'todos'; // 'todos' | 'pendientes' | 'autorizados'
+        let validacionBusqueda = '';
+
+        function normalizeEtapa(raw) {
+            if (raw === null || raw === undefined) return '';
+            return String(raw).trim().toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        }
+
+        function normalizeAgrupador(raw) {
+            if (raw === null || raw === undefined) return null;
+            const digits = String(raw).replace(/[^0-9]/g, '');
+            if (!digits) return null;
+            const n = parseInt(digits, 10);
+            return (!n || isNaN(n)) ? null : String(n);
+        }
+
+        function normalizeMaterialCode(raw) {
+            if (raw === null || raw === undefined) return null;
+            const s = String(raw).trim();
+            if (!s) return null;
+            return s.replace(/[^0-9]/g, '') || null;
+        }
+
+        const BASE_DATOS_CLOUD_URL = "https://medifarmape-my.sharepoint.com/:x:/g/personal/cjesusz_humanovalab_com/IQCb7jT0w5sdSLKUMZIM_y-2AcCuhdKumho912d7f2im5WQ?e=MSub2u";
+
+        function buildSharePointDirectDownloadUrl(shareUrl) {
+            try {
+                const u = new URL(shareUrl);
+                u.searchParams.set('download', '1');
+                return u.toString();
+            } catch (err) {
+                return shareUrl + (shareUrl.includes('?') ? '&download=1' : '?download=1');
+            }
+        }
+
+        // Nueva función: muestra diálogo unificado al pulsar "Base de Datos"
+        function showBaseDatosOptions() {
+            Swal.fire({
+                title: 'Cargar Base de Datos',
+                text: 'Selecciona el origen del archivo',
+                showDenyButton: true,
+                confirmButtonText: 'Desde mi equipo',
+                denyButtonText: 'Desde la nube',
+                background: '#0f172a',
+                color: '#f8fafc',
+                customClass: {
+                    confirmButton: 'bg-slate-700 hover:bg-slate-600 text-white px-4 py-2.5 rounded-lg text-xs min-w-[44px]',
+                    denyButton: 'bg-cyan-700 hover:bg-cyan-600 text-white px-4 py-2.5 rounded-lg text-xs min-w-[44px]'
+                },
+                buttonsStyling: false
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Abre el selector de archivos local
+                    document.getElementById('fileInputBaseDatos').click();
+                } else if (result.isDenied) {
+                    // Descarga desde la nube (sin CORS)
+                    downloadBaseDatosFromCloud();
+                }
+            });
+        }
+
+        // Modificada para evitar CORS: abre nueva pestaña
+        async function downloadBaseDatosFromCloud() {
+            const btn = document.getElementById('btnDescargarBaseDatosNube');
+            const originalHtml = btn ? btn.innerHTML : '';
+            if (btn) {
+                btn.innerHTML = '<span>Abriendo...</span>';
+                btn.disabled = true;
+            }
+
+            Swal.fire({
+                title: 'Descargando desde la nube',
+                html: 'Se abrirá una nueva pestaña para iniciar la descarga.<br><small>Si no comienza automáticamente, haz clic en "Descargar" en la página que se abre.</small>',
+                icon: 'info',
+                background: '#0f172a',
+                confirmButtonText: 'Entendido',
+                timer: 5000,
+                timerProgressBar: true
+            });
+
+            const downloadUrl = buildSharePointDirectDownloadUrl(BASE_DATOS_CLOUD_URL);
+            window.open(downloadUrl, '_blank');
+
+            if (btn) {
+                setTimeout(() => {
+                    btn.innerHTML = originalHtml;
+                    btn.disabled = false;
+                }, 2000);
+            }
+        }
+
+        function handleFileBaseDatos(e) { const file = e.target.files[0]; if (file) processFileBaseDatos(file); e.target.value = ''; }
+        function handleFileRmdAutorizados(e) { const file = e.target.files[0]; if (file) processFileRmdAutorizados(file); e.target.value = ''; }
+
+        function processFileBaseDatos(file) {
+            Swal.fire({ title: 'Procesando Base de Datos...', allowOutsideClick: false, didOpen: () => Swal.showLoading(), background: '#0f172a' });
+            const reader = new FileReader();
+            reader.onload = (e) => { parseBaseDatosWorkbookData(new Uint8Array(e.target.result)); };
+            reader.onerror = () => { Swal.fire({ icon: 'error', title: 'Error', text: 'No se pudo leer el archivo de Base de Datos.', background: '#0f172a' }); };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function parseBaseDatosWorkbookData(data) {
+            try {
+                const workbook = XLSX.read(data, { type: 'array', cellDates: true });
+                const parsed = new Map();
+                const etapasByAgr = new Map();
+
+                workbook.SheetNames.forEach(sn => {
+                    const sheet = workbook.Sheets[sn];
+                    const hiddenCols = getHiddenColSet(sheet);
+                    const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: "" });
+                    if (rows.length < 2) return;
+                    const headerRow = rows[0];
+                    const keys = headerRow.map((h, idx) => hiddenCols.has(idx) ? null : String(h || '').trim().toLowerCase());
+                    const colIndexByName = {};
+                    keys.forEach((k, idx) => { if (k) colIndexByName[k] = idx; });
+                    const findCol = (...aliases) => {
+                        for (const a of aliases) {
+                            const found = Object.keys(colIndexByName).find(k => k.includes(a));
+                            if (found !== undefined) return colIndexByName[found];
+                        }
+                        return -1;
+                    };
+                    const materialCol = findCol('material');
+                    const descCol = findCol('descripci');
+                    const agrupadorCol = findCol('agrupador');
+                    const etapaCol = findCol('etapa');
+                    if (materialCol === -1) return;
+
+                    rows.slice(1).forEach(row => {
+                        if (!row || row.length === 0) return;
+                        const matCode = normalizeMaterialCode(row[materialCol]);
+                        if (!matCode) return;
+                        const agr = agrupadorCol !== -1 ? normalizeAgrupador(row[agrupadorCol]) : null;
+                        const etapa = etapaCol !== -1 ? String(row[etapaCol] || '').trim() : '';
+                        const desc = descCol !== -1 ? String(row[descCol] || '').trim() : '';
+
+                        const etapaNorm = normalizeEtapa(etapa);
+                        if (agr && etapaNorm) {
+                            if (!etapasByAgr.has(agr)) etapasByAgr.set(agr, new Set());
+                            etapasByAgr.get(agr).add(etapaNorm);
+                        }
+                        if (!parsed.has(matCode)) parsed.set(matCode, { material: matCode, descripcion: desc, agrupador: agr, etapaPropia: etapaNorm });
+                    });
+                });
+
+                if (parsed.size === 0) {
+                    Swal.close();
+                    Swal.fire({ icon: 'warning', title: 'Formato inesperado', text: 'No se encontraron columnas reconocibles (Material, Agrupador, Etapa) en el archivo de Base de Datos.', background: '#0f172a' });
+                    return false;
+                }
+
+                databaseMaterials = parsed;
+                agrupadorEtapasMap = etapasByAgr;
+                databaseMaterialsLoaded = true;
+                saveValidacionData();
+                document.getElementById('baseDatosStatusBadge').style.display = 'inline';
+                Swal.fire({ icon: 'success', title: '¡Listo!', text: `${parsed.size} materiales cargados desde Base de Datos.`, timer: 2000, showConfirmButton: false, background: '#0f172a' });
+                runValidacionMateriales();
+                return true;
+            } catch (error) {
+                console.error(error);
+                Swal.fire({ icon: 'error', title: 'Error', text: 'No se pudo leer el archivo de Base de Datos.', background: '#0f172a' });
+                return false;
+            }
+        }
+
+        function processFileRmdAutorizados(file) {
+            Swal.fire({ title: 'Procesando RMD Autorizados...', allowOutsideClick: false, didOpen: () => Swal.showLoading(), background: '#0f172a' });
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array', cellDates: true });
+                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const hiddenCols = getHiddenColSet(firstSheet);
+                    const rows = XLSX.utils.sheet_to_json(firstSheet, { header: 1, defval: "" });
+                    if (rows.length < 2) {
+                        Swal.close();
+                        Swal.fire({ icon: 'warning', title: 'Vacío', text: 'No se encontraron datos en el archivo RMD Autorizados.', background: '#0f172a' });
+                        return;
+                    }
+                    const headerRow = rows[0];
+                    const keys = headerRow.map((h, idx) => hiddenCols.has(idx) ? null : String(h || '').trim().toLowerCase());
+                    const colIndexByName = {};
+                    keys.forEach((k, idx) => { if (k) colIndexByName[k] = idx; });
+                    const findCol = (...aliases) => {
+                        for (const a of aliases) {
+                            const found = Object.keys(colIndexByName).find(k => k.includes(a));
+                            if (found !== undefined) return colIndexByName[found];
+                        }
+                        return -1;
+                    };
+
+                    const codigoAgrupadorCol = findCol('código agrupador', 'codigo agrupador');
+                    const estadoCol = findCol('estado');
+                    const descCol = findCol('descripci');
+                    const etapaCol = findCol('etapa');
+
+                    if (codigoAgrupadorCol === -1 || etapaCol === -1) {
+                        Swal.close();
+                        Swal.fire({ icon: 'warning', title: 'Formato inesperado', text: 'No se encontraron las columnas "Código Agrupador" y/o "Etapa" en el archivo RMD Autorizados.', background: '#0f172a' });
+                        return;
+                    }
+
+                    const etapasByAgrupador = new Map();
+                    const raw = [];
+                    rows.slice(1).forEach(row => {
+                        if (!row || row.length === 0) return;
+                        const agr = normalizeAgrupador(row[codigoAgrupadorCol]);
+                        const etapaRaw = String(row[etapaCol] || '').trim();
+                        if (!agr || !etapaRaw) return;
+                        const etapaNorm = normalizeEtapa(etapaRaw);
+                        if (!etapasByAgrupador.has(agr)) etapasByAgrupador.set(agr, new Set());
+                        etapasByAgrupador.get(agr).add(etapaNorm);
+                        raw.push({ codigoAgrupador: agr, estado: estadoCol !== -1 ? String(row[estadoCol] || '').trim() : '', descripcion: descCol !== -1 ? String(row[descCol] || '').trim() : '', etapa: etapaRaw });
+                    });
+
+                    if (etapasByAgrupador.size === 0) {
+                        Swal.close();
+                        Swal.fire({ icon: 'warning', title: 'Sin registros válidos', text: 'No se pudo asociar ninguna Etapa con un Código Agrupador.', background: '#0f172a' });
+                        return;
+                    }
+
+                    rmdAutorizadosEtapasPorAgrupador = etapasByAgrupador;
+                    rmdAutorizadosRaw = raw;
+                    rmdAutorizadosLoaded = true;
+                    saveValidacionData();
+                    document.getElementById('rmdAutorizadosStatusBadge').style.display = 'inline';
+                    Swal.fire({ icon: 'success', title: '¡Listo!', text: `${raw.length} registros de RMD Autorizados cargados.`, timer: 2000, showConfirmButton: false, background: '#0f172a' });
+                    runValidacionMateriales();
+                } catch (error) {
+                    console.error(error);
+                    Swal.fire({ icon: 'error', title: 'Error', text: 'No se pudo leer el archivo RMD Autorizados.', background: '#0f172a' });
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        async function saveValidacionData() {
+            await storeSet('val_database_materials', Array.from(databaseMaterials.entries()));
+            await storeSet('val_agrupador_etapas', Array.from(agrupadorEtapasMap.entries()).map(([k, v]) => [k, Array.from(v)]));
+            await storeSet('val_rmd_autorizados_raw', rmdAutorizadosRaw);
+            await storeSet('val_rmd_autorizados_etapas_por_agrupador', Array.from(rmdAutorizadosEtapasPorAgrupador.entries()).map(([k, v]) => [k, Array.from(v)]));
+            await storeSet('val_flags', { databaseMaterialsLoaded, rmdAutorizadosLoaded });
+        }
+
+        async function saveManualAutorizados() { await storeSet('val_manual_autorizados', Array.from(manualAutorizados)); }
+
+        async function loadValidacionData() {
+            const ma = await storeGet('val_manual_autorizados');
+            if (ma) manualAutorizados = new Set(ma);
+
+            const flags = await storeGet('val_flags');
+            if (!flags) return;
+            const dm = await storeGet('val_database_materials');
+            const ae = await storeGet('val_agrupador_etapas');
+            const rr = await storeGet('val_rmd_autorizados_raw');
+            const ea = await storeGet('val_rmd_autorizados_etapas_por_agrupador');
+
+            if (dm) databaseMaterials = new Map(dm);
+            if (ae) agrupadorEtapasMap = new Map(ae.map(([k, v]) => [k, new Set(v)]));
+            if (rr) rmdAutorizadosRaw = rr;
+            if (ea) rmdAutorizadosEtapasPorAgrupador = new Map(ea.map(([k, v]) => [k, new Set(v)]));
+
+            databaseMaterialsLoaded = !!flags.databaseMaterialsLoaded;
+            rmdAutorizadosLoaded = !!flags.rmdAutorizadosLoaded;
+
+            if (databaseMaterialsLoaded) document.getElementById('baseDatosStatusBadge').style.display = 'inline';
+            if (rmdAutorizadosLoaded) document.getElementById('rmdAutorizadosStatusBadge').style.display = 'inline';
+        }
+
+        async function toggleManualAutorizado(material) {
+            if (manualAutorizados.has(material)) manualAutorizados.delete(material);
+            else manualAutorizados.add(material);
+            await saveManualAutorizados();
+            runValidacionMateriales();
+        }
+
+        function runValidacionMateriales() {
+            updateFuentesStatusUI();
+
+            const readyProd = productionData.length > 0;
+            const readyBase = databaseMaterialsLoaded && databaseMaterials.size > 0;
+            const readyRmd = rmdAutorizadosLoaded && rmdAutorizadosEtapasPorAgrupador.size > 0;
+
+            const emptyState = document.getElementById('validacionEmptyState');
+            const tableWrapper = document.getElementById('tablaPendientesWrapper');
+            const toolbar = document.getElementById('validacionToolbar');
+
+            if (!readyProd || !readyBase || !readyRmd) {
+                emptyState.style.display = 'block';
+                tableWrapper.style.display = 'none';
+                if (toolbar) toolbar.style.display = 'none';
+                emptyState.textContent = 'Carga los tres archivos (Programa de Producción, Base de Datos y RMD Autorizados) para generar la validación de materiales.';
+                animateCounter('kpi-val-revisados', 0);
+                animateCounter('kpi-val-autorizados', 0);
+                animateCounter('kpi-val-pendientes', 0);
+                ultimoResultadoValidacion = { revisados: 0, autorizados: 0, pendientes: [] };
+                return;
+            }
+
+            const materialAreas = new Map();
+            productionData.forEach(p => {
+                if (currentAreaFilter !== 'TODAS' && p.area !== currentAreaFilter) return;
+                const cod = normalizeMaterialCode(p.codigo);
+                if (!cod) return;
+                if (!materialAreas.has(cod)) materialAreas.set(cod, new Set());
+                materialAreas.get(cod).add(p.area);
+            });
+
+            let revisados = 0, autorizados = 0;
+            const pendientes = [];
+
+            materialAreas.forEach((areas, cod) => {
+                revisados++;
+                const info = databaseMaterials.get(cod);
+
+                if (!info) {
+                    pendientes.push({ material: cod, descripcion: '(no encontrado en Base de Datos)', areas: Array.from(areas).join(', '), etapasPendientes: [], motivo: 'No encontrado en Base de Datos' });
+                    return;
+                }
+
+                if (!info.agrupador) {
+                    const etapasSinAgr = info.etapaPropia ? [info.etapaPropia] : [];
+                    pendientes.push({ material: cod, descripcion: info.descripcion || '-', areas: Array.from(areas).join(', '), etapasPendientes: etapasSinAgr, motivo: 'Sin agrupador válido en Base de Datos' });
+                    return;
+                }
+
+                const etapasSet = agrupadorEtapasMap.get(info.agrupador);
+                const etapasMaterial = etapasSet && etapasSet.size > 0 ? Array.from(etapasSet) : (info.etapaPropia ? [info.etapaPropia] : []);
+                const etapasAutorizadas = rmdAutorizadosEtapasPorAgrupador.get(info.agrupador);
+
+                if (!etapasAutorizadas || etapasAutorizadas.size === 0) {
+                    pendientes.push({ material: cod, descripcion: info.descripcion || '-', areas: Array.from(areas).join(', '), etapasPendientes: etapasMaterial, motivo: `Agrupador ${info.agrupador} sin RMD autorizado` });
+                    return;
+                }
+
+                const etapasPendientes = etapasMaterial.filter(et => !etapasAutorizadas.has(et));
+
+                if (etapasPendientes.length === 0) {
+                    autorizados++;
+                } else {
+                    pendientes.push({ material: cod, descripcion: info.descripcion || '-', areas: Array.from(areas).join(', '), etapasPendientes: etapasPendientes, motivo: etapasPendientes.map(et => `Etapa ${et} no tiene RMD autorizado para el agrupador ${info.agrupador}`).join(' | ') });
+                }
+            });
+
+            pendientes.sort((a, b) => a.material.localeCompare(b.material));
+
+            const pendientesReales = [];
+            const autorizadosManualLista = [];
+            pendientes.forEach(p => {
+                if (manualAutorizados.has(p.material)) autorizadosManualLista.push(p);
+                else pendientesReales.push(p);
+            });
+
+            const autorizadosTotal = autorizados + autorizadosManualLista.length;
+            ultimoResultadoValidacion = { revisados, autorizados: autorizadosTotal, pendientes: pendientesReales, autorizadosManual: autorizadosManualLista };
+
+            animateCounter('kpi-val-revisados', revisados, 1.2);
+            animateCounter('kpi-val-autorizados', autorizadosTotal, 1.2);
+            animateCounter('kpi-val-pendientes', pendientesReales.length, 1.2);
+
+            const todasLasFilas = [...pendientesReales.map(p => ({ ...p, estado: 'pendiente' })), ...autorizadosManualLista.map(p => ({ ...p, estado: 'autorizado' }))];
+
+            if (todasLasFilas.length === 0) {
+                emptyState.style.display = 'block';
+                emptyState.textContent = revisados > 0 ? 'Todos los materiales programados están autorizados en todas sus etapas. ✅' : 'No hay materiales programados para el área seleccionada.';
+                tableWrapper.style.display = 'none';
+                if (toolbar) toolbar.style.display = 'none';
+            } else {
+                emptyState.style.display = 'none';
+                tableWrapper.style.display = 'block';
+                if (toolbar) toolbar.style.display = 'flex';
+                renderTablaPendientes(todasLasFilas);
+            }
+        }
+
+        function refiltrarValidacionFiltros() {
+            const map = { todos: 'filtroValTodos', pendientes: 'filtroValPendientes', autorizados: 'filtroValAutorizados' };
+            Object.values(map).forEach(id => document.getElementById(id) && document.getElementById(id).classList.remove('active'));
+            const activeBtn = document.getElementById(map[validacionFiltroEstado]);
+            if (activeBtn) activeBtn.classList.add('active');
+            refiltrarTablaPendientes();
+        }
+
+        function renderTablaPendientes(filas) {
+            window.__ultimasFilasValidacion = filas;
+
+            let visibles = filas;
+            if (validacionFiltroEstado === 'pendientes') visibles = visibles.filter(f => f.estado === 'pendiente');
+            else if (validacionFiltroEstado === 'autorizados') visibles = visibles.filter(f => f.estado === 'autorizado');
+
+            if (validacionBusqueda.trim()) {
+                const q = validacionBusqueda.trim().toLowerCase();
+                visibles = visibles.filter(f => f.material.toLowerCase().includes(q) || (f.descripcion || '').toLowerCase().includes(q));
+            }
+
+            const body = document.getElementById('tablaPendientesBody');
+            const contador = document.getElementById('validacionContadorFilas');
+            if (contador) contador.textContent = `${visibles.length} de ${filas.length} materiales`;
+
+            if (visibles.length === 0) {
+                body.innerHTML = `<tr><td colspan="5" class="text-center text-slate-500 py-6 text-xs">Ningún material coincide con el filtro/búsqueda actual.</td></tr>`;
+                return;
+            }
+
+            body.innerHTML = visibles.map(p => {
+                const etapasTxt = p.etapasPendientes && p.etapasPendientes.length > 0 ? p.etapasPendientes.join(', ') : (p.motivo || 'No encontrado');
+                const esAutorizado = p.estado === 'autorizado';
+                const rowCls = esAutorizado
+                    ? 'border-b border-slate-800/60 last:border-0 bg-emerald-500/10 hover:bg-emerald-500/15 transition-colors'
+                    : 'border-b border-slate-800/60 last:border-0 hover:bg-slate-800/40 transition-colors';
+                const badge = esAutorizado
+                    ? '<span class="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-2 py-0.5 rounded-full whitespace-nowrap"><svg xmlns="http://www.w3.org/2000/svg" class="h-2.5 w-2.5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.7 5.3a1 1 0 010 1.4l-8 8a1 1 0 01-1.4 0l-4-4a1 1 0 111.4-1.4L8 12.6l7.3-7.3a1 1 0 011.4 0z" clip-rule="evenodd"/></svg>Autorizado manual</span>'
+                    : '<span class="inline-flex items-center gap-1 text-[10px] font-semibold text-red-300 bg-red-500/10 border border-red-500/30 px-2 py-0.5 rounded-full whitespace-nowrap">Pendiente</span>';
+                const etapasCls = esAutorizado ? 'text-emerald-300/70 line-through whitespace-nowrap' : 'text-red-300 whitespace-nowrap';
+                const accionBtn = esAutorizado
+                    ? `<button onclick="toggleManualAutorizado('${p.material}')" class="text-[10px] font-medium text-slate-400 hover:text-slate-200 border border-slate-600 hover:border-slate-400 px-2 py-1.5 rounded-md transition-colors whitespace-nowrap min-h-[32px]">Revertir</button>`
+                    : `<button onclick="toggleManualAutorizado('${p.material}')" class="text-[10px] font-medium text-emerald-400 hover:text-emerald-300 border border-emerald-500/40 hover:border-emerald-400 bg-emerald-500/5 hover:bg-emerald-500/10 px-2 py-1.5 rounded-md transition-colors whitespace-nowrap min-h-[32px]">Marcar autorizado</button>`;
+                return `<tr class="${rowCls}" title="${p.motivo || ''}">
+                    <td class="font-medium text-slate-200 whitespace-nowrap py-2">${p.material}</td>
+                    <td class="text-slate-300 py-2">${p.descripcion}</td>
+                    <td class="text-slate-400 whitespace-nowrap py-2">${p.areas}</td>
+                    <td class="${etapasCls} py-2">${etapasTxt}</td>
+                    <td class="py-2">${badge}</td>
+                    <td class="py-2 text-right">${accionBtn}</td>
+                </tr>`;
+            }).join('');
+        }
+
+        function refiltrarTablaPendientes() { if (window.__ultimasFilasValidacion) renderTablaPendientes(window.__ultimasFilasValidacion); }
+
+        function updateFuentesStatusUI() {
+            const setStatus = (id, ok) => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                el.textContent = ok ? '✓ Cargado' : 'Pendiente';
+                el.className = ok ? 'text-emerald-400 font-semibold' : 'text-slate-500 font-semibold';
+            };
+            setStatus('fuenteStatusProd', productionData.length > 0);
+            setStatus('fuenteStatusBase', databaseMaterialsLoaded && databaseMaterials.size > 0);
+            setStatus('fuenteStatusRmd', rmdAutorizadosLoaded && rmdAutorizadosEtapasPorAgrupador.size > 0);
+        }
+
+        function exportPendientesToExcel() {
+            const { pendientes } = ultimoResultadoValidacion;
+            if (!pendientes || pendientes.length === 0) {
+                Swal.fire({ icon: 'info', title: 'Nada que exportar', text: 'No hay materiales pendientes para exportar en este momento.', background: '#0f172a', timer: 2000, showConfirmButton: false });
+                return;
+            }
+            const wsData = pendientes.map(p => ({
+                'Material': p.material, 'Descripción': p.descripcion, 'Área(s)': p.areas,
+                'Etapa(s) Pendiente(s)': p.etapasPendientes && p.etapasPendientes.length > 0 ? p.etapasPendientes.join(', ') : '-',
+                'Motivo': p.motivo || ''
+            }));
+            const ws = XLSX.utils.json_to_sheet(wsData);
+            ws['!cols'] = [{ wch: 14 }, { wch: 45 }, { wch: 20 }, { wch: 30 }, { wch: 55 }];
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Materiales Pendientes');
+            XLSX.writeFile(wb, `Materiales_Pendientes_RMD_${dayjs().format('YYYYMMDD_HHmm')}.xlsx`);
+        }
+
+        async function copyPendientesToClipboard() {
+            const btn = document.getElementById('copyPendientesBtn');
+            const label = document.getElementById('copyPendientesLabel');
+            const originalLabel = label.textContent;
+            const { pendientes } = ultimoResultadoValidacion;
+
+            if (!pendientes || pendientes.length === 0) {
+                Swal.fire({ icon: 'info', title: 'Nada que copiar', text: 'No hay materiales pendientes para copiar en este momento.', background: '#0f172a', timer: 2000, showConfirmButton: false });
+                return;
+            }
+
+            const header = ['Material', 'Descripción', 'Área(s)', 'Etapa(s) Pendiente(s)'].join('\t');
+            const lines = pendientes.map(p => [p.material, p.descripcion, p.areas, (p.etapasPendientes && p.etapasPendientes.length > 0 ? p.etapasPendientes.join(', ') : '-')].join('\t'));
+            const tsv = [header, ...lines].join('\n');
+
+            try {
+                await navigator.clipboard.writeText(tsv);
+                label.textContent = '¡Copiado!';
+                btn.classList.add('copied');
+                setTimeout(() => { label.textContent = originalLabel; btn.classList.remove('copied'); }, 2000);
+            } catch (err) {
+                console.error(err);
+                Swal.fire({ icon: 'error', title: 'No se pudo copiar', text: 'El navegador bloqueó el acceso al portapapeles.', background: '#0f172a' });
+            }
+        }
+
         // ==================== MÓDULO RESUMEN + COPIAR AL PORTAPAPELES ====================
-        // Instancia el template de "Resumen" una vez por pestaña (RMD y Producción).
         function initSummaryModules() {
             const tpl = document.getElementById('summaryTemplate');
             const hostRMD = document.getElementById('summarySectionRMD');
@@ -1826,9 +2317,7 @@
             }
         }
 
-        function getSummaryChartCanvasesRMD() {
-            return [document.getElementById('chartWeeklyRMD'), document.getElementById('chartTimelineRMD')].filter(Boolean);
-        }
+        function getSummaryChartCanvasesRMD() { return [document.getElementById('chartWeeklyRMD'), document.getElementById('chartTimelineRMD')].filter(Boolean); }
         function getSummaryChartCanvasesProd() {
             const list = [document.getElementById('chartAreaDistribution'), document.getElementById('chartTrendProd')];
             const pieCard = document.getElementById('pieChartCard');
@@ -1836,7 +2325,6 @@
             return list.filter(Boolean);
         }
 
-        // --- Generación de texto dinámico ---
         function renderSummaryRMD() {
             const host = document.getElementById('summarySectionRMD'); if (!host) return;
             const textEl = host.querySelector('.summary-text');
@@ -1867,9 +2355,7 @@
 
             let text = `Considerando únicamente Planta ATE y Planta LIMA, la planta con mayor volumen es ${plantaTop} con ${plantaTopCount} órdenes registradas. `;
             text += `El pico de producción será el día ${peakDateFmt}, con ${peakCount} órdenes con fecha crítica ese día. `;
-            text += vencidos > 0
-                ? `Se identificaron ${vencidos} órdenes con fecha crítica ya vencida que requieren atención inmediata.`
-                : `No se registran órdenes vencidas; el programa está al día.`;
+            text += vencidos > 0 ? `Se identificaron ${vencidos} órdenes con fecha crítica ya vencida que requieren atención inmediata.` : `No se registran órdenes vencidas; el programa está al día.`;
             textEl.textContent = text;
 
             statsEl.innerHTML = [
@@ -1919,11 +2405,9 @@
             ].map(s => `<div class="bg-slate-900/50 border border-slate-700/50 rounded-lg px-3 py-2.5"><p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">${s.label}</p><p class="text-lg font-bold text-slate-100 mt-0.5">${s.value}</p></div>`).join('');
         }
 
-        // --- Copiar al portapapeles: texto + imagen combinada de los gráficos ---
         function wireSummaryCopyButton(host, getCanvases) {
             const btn = host.querySelector('.summary-copy-btn');
-            if (!btn) return;
-            btn.addEventListener('click', () => handleCopySummary(host, getCanvases, btn));
+            if (btn) btn.addEventListener('click', () => handleCopySummary(host, getCanvases, btn));
         }
 
         async function handleCopySummary(host, getCanvases, btn) {
@@ -1942,24 +2426,14 @@
                     return;
                 }
 
-                // Compone una sola imagen: texto de resumen + gráficos, en fondo blanco
-                // (blanco para que se vea bien al pegar en Word/Excel).
                 const combinedCanvas = buildCombinedSummaryCanvas(summaryText, canvases);
-
                 const blob = await new Promise(resolve => combinedCanvas.toBlob(resolve, 'image/png'));
 
-                // Clipboard API: intenta escribir imagen + texto plano juntos.
-                // Los navegadores permiten múltiples representaciones del mismo ítem,
-                // así Word/Excel eligen la imagen y otros programas pueden tomar el texto.
                 if (navigator.clipboard && window.ClipboardItem) {
                     const textBlob = new Blob([summaryText], { type: 'text/plain' });
-                    const item = new ClipboardItem({
-                        'image/png': blob,
-                        'text/plain': textBlob
-                    });
+                    const item = new ClipboardItem({ 'image/png': blob, 'text/plain': textBlob });
                     await navigator.clipboard.write([item]);
                 } else {
-                    // Fallback: navegadores sin soporte de imagen en el portapapeles
                     await navigator.clipboard.writeText(summaryText);
                     Swal.fire({ icon: 'warning', title: 'Solo texto copiado', text: 'Tu navegador no soporta copiar imágenes al portapapeles; se copió únicamente el texto.', background: '#0f172a' });
                 }
@@ -1974,16 +2448,13 @@
             }
         }
 
-        // Dibuja el texto del resumen + los canvases de Chart.js en un único canvas final,
-        // en formato apto para pegar en Word/Excel (fondo blanco, texto oscuro, márgenes).
         function buildCombinedSummaryCanvas(summaryText, sourceCanvases) {
-            const scale = 2; // nitidez al pegar en Office
+            const scale = 2;
             const width = 900;
             const padding = 32;
             const lineHeight = 22;
             const font = '600 15px Inter, Arial, sans-serif';
 
-            // Envuelve el texto a lo ancho disponible usando un canvas temporal para medir
             const measureCanvas = document.createElement('canvas');
             const measureCtx = measureCanvas.getContext('2d');
             measureCtx.font = font;
@@ -1993,12 +2464,8 @@
             let currentLine = '';
             words.forEach(word => {
                 const testLine = currentLine ? `${currentLine} ${word}` : word;
-                if (measureCtx.measureText(testLine).width > maxTextWidth && currentLine) {
-                    lines.push(currentLine);
-                    currentLine = word;
-                } else {
-                    currentLine = testLine;
-                }
+                if (measureCtx.measureText(testLine).width > maxTextWidth && currentLine) { lines.push(currentLine); currentLine = word; }
+                else currentLine = testLine;
             });
             if (currentLine) lines.push(currentLine);
 
@@ -2008,7 +2475,6 @@
             const chartsPerRow = sourceCanvases.length > 1 ? 2 : 1;
             const rows = Math.ceil(sourceCanvases.length / chartsPerRow);
             const chartsBlockHeight = rows * (chartDisplayHeight + 20);
-
             const totalHeight = textBlockHeight + chartsBlockHeight + padding;
 
             const canvas = document.createElement('canvas');
@@ -2017,22 +2483,18 @@
             const ctx = canvas.getContext('2d');
             ctx.scale(scale, scale);
 
-            // Fondo blanco (para Word/Excel)
             ctx.fillStyle = '#ffffff';
             ctx.fillRect(0, 0, width, totalHeight);
 
-            // Título
             ctx.fillStyle = '#0f172a';
             ctx.font = '700 18px Inter, Arial, sans-serif';
             ctx.fillText('Resumen del Programa de Producción', padding, padding);
 
-            // Texto envuelto
             ctx.font = font;
             ctx.fillStyle = '#334155';
             let y = padding + titleHeight;
             lines.forEach(line => { ctx.fillText(line, padding, y); y += lineHeight; });
 
-            // Gráficos
             const chartAreaWidth = width - padding * 2;
             const chartWidth = chartsPerRow === 2 ? (chartAreaWidth - 16) / 2 : chartAreaWidth;
             let cx = padding, cy = y + 12, colIdx = 0;
@@ -2040,7 +2502,6 @@
                 const ratio = srcCanvas.width / srcCanvas.height;
                 let drawW = chartWidth, drawH = drawW / ratio;
                 if (drawH > chartDisplayHeight) { drawH = chartDisplayHeight; drawW = drawH * ratio; }
-                // Fondo tarjeta clara por gráfico
                 ctx.fillStyle = '#f8fafc';
                 ctx.fillRect(cx, cy, chartWidth, chartDisplayHeight);
                 ctx.strokeStyle = '#e2e8f0';
@@ -2051,7 +2512,7 @@
 
                 colIdx++;
                 if (colIdx >= chartsPerRow) { colIdx = 0; cx = padding; cy += chartDisplayHeight + 20; }
-                else { cx += chartWidth + 16; }
+                else cx += chartWidth + 16;
             });
 
             return canvas;
@@ -2063,12 +2524,8 @@
                 const zone = document.getElementById(zoneId);
                 const input = document.getElementById(inputId);
                 if (!zone || !input) return;
-                ['dragenter', 'dragover'].forEach(evt => zone.addEventListener(evt, (e) => {
-                    e.preventDefault(); e.stopPropagation(); zone.classList.add('drag-over');
-                }));
-                ['dragleave', 'drop'].forEach(evt => zone.addEventListener(evt, (e) => {
-                    e.preventDefault(); e.stopPropagation(); zone.classList.remove('drag-over');
-                }));
+                ['dragenter', 'dragover'].forEach(evt => zone.addEventListener(evt, (e) => { e.preventDefault(); e.stopPropagation(); zone.classList.add('drag-over'); }));
+                ['dragleave', 'drop'].forEach(evt => zone.addEventListener(evt, (e) => { e.preventDefault(); e.stopPropagation(); zone.classList.remove('drag-over'); }));
                 zone.addEventListener('drop', (e) => {
                     const file = e.dataTransfer.files && e.dataTransfer.files[0];
                     if (file && /\.(xlsx|xls)$/i.test(file.name)) handler(file);
@@ -2077,6 +2534,8 @@
             };
             setupZone('dropZoneRMD', 'fileInputRMD', processFileRMD);
             setupZone('dropZoneProd', 'fileInputProd', processFileProd);
+            setupZone('dropZoneBaseDatos', 'fileInputBaseDatos', processFileBaseDatos);
+            setupZone('dropZoneRmdAutorizados', 'fileInputRmdAutorizados', processFileRmdAutorizados);
         }
 
         // ==================== INITIALIZATION ====================
@@ -2088,6 +2547,7 @@
             initDragDrop();
             initUpcomingFilters();
             await loadRMData();
+            await loadValidacionData();
             await loadProdData();
             initReactiveBackground();
             initTiltCards();
