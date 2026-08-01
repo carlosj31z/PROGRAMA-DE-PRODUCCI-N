@@ -837,6 +837,49 @@
         @media (max-width: 640px) {
             .planta-btn { padding: 0.25rem 0.6rem; font-size: 0.65rem; }
         }
+        .tour-highlight {
+    position: fixed;
+    border-radius: 14px;
+    box-shadow: 0 0 0 9999px rgba(2, 6, 23, 0.78);
+    pointer-events: none;
+    z-index: 200;
+    transition: top 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), left 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), width 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), height 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    opacity: 0;
+}
+.tour-highlight.is-visible { opacity: 1; }
+.tour-highlight::after {
+    content: '';
+    position: absolute; inset: -3px;
+    border-radius: inherit;
+    border: 2px solid rgba(59, 130, 246, 0.85);
+    box-shadow: 0 0 24px rgba(59, 130, 246, 0.45);
+}
+.tour-tooltip {
+    position: fixed;
+    z-index: 201;
+    width: min(320px, 88vw);
+    background: linear-gradient(160deg, rgba(30, 41, 59, 0.98), rgba(15, 23, 42, 0.99));
+    border: 1px solid rgba(255,255,255,0.09);
+    border-radius: 1rem;
+    box-shadow: 0 30px 60px -15px rgba(0,0,0,0.6);
+    padding: 1.1rem 1.2rem 1rem;
+    opacity: 0; transform: translateY(8px) scale(0.97);
+    pointer-events: none;
+    transition: opacity 0.25s ease, transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), top 0.35s ease, left 0.35s ease;
+}
+.tour-tooltip.is-visible { opacity: 1; transform: translateY(0) scale(1); pointer-events: auto; }
+.tour-step-badge { font-size: 0.62rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #60a5fa; margin-bottom: 0.35rem; }
+.tour-title { font-size: 0.92rem; font-weight: 700; color: #f8fafc; margin-bottom: 0.35rem; }
+.tour-text { font-size: 0.78rem; color: #cbd5e1; line-height: 1.5; margin-bottom: 1rem; }
+.tour-actions { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; }
+.tour-btn { font-size: 0.72rem; font-weight: 600; padding: 0.45rem 0.85rem; border-radius: 0.55rem; cursor: pointer; transition: all 0.2s ease; border: 1px solid transparent; white-space: nowrap; }
+.tour-btn-skip { color: #94a3b8; background: transparent; }
+.tour-btn-skip:hover { color: #f8fafc; }
+.tour-btn-prev { color: #cbd5e1; background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.08); }
+.tour-btn-prev:hover { background: rgba(255,255,255,0.1); }
+.tour-btn-prev:disabled { opacity: 0.35; cursor: default; }
+.tour-btn-next { color: white; background: linear-gradient(145deg, #3b82f6, #2563eb); box-shadow: 0 6px 16px -6px rgba(59,130,246,0.6); }
+.tour-btn-next:hover { filter: brightness(1.08); }
     </style>
 </head>
 <body class="min-h-screen flex flex-col p-3 md:p-5 space-y-4 relative">
@@ -865,10 +908,15 @@
                 </div>
             </div>
         </div>
-        <button onclick="clearCurrentTabData()" class="btn-clear w-full md:w-auto justify-center px-4 py-2 rounded-lg text-xs font-medium flex items-center gap-1.5 active:scale-95">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-            Limpiar
-        </button>
+        <div class="flex items-center gap-2 w-full md:w-auto">
+            <button onclick="startTour()" class="btn-clear px-3 py-2 rounded-lg flex items-center justify-center active:scale-95" title="Ver guía de la interfaz" aria-label="Ver guía de la interfaz">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            </button>
+            <button onclick="clearCurrentTabData()" class="btn-clear flex-1 md:flex-initial justify-center px-4 py-2 rounded-lg text-xs font-medium flex items-center gap-1.5 active:scale-95">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                Limpiar
+            </button>
+        </div>
     </header>
 
     <!-- Tab Navigation + Upload Zone -->
@@ -3998,6 +4046,199 @@ return `<tr class="${rowCls}" title="${p.motivo || ''}">
             setupZone('dropZoneForecast', 'fileInputForecast', processFileForecast);
         }
 
+// ==================== TOUR GUIADO ====================
+const TOUR_STEPS = [
+    { tab: null, selector: '#gooeyNavContainer', title: 'Navegación por pestañas', text: 'El dashboard tiene tres secciones: Producción, OP sin RMD y Forecast. Puedes cambiar entre ellas en cualquier momento desde aquí.' },
+
+    // ---- Pestaña OP sin RMD ----
+    { tab: 'rmd', selector: '#inlineUploadRMD', title: 'Carga de Excel RMD', text: 'Sube aquí el Excel de órdenes con RMD pendiente. El dashboard detecta automáticamente las órdenes vigentes en Planta ATE y LIMA.' },
+    { tab: 'rmd', selector: '#calendarRMD', title: 'Calendario de fechas críticas', text: 'Muestra cuándo vence la autorización de cada orden. Haz clic en un evento para ver el detalle y dejar observaciones.' },
+    { tab: 'rmd', selector: '#alertsListRMD', title: 'Fechas Críticas', text: 'Lista priorizada de órdenes por urgencia: vencidas primero, luego las más próximas a vencer.' },
+
+    // ---- Pestaña Producción ----
+    { tab: 'produccion', selector: '#inlineUploadProd', title: 'Carga de archivos de Producción', text: 'Sube el Programa de Producción (elige Planta 1 o 2), la Base de Datos de materiales y los RMD Autorizados.' },
+    { tab: 'produccion', selector: '#calendarProd', title: 'Calendario de producción', text: 'Visualiza qué se produce cada día por área. Haz clic en cualquier evento para ver el detalle del producto.' },
+    { tab: 'produccion', selector: '#cardValidacionMateriales', title: 'RMD Pendientes de Autorización', text: 'Cruza automáticamente los tres archivos y te dice qué materiales programados aún no tienen su RMD autorizado.' },
+    { tab: 'produccion', selector: '#areaFiltersContainer', title: 'Filtro por área', text: 'Filtra todo el dashboard (calendario, gráficos y tabla) por una sola área de producción.' },
+
+    // ---- Pestaña Forecast ----
+    { tab: 'forecast', selector: '#inlineUploadForecast', title: 'Carga del Plan de Producción (Forecast)', text: 'Sube el Plan de Producción proyectado, reutilizando la misma Base de Datos y RMD Autorizados que en Producción.' },
+    { tab: 'forecast', selector: '#chartForecastMonthly', title: 'Materiales programados por mes', text: 'Vista mensual de cuántos materiales tienen producción proyectada, útil para planificar autorizaciones con anticipación.' },
+    { tab: 'forecast', selector: '#cardValidacionForecast', title: 'RMD Pendientes — Forecast', text: 'Igual que en Producción, pero a nivel proyección: te adelanta qué RMD necesitarás gestionar en los próximos meses.' },
+
+    // ---- Global ----
+    { tab: null, selector: '#backupCorner', title: 'Copia de seguridad', text: 'Exporta o importa todos tus datos guardados en un archivo JSON, por si cambias de equipo o navegador.' }
+];
+let tourStepIndex = 0;
+let tourHighlightEl = null;
+let tourTooltipEl = null;
+let tourResizeHandler = null;
+
+function buildTourDom() {
+    if (tourHighlightEl) return;
+    tourHighlightEl = document.createElement('div');
+    tourHighlightEl.className = 'tour-highlight';
+    document.body.appendChild(tourHighlightEl);
+
+    tourTooltipEl = document.createElement('div');
+    tourTooltipEl.className = 'tour-tooltip';
+    tourTooltipEl.innerHTML = `
+        <div class="tour-step-badge" id="tourStepBadge"></div>
+        <div class="tour-title" id="tourTitle"></div>
+        <div class="tour-text" id="tourText"></div>
+        <div class="tour-actions">
+            <button type="button" class="tour-btn tour-btn-skip" id="tourSkipBtn">Saltar</button>
+            <div class="flex items-center gap-2">
+                <button type="button" class="tour-btn tour-btn-prev" id="tourPrevBtn">Anterior</button>
+                <button type="button" class="tour-btn tour-btn-next" id="tourNextBtn">Siguiente</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(tourTooltipEl);
+
+    document.getElementById('tourSkipBtn').addEventListener('click', endTour);
+    document.getElementById('tourPrevBtn').addEventListener('click', () => goToTourStep(tourStepIndex - 1));
+    document.getElementById('tourNextBtn').addEventListener('click', () => {
+        if (tourStepIndex >= TOUR_STEPS.length - 1) endTour();
+        else goToTourStep(tourStepIndex + 1);
+    });
+}
+
+function tourSwitchTab(tab) {
+    if (currentTab === tab) return;
+    if (tabSwitchTimeline) { tabSwitchTimeline.kill(); tabSwitchTimeline = null; }
+    document.body.classList.remove('is-tab-switching');
+
+    const outgoing = document.querySelector('.tab-content.active');
+    const incoming = document.getElementById(`tab-${tab}`);
+    currentTab = tab;
+
+    document.getElementById('inlineUploadRMD').style.display = tab === 'rmd' ? 'flex' : 'none';
+    document.getElementById('inlineUploadProd').style.display = tab === 'produccion' ? 'flex' : 'none';
+    document.getElementById('inlineUploadForecast').style.display = tab === 'forecast' ? 'flex' : 'none';
+
+    if (outgoing && outgoing !== incoming) {
+        outgoing.classList.remove('active');
+        gsap.set(outgoing, { clearProps: 'transform,filter,opacity' });
+    }
+    incoming.classList.add('active');
+    gsap.set(incoming, { clearProps: 'transform,filter,opacity' });
+
+    document.querySelectorAll('#gooeyNavList li').forEach(li => {
+        li.classList.toggle('active', li.getAttribute('data-tab') === tab);
+    });
+    const activeLi = document.querySelector(`#gooeyNavList li[data-tab="${tab}"]`);
+    const container = document.getElementById('gooeyNavContainer');
+    const filterEl = document.getElementById('gooeyFilter');
+    if (activeLi && container && filterEl) {
+        const containerRect = container.getBoundingClientRect();
+        const pos = activeLi.getBoundingClientRect();
+        Object.assign(filterEl.style, { left: `${pos.x - containerRect.x}px`, top: `${pos.y - containerRect.y}px`, width: `${pos.width}px`, height: `${pos.height}px` });
+    }
+
+    const glowOrb = document.getElementById('glow-orb');
+    const glowByTab = {
+        rmd: 'radial-gradient(circle, rgba(59, 130, 246, 0.15) 0%, rgba(139, 92, 246, 0.1) 40%, rgba(0, 0, 0, 0) 70%)',
+        produccion: 'radial-gradient(circle, rgba(16, 185, 129, 0.15) 0%, rgba(59, 130, 246, 0.1) 40%, rgba(0, 0, 0, 0) 70%)',
+        forecast: 'radial-gradient(circle, rgba(244, 63, 94, 0.15) 0%, rgba(249, 115, 22, 0.1) 40%, rgba(0, 0, 0, 0) 70%)'
+    };
+    if (glowOrb) glowOrb.style.background = glowByTab[tab] || glowByTab.produccion;
+
+    if (tab === 'rmd') { if (calendarRMD) calendarRMD.updateSize(); }
+    else if (tab === 'produccion') {
+        if (calendarProd) calendarProd.updateSize();
+        if (chartAreaDist) chartAreaDist.resize();
+        if (chartPie3D) chartPie3D.resize();
+        if (chartTrendProd) chartTrendProd.resize();
+    } else if (tab === 'forecast') {
+        if (chartForecastMonthly) chartForecastMonthly.resize();
+    }
+    animateCurrentTabCards();
+}
+function startTour() {
+    buildTourDom();
+    setTimeout(() => goToTourStep(0), 50);
+}
+
+function goToTourStep(index) {
+    if (index < 0 || index >= TOUR_STEPS.length) return;
+    const step = TOUR_STEPS[index];
+
+    tourHighlightEl.classList.remove('is-visible');
+    tourTooltipEl.classList.remove('is-visible');
+
+    // Si el paso vive en otra pestaña, cámbiala primero y espera a que
+    // termine la animación de transición (~0.71s) antes de medir posiciones,
+    // porque el panel entrante se anima con transform (x) durante ese lapso
+    // y getBoundingClientRect() daría una posición intermedia incorrecta.
+    const needsTabSwitch = step.tab && currentTab !== step.tab;
+    if (needsTabSwitch) tourSwitchTab(step.tab);
+    const delay = needsTabSwitch ? 80 : 0;
+
+    setTimeout(() => {
+        const target = document.querySelector(step.selector);
+        if (!target) {
+            const dir = index >= tourStepIndex ? 1 : -1;
+            return goToTourStep(index + dir);
+        }
+        tourStepIndex = index;
+
+        document.getElementById('tourStepBadge').textContent = `Paso ${index + 1} de ${TOUR_STEPS.length}`;
+        document.getElementById('tourTitle').textContent = step.title;
+        document.getElementById('tourText').textContent = step.text;
+        document.getElementById('tourPrevBtn').disabled = index === 0;
+        document.getElementById('tourNextBtn').textContent = index === TOUR_STEPS.length - 1 ? 'Finalizar' : 'Siguiente';
+
+        target.scrollIntoView({ behavior: 'auto', block: 'center' });
+
+        if (tourResizeHandler) window.removeEventListener('resize', tourResizeHandler);
+        tourResizeHandler = () => positionTourElements(target);
+        window.addEventListener('resize', tourResizeHandler);
+
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                positionTourElements(target);
+                tourHighlightEl.classList.add('is-visible');
+                tourTooltipEl.classList.add('is-visible');
+            });
+        });
+    }, delay);
+}
+
+function positionTourElements(target) {
+    const rect = target.getBoundingClientRect();
+    const pad = 8;
+    Object.assign(tourHighlightEl.style, {
+        top: `${rect.top - pad}px`,
+        left: `${rect.left - pad}px`,
+        width: `${rect.width + pad * 2}px`,
+        height: `${rect.height + pad * 2}px`
+    });
+
+    const tooltipWidth = tourTooltipEl.offsetWidth || 320;
+    const tooltipHeight = tourTooltipEl.offsetHeight || 160;
+    const spacing = 16;
+    let top = rect.bottom + spacing;
+    let left = rect.left;
+
+    if (top + tooltipHeight > window.innerHeight - 12) top = Math.max(12, rect.top - tooltipHeight - spacing);
+    if (left + tooltipWidth > window.innerWidth - 12) left = window.innerWidth - tooltipWidth - 12;
+    if (left < 12) left = 12;
+
+    Object.assign(tourTooltipEl.style, { top: `${top}px`, left: `${left}px` });
+}
+
+async function endTour() {
+    if (tourHighlightEl) tourHighlightEl.classList.remove('is-visible');
+    if (tourTooltipEl) tourTooltipEl.classList.remove('is-visible');
+    if (tourResizeHandler) { window.removeEventListener('resize', tourResizeHandler); tourResizeHandler = null; }
+    await storeSet('tour_completed', true);
+}
+
+async function maybeAutoStartTour() {
+    const seen = await storeGet('tour_completed');
+    if (!seen) setTimeout(() => startTour(), 1300);
+}
         // ==================== INITIALIZATION ====================
         document.addEventListener('DOMContentLoaded', async () => {
             initCalendarRMD();
