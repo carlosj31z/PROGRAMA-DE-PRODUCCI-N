@@ -1518,7 +1518,6 @@
             const particleR = 80;
             const timeVariance = 300;
             const colors = [1, 2, 3, 1, 2, 3, 1, 4];
-            let activeIndex = 0;
 
             const noise = (n = 1) => n / 2 - Math.random() * n;
             const getXY = (distance, pointIndex, totalPoints) => {
@@ -1574,8 +1573,8 @@
             };
 
             const handleNavClick = (index, liEl) => {
-                if (activeIndex === index) return;
-                activeIndex = index;
+                if (gooeyActiveIndex === index) return;
+                gooeyActiveIndex = index;
                 items.forEach(item => item.classList.remove('active'));
                 liEl.classList.add('active');
                 updateEffectPosition(liEl);
@@ -1588,7 +1587,7 @@
                 switchTab(liEl.getAttribute('data-tab'));
             };
 
-            const activeLi = items[activeIndex];
+            const activeLi = items[gooeyActiveIndex];
             if (activeLi) setTimeout(() => updateEffectPosition(activeLi), 100);
             items.forEach((li, index) => {
                 li.addEventListener('click', () => handleNavClick(index, li));
@@ -1598,7 +1597,7 @@
             });
 
             const resizeObserver = new ResizeObserver(() => {
-                const currentActive = items[activeIndex];
+                const currentActive = items[gooeyActiveIndex];
                 if (currentActive) updateEffectPosition(currentActive);
             });
             resizeObserver.observe(container);
@@ -1645,6 +1644,9 @@
         let tabSwitchTimeline = null;
         const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         const TAB_ORDER = ['rmd', 'produccion', 'forecast'];
+// NUEVO: índice de cada pestaña dentro de la lista visual del gooey nav (li[0]=produccion, li[1]=rmd, li[2]=forecast)
+const TAB_TO_GOOEY_INDEX = { produccion: 0, rmd: 1, forecast: 2 };
+let gooeyActiveIndex = 0; // NUEVO: reemplaza al "activeIndex" local de initGooeyNav
 
         function switchTab(tab) {
             if (currentTab === tab) return;
@@ -4048,7 +4050,7 @@ return `<tr class="${rowCls}" title="${p.motivo || ''}">
 
 // ==================== TOUR GUIADO ====================
 const TOUR_STEPS = [
-    { tab: null, selector: '#gooeyNavContainer', title: 'Navegación por pestañas', text: 'El dashboard tiene tres secciones: Producción, OP sin RMD y Forecast. Puedes cambiar entre ellas en cualquier momento desde aquí.' },
+    { tab: null, selector: '#gooeyNavContainer nav ul', title: 'Navegación por pestañas', text: 'El dashboard tiene tres secciones: Producción, OP sin RMD y Forecast. Puedes cambiar entre ellas en cualquier momento desde aquí.' },
 
     // ---- Pestaña OP sin RMD ----
     { tab: 'rmd', selector: '#inlineUploadRMD', title: 'Carga de Excel RMD', text: 'Sube aquí el Excel de órdenes con RMD pendiente. El dashboard detecta automáticamente las órdenes vigentes en Planta ATE y LIMA.' },
@@ -4125,16 +4127,17 @@ function tourSwitchTab(tab) {
     gsap.set(incoming, { clearProps: 'transform,filter,opacity' });
 
     document.querySelectorAll('#gooeyNavList li').forEach(li => {
-        li.classList.toggle('active', li.getAttribute('data-tab') === tab);
-    });
-    const activeLi = document.querySelector(`#gooeyNavList li[data-tab="${tab}"]`);
-    const container = document.getElementById('gooeyNavContainer');
-    const filterEl = document.getElementById('gooeyFilter');
-    if (activeLi && container && filterEl) {
-        const containerRect = container.getBoundingClientRect();
-        const pos = activeLi.getBoundingClientRect();
-        Object.assign(filterEl.style, { left: `${pos.x - containerRect.x}px`, top: `${pos.y - containerRect.y}px`, width: `${pos.width}px`, height: `${pos.height}px` });
-    }
+    li.classList.toggle('active', li.getAttribute('data-tab') === tab);
+});
+gooeyActiveIndex = TAB_TO_GOOEY_INDEX[tab] ?? gooeyActiveIndex;
+const activeLi = document.querySelector(`#gooeyNavList li[data-tab="${tab}"]`);
+const container = document.getElementById('gooeyNavContainer');
+const filterEl = document.getElementById('gooeyFilter');
+if (activeLi && container && filterEl) {
+    const containerRect = container.getBoundingClientRect();
+    const pos = activeLi.getBoundingClientRect();
+    Object.assign(filterEl.style, { left: `${pos.x - containerRect.x}px`, top: `${pos.y - containerRect.y}px`, width: `${pos.width}px`, height: `${pos.height}px` });
+}
 
     const glowOrb = document.getElementById('glow-orb');
     const glowByTab = {
@@ -4172,37 +4175,50 @@ function goToTourStep(index) {
     // porque el panel entrante se anima con transform (x) durante ese lapso
     // y getBoundingClientRect() daría una posición intermedia incorrecta.
     const needsTabSwitch = step.tab && currentTab !== step.tab;
-    if (needsTabSwitch) tourSwitchTab(step.tab);
-    const delay = needsTabSwitch ? 80 : 0;
+if (needsTabSwitch) tourSwitchTab(step.tab);
+// 550ms cubre la animación GSAP de las cards (0.4s + stagger) que dispara animateCurrentTabCards()
+const delay = needsTabSwitch ? 550 : 0;
 
-    setTimeout(() => {
-        const target = document.querySelector(step.selector);
-        if (!target) {
-            const dir = index >= tourStepIndex ? 1 : -1;
-            return goToTourStep(index + dir);
-        }
-        tourStepIndex = index;
+setTimeout(() => {
+    const target = document.querySelector(step.selector);
+    if (!target) {
+        const dir = index >= tourStepIndex ? 1 : -1;
+        return goToTourStep(index + dir);
+    }
+    tourStepIndex = index;
 
-        document.getElementById('tourStepBadge').textContent = `Paso ${index + 1} de ${TOUR_STEPS.length}`;
-        document.getElementById('tourTitle').textContent = step.title;
-        document.getElementById('tourText').textContent = step.text;
-        document.getElementById('tourPrevBtn').disabled = index === 0;
-        document.getElementById('tourNextBtn').textContent = index === TOUR_STEPS.length - 1 ? 'Finalizar' : 'Siguiente';
+    document.getElementById('tourStepBadge').textContent = `Paso ${index + 1} de ${TOUR_STEPS.length}`;
+    document.getElementById('tourTitle').textContent = step.title;
+    document.getElementById('tourText').textContent = step.text;
+    document.getElementById('tourPrevBtn').disabled = index === 0;
+    document.getElementById('tourNextBtn').textContent = index === TOUR_STEPS.length - 1 ? 'Finalizar' : 'Siguiente';
 
-        target.scrollIntoView({ behavior: 'auto', block: 'center' });
+    target.scrollIntoView({ behavior: 'auto', block: 'center' });
 
-        if (tourResizeHandler) window.removeEventListener('resize', tourResizeHandler);
-        tourResizeHandler = () => positionTourElements(target);
-        window.addEventListener('resize', tourResizeHandler);
+    if (tourResizeHandler) window.removeEventListener('resize', tourResizeHandler);
+    tourResizeHandler = () => positionTourElements(target);
+    window.addEventListener('resize', tourResizeHandler);
 
-        requestAnimationFrame(() => {
-            requestAnimationFrame(() => {
-                positionTourElements(target);
-                tourHighlightEl.classList.add('is-visible');
-                tourTooltipEl.classList.add('is-visible');
-            });
-        });
-    }, delay);
+    function waitForStableRect(el, cb, attempts = 0) {
+    const r1 = el.getBoundingClientRect();
+    requestAnimationFrame(() => {
+        const r2 = el.getBoundingClientRect();
+        const stable = Math.abs(r1.top - r2.top) < 0.5 &&
+                        Math.abs(r1.left - r2.left) < 0.5 &&
+                        Math.abs(r1.height - r2.height) < 0.5 &&
+                        Math.abs(r1.width - r2.width) < 0.5;
+        if (stable || attempts >= 10) cb(r2);
+        else waitForStableRect(el, cb, attempts + 1);
+    });
+}
+
+waitForStableRect(target, () => {
+    positionTourElements(target);
+    tourHighlightEl.classList.add('is-visible');
+    tourTooltipEl.classList.add('is-visible');
+    setTimeout(() => positionTourElements(target), 200); // remedición de respaldo (ver mensaje anterior)
+});
+}, delay);
 }
 
 function positionTourElements(target) {
