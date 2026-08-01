@@ -834,6 +834,10 @@
             box-shadow: 0 2px 8px -2px rgba(59,130,246,0.4);
         }
         .planta-btn:focus-visible { outline: 2px solid #60a5fa; outline-offset: 1px; }
+        .forecast-filter-btn { padding: 0.3rem 0.9rem; border-radius: 0.4rem; font-size: 0.7rem; font-weight: 600; color: #94a3b8; background: transparent; border: none; cursor: pointer; transition: all 0.2s ease; white-space: nowrap; }
+.forecast-filter-btn:hover { color: #f8fafc; background: rgba(255,255,255,0.05); }
+.forecast-filter-btn.active { background: linear-gradient(145deg, #f43f5e, #e11d48); color: white; box-shadow: 0 2px 8px -2px rgba(244,63,94,0.4); }
+.forecast-filter-btn:focus-visible { outline: 2px solid #fb7185; outline-offset: 1px; }
         @media (max-width: 640px) {
             .planta-btn { padding: 0.25rem 0.6rem; font-size: 0.65rem; }
         }
@@ -1334,6 +1338,35 @@
             <span id="forecastInfoText" class="text-xs"></span>
         </div>
 
+        <!-- Filtros Forecast: Planta y Mes -->
+        <div class="card p-3 md:p-4 opacity-0 section-spacing" id="forecastFiltersCard">
+            <div class="flex flex-col md:flex-row md:items-center gap-3 md:gap-5 flex-wrap">
+                <div class="flex items-center gap-2">
+                    <span class="text-[10px] text-slate-400 uppercase font-bold tracking-wider whitespace-nowrap">Planta</span>
+                    <div class="planta-selector" id="forecastPlantaSelector">
+                        <button class="forecast-filter-btn active" data-planta="TODAS" onclick="setForecastPlantFilter('TODAS')">Todas</button>
+                        <button class="forecast-filter-btn" data-planta="1020" onclick="setForecastPlantFilter('1020')">ATE (1020)</button>
+                        <button class="forecast-filter-btn" data-planta="1021" onclick="setForecastPlantFilter('1021')">LIMA (1021)</button>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 flex-wrap">
+                    <span class="text-[10px] text-slate-400 uppercase font-bold tracking-wider whitespace-nowrap">Mes</span>
+                    <div class="planta-selector" id="forecastMonthModeSelector">
+                        <button class="forecast-filter-btn active" data-mode="todos" onclick="setForecastMonthMode('todos')">Todos</button>
+                        <button class="forecast-filter-btn" data-mode="desde" onclick="setForecastMonthMode('desde')">Desde</button>
+                        <button class="forecast-filter-btn" data-mode="solo" onclick="setForecastMonthMode('solo')">Solo este mes</button>
+                    </div>
+                    <input type="month" id="forecastMonthInput" style="display:none;" class="bg-slate-900/50 border border-slate-700/60 rounded-lg px-2 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-rose-500/60 transition-colors [color-scheme:dark]" onchange="setForecastMonthValue(this.value)">
+                </div>
+                <button onclick="resetForecastFilters()" class="btn-clear px-3 py-1.5 rounded-lg text-[11px] font-medium flex items-center gap-1.5 active:scale-95 md:ml-auto">
+                    Limpiar filtros
+                </button>
+            </div>
+            <div id="forecastActiveFiltersBadge" class="mt-3 text-xs text-rose-300/90" style="display:none;">
+                <span id="forecastActiveFiltersText"></span>
+            </div>
+        </div>
+
         <!-- KPIs Forecast -->
         <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 section-spacing">
             <div class="card p-4 opacity-0 text-center">
@@ -1403,7 +1436,7 @@
             </div>
 
             <!-- KPIs de validación -->
-            <div class="grid grid-cols-3 gap-2.5 mb-4">
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mb-4">
                 <div class="bg-slate-900/50 border border-slate-700/50 rounded-lg px-3 py-2.5 text-center">
                     <p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Revisados</p>
                     <p id="kpi-val-revisados-forecast" class="text-xl font-bold mt-0.5 text-slate-100">0</p>
@@ -1413,8 +1446,12 @@
                     <p id="kpi-val-autorizados-forecast" class="text-xl font-bold mt-0.5 text-emerald-400">0</p>
                 </div>
                 <div class="bg-slate-900/50 border border-red-700/30 rounded-lg px-3 py-2.5 text-center">
-                    <p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Pendientes</p>
+                    <p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Producto Pendiente</p>
                     <p id="kpi-val-pendientes-forecast" class="text-xl font-bold mt-0.5 text-red-400">0</p>
+                </div>
+                <div class="bg-slate-900/50 border border-orange-700/30 rounded-lg px-3 py-2.5 text-center">
+                    <p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">RMD Pendientes</p>
+                    <p id="kpi-val-rmd-forecast" class="text-xl font-bold mt-0.5 text-orange-400">0</p>
                 </div>
             </div>
 
@@ -3262,6 +3299,86 @@ return `<tr class="${rowCls}" title="${p.motivo || ''}">
         let ultimoResultadoValidacionForecast = { revisados: 0, autorizados: 0, pendientes: [] };
         let validacionForecastFiltroEstado = 'todos';
         let validacionForecastBusqueda = '';
+        let currentForecastPlantFilter = 'TODAS'; // 'TODAS' | '1020' | '1021'
+let forecastMonthFilterMode = 'todos';    // 'todos' | 'desde' | 'solo'
+let forecastMonthFilterValue = null;      // 'YYYY-MM'
+
+function getCentroLabel(centro) {
+    const c = String(centro || '').trim();
+    if (c === '1020') return 'ATE';
+    if (c === '1021') return 'LIMA';
+    return c || '-';
+}
+function materialMatchesPlantFilter(centros) {
+    if (currentForecastPlantFilter === 'TODAS') return true;
+    return (centros || []).some(c => String(c).trim() === currentForecastPlantFilter);
+}
+function filterMesesByMonthFilter(meses) {
+    if (forecastMonthFilterMode === 'desde' && forecastMonthFilterValue) return meses.filter(mk => mk >= forecastMonthFilterValue);
+    if (forecastMonthFilterMode === 'solo' && forecastMonthFilterValue) return meses.filter(mk => mk === forecastMonthFilterValue);
+    return meses;
+}
+function getFilteredForecastData() {
+    return forecastData
+        .filter(m => materialMatchesPlantFilter(m.centros))
+        .map(m => ({ ...m, meses: filterMesesByMonthFilter(m.meses) }))
+        .filter(m => m.meses.length > 0);
+}
+function getFilteredForecastMonthsMeta() {
+    let months = forecastMonthsMeta;
+    if (forecastMonthFilterMode === 'desde' && forecastMonthFilterValue) months = months.filter(m => m.key >= forecastMonthFilterValue);
+    else if (forecastMonthFilterMode === 'solo' && forecastMonthFilterValue) months = months.filter(m => m.key === forecastMonthFilterValue);
+    return months;
+}
+function setForecastPlantFilter(val) {
+    currentForecastPlantFilter = val;
+    document.querySelectorAll('#forecastPlantaSelector .forecast-filter-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.planta === val));
+    updateForecastActiveFiltersBadge();
+    updateDashboardForecast();
+}
+function setForecastMonthMode(mode) {
+    forecastMonthFilterMode = mode;
+    document.querySelectorAll('#forecastMonthModeSelector .forecast-filter-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.mode === mode));
+    const input = document.getElementById('forecastMonthInput');
+    if (mode === 'todos') { input.style.display = 'none'; }
+    else {
+        input.style.display = 'inline-block';
+        if (!forecastMonthFilterValue) {
+            forecastMonthFilterValue = (forecastMonthsMeta[0] && forecastMonthsMeta[0].key) || dayjs().format('YYYY-MM');
+            input.value = forecastMonthFilterValue;
+        }
+    }
+    updateForecastActiveFiltersBadge();
+    updateDashboardForecast();
+}
+function setForecastMonthValue(val) {
+    forecastMonthFilterValue = val || null;
+    updateForecastActiveFiltersBadge();
+    updateDashboardForecast();
+}
+function resetForecastFilters() {
+    currentForecastPlantFilter = 'TODAS';
+    forecastMonthFilterMode = 'todos';
+    forecastMonthFilterValue = null;
+    document.querySelectorAll('#forecastPlantaSelector .forecast-filter-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.planta === 'TODAS'));
+    document.querySelectorAll('#forecastMonthModeSelector .forecast-filter-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.mode === 'todos'));
+    document.getElementById('forecastMonthInput').style.display = 'none';
+    document.getElementById('forecastMonthInput').value = '';
+    updateForecastActiveFiltersBadge();
+    updateDashboardForecast();
+}
+function updateForecastActiveFiltersBadge() {
+    const badge = document.getElementById('forecastActiveFiltersBadge');
+    const text = document.getElementById('forecastActiveFiltersText');
+    if (!badge || !text) return;
+    const parts = [];
+    if (currentForecastPlantFilter !== 'TODAS') parts.push(`Planta: ${getCentroLabel(currentForecastPlantFilter)} (${currentForecastPlantFilter})`);
+    if (forecastMonthFilterMode === 'desde' && forecastMonthFilterValue) parts.push(`Desde ${dayjs(forecastMonthFilterValue + '-01').format('MMM YYYY')}`);
+    if (forecastMonthFilterMode === 'solo' && forecastMonthFilterValue) parts.push(`Solo ${dayjs(forecastMonthFilterValue + '-01').format('MMM YYYY')}`);
+    if (parts.length === 0) { badge.style.display = 'none'; return; }
+    badge.style.display = 'flex';
+    text.textContent = `Filtros activos — ${parts.join(' · ')}`;
+}
 
         const FORECAST_SHEET_NAME = 'BD';
         const FORECAST_HEADER_ROW_INDEX = 2;
@@ -3403,7 +3520,8 @@ return `<tr class="${rowCls}" title="${p.motivo || ''}">
         }
 
         function updateDashboardForecast() {
-            renderKPIsForecast();
+    updateForecastActiveFiltersBadge();
+    renderKPIsForecast();
             renderChartForecastMonthly();
             runValidacionForecast();
             const ib = document.getElementById('forecastInfoBadge');
@@ -3416,28 +3534,32 @@ return `<tr class="${rowCls}" title="${p.motivo || ''}">
         }
 
         function renderKPIsForecast() {
-            animateCounter('kpi-forecast-materiales', forecastData.length);
-            animateCounter('kpi-forecast-meses', forecastMonthsMeta.length);
-            const mesCounts = {};
-            forecastData.forEach(m => m.meses.forEach(mk => { mesCounts[mk] = (mesCounts[mk] || 0) + 1; }));
-            let topMes = '-', topVal = 0;
-            for (const [mk, c] of Object.entries(mesCounts)) { if (c > topVal) { topVal = c; topMes = mk; } }
-            document.getElementById('kpi-forecast-mes-top').textContent = topVal > 0 ? `${dayjs(topMes + '-01').format('MMM YYYY')} (${topVal})` : '-';
-            if (forecastMonthsMeta.length > 0) {
-                const first = forecastMonthsMeta[0].label, last = forecastMonthsMeta[forecastMonthsMeta.length - 1].label;
-                document.getElementById('kpi-forecast-horizonte').textContent = `${first} - ${last}`;
-            } else {
-                document.getElementById('kpi-forecast-horizonte').textContent = '-';
-            }
-        }
+    const filtered = getFilteredForecastData();
+    animateCounter('kpi-forecast-materiales', filtered.length);
+    const monthsMeta = getFilteredForecastMonthsMeta();
+    animateCounter('kpi-forecast-meses', monthsMeta.length);
+    const mesCounts = {};
+    filtered.forEach(m => m.meses.forEach(mk => { mesCounts[mk] = (mesCounts[mk] || 0) + 1; }));
+    let topMes = '-', topVal = 0;
+    for (const [mk, c] of Object.entries(mesCounts)) { if (c > topVal) { topVal = c; topMes = mk; } }
+    document.getElementById('kpi-forecast-mes-top').textContent = topVal > 0 ? `${dayjs(topMes + '-01').format('MMM YYYY')} (${topVal})` : '-';
+    if (monthsMeta.length > 0) {
+        const first = monthsMeta[0].label, last = monthsMeta[monthsMeta.length - 1].label;
+        document.getElementById('kpi-forecast-horizonte').textContent = `${first} - ${last}`;
+    } else {
+        document.getElementById('kpi-forecast-horizonte').textContent = '-';
+    }
+}
 
         function renderChartForecastMonthly() {
-            const ctx = document.getElementById('chartForecastMonthly'); if (!ctx) return;
-            const mesCounts = {};
-            forecastMonthsMeta.forEach(m => { mesCounts[m.key] = 0; });
-            forecastData.forEach(mat => mat.meses.forEach(mk => { mesCounts[mk] = (mesCounts[mk] || 0) + 1; }));
-            const labels = forecastMonthsMeta.map(m => m.label);
-            const values = forecastMonthsMeta.map(m => mesCounts[m.key] || 0);
+    const ctx = document.getElementById('chartForecastMonthly'); if (!ctx) return;
+    const filtered = getFilteredForecastData();
+    const monthsMeta = getFilteredForecastMonthsMeta();
+    const mesCounts = {};
+    monthsMeta.forEach(m => { mesCounts[m.key] = 0; });
+    filtered.forEach(mat => mat.meses.forEach(mk => { mesCounts[mk] = (mesCounts[mk] || 0) + 1; }));
+    const labels = monthsMeta.map(m => m.label);
+    const values = monthsMeta.map(m => mesCounts[m.key] || 0);
 
             if (chartForecastMonthly) chartForecastMonthly.destroy();
             const gradient = ctx.getContext('2d').createLinearGradient(0, 0, 0, 260);
@@ -3505,21 +3627,22 @@ return `<tr class="${rowCls}" title="${p.motivo || ''}">
             let revisados = 0, autorizados = 0;
             const pendientes = [];
 
-            forecastData.forEach(mat => {
+            getFilteredForecastData().forEach(mat => {
                 const cod = normalizeMaterialCode(mat.material);
                 if (!cod) return;
                 revisados++;
                 const mesesLabel = mat.meses.map(mk => dayjs(mk + '-01').format('MMM YYYY'));
+                const plantaLabel = (mat.centros || []).map(c => `${getCentroLabel(c)} (${c})`).join(', ') || '-';
                 const info = databaseMaterials.get(cod);
 
                 if (!info) {
-                    pendientes.push({ material: cod, descripcion: mat.descripcion || '(no encontrado en Base de Datos)', centros: mat.centros.join(', '), meses: mesesLabel, etapasPendientes: [], motivo: 'No encontrado en Base de Datos' });
+                    pendientes.push({ material: cod, descripcion: mat.descripcion || '(no encontrado en Base de Datos)', centros: plantaLabel, meses: mesesLabel, etapasPendientes: [], motivo: 'No encontrado en Base de Datos' });
                     return;
                 }
 
                 if (!info.agrupador) {
                     const etapasSinAgr = info.etapaPropia ? [info.etapaPropia] : [];
-                    pendientes.push({ material: cod, descripcion: info.descripcion || mat.descripcion || '-', centros: mat.centros.join(', '), meses: mesesLabel, etapasPendientes: etapasSinAgr, motivo: 'Sin agrupador válido en Base de Datos' });
+                    pendientes.push({ material: cod, descripcion: info.descripcion || mat.descripcion || '-', centros: plantaLabel, meses: mesesLabel, etapasPendientes: etapasSinAgr, motivo: 'Sin agrupador válido en Base de Datos' });
                     return;
                 }
 
@@ -3528,7 +3651,7 @@ return `<tr class="${rowCls}" title="${p.motivo || ''}">
                 const etapasAutorizadas = rmdAutorizadosEtapasPorAgrupador.get(info.agrupador);
 
                 if (!etapasAutorizadas || etapasAutorizadas.size === 0) {
-                    pendientes.push({ material: cod, descripcion: info.descripcion || mat.descripcion || '-', centros: mat.centros.join(', '), meses: mesesLabel, etapasPendientes: etapasMaterial, motivo: `Agrupador ${info.agrupador} sin RMD autorizado` });
+                    pendientes.push({ material: cod, descripcion: info.descripcion || mat.descripcion || '-', centros: plantaLabel, meses: mesesLabel, etapasPendientes: etapasMaterial, motivo: `Agrupador ${info.agrupador} sin RMD autorizado` });
                     return;
                 }
 
@@ -3536,7 +3659,7 @@ return `<tr class="${rowCls}" title="${p.motivo || ''}">
                 if (etapasPendientes.length === 0) {
                     autorizados++;
                 } else {
-                    pendientes.push({ material: cod, descripcion: info.descripcion || mat.descripcion || '-', centros: mat.centros.join(', '), meses: mesesLabel, etapasPendientes: etapasPendientes, motivo: etapasPendientes.map(et => `Etapa ${et} no tiene RMD autorizado para el agrupador ${info.agrupador}`).join(' | ') });
+                    pendientes.push({ material: cod, descripcion: info.descripcion || mat.descripcion || '-', centros: plantaLabel, meses: mesesLabel, etapasPendientes: etapasPendientes, motivo: etapasPendientes.map(et => `Etapa ${et} no tiene RMD autorizado para el agrupador ${info.agrupador}`).join(' | ') });
                 }
             });
 
@@ -3550,17 +3673,22 @@ return `<tr class="${rowCls}" title="${p.motivo || ''}">
             });
 
             const autorizadosTotal = autorizados + autorizadosManualLista.length;
-            ultimoResultadoValidacionForecast = { revisados, autorizados: autorizadosTotal, pendientes: pendientesReales, autorizadosManual: autorizadosManualLista };
+            const rmdPendientesTotal = pendientesReales.reduce((sum, p) => sum + (p.etapasPendientes && p.etapasPendientes.length > 0 ? p.etapasPendientes.length : 1), 0);
+            ultimoResultadoValidacionForecast = { revisados, autorizados: autorizadosTotal, pendientes: pendientesReales, autorizadosManual: autorizadosManualLista, rmdPendientes: rmdPendientesTotal };
 
             animateCounter('kpi-val-revisados-forecast', revisados, 1.2);
             animateCounter('kpi-val-autorizados-forecast', autorizadosTotal, 1.2);
             animateCounter('kpi-val-pendientes-forecast', pendientesReales.length, 1.2);
+            animateCounter('kpi-val-rmd-forecast', rmdPendientesTotal, 1.2);
 
             const todasLasFilas = [...pendientesReales.map(p => ({ ...p, estado: 'pendiente' })), ...autorizadosManualLista.map(p => ({ ...p, estado: 'autorizado' }))];
+            const hayFiltrosActivos = currentForecastPlantFilter !== 'TODAS' || forecastMonthFilterMode !== 'todos';
 
             if (todasLasFilas.length === 0) {
                 emptyState.style.display = 'block';
-                emptyState.textContent = revisados > 0 ? 'Todos los materiales del forecast están autorizados en todas sus etapas. ✅' : 'No hay materiales proyectados para validar.';
+                emptyState.textContent = revisados > 0
+                    ? 'Todos los materiales del forecast (según los filtros aplicados) están autorizados en todas sus etapas. ✅'
+                    : (hayFiltrosActivos ? 'No hay materiales que coincidan con los filtros de planta/mes seleccionados.' : 'No hay materiales proyectados para validar.');
                 tableWrapper.style.display = 'none';
                 if (toolbar) toolbar.style.display = 'none';
             } else {
@@ -3629,23 +3757,52 @@ return `<tr class="${rowCls}" title="${p.motivo || ''}">
         function refiltrarTablaPendientesForecast() { if (window.__ultimasFilasValidacionForecast) renderTablaPendientesForecast(window.__ultimasFilasValidacionForecast); }
 
         function exportPendientesForecastToExcel() {
-            const { pendientes } = ultimoResultadoValidacionForecast;
-            if (!pendientes || pendientes.length === 0) {
-                Swal.fire({ icon: 'info', title: 'Nada que exportar', text: 'No hay materiales pendientes para exportar en este momento.', background: '#0f172a', timer: 2000, showConfirmButton: false });
-                return;
-            }
-            const wsData = pendientes.map(p => ({
-                'Material': p.material, 'Descripción': p.descripcion, 'Centro(s)': p.centros,
-                'Mes(es) Programado(s)': (p.meses || []).join(', '),
-                'Etapa(s) Pendiente(s)': p.etapasPendientes && p.etapasPendientes.length > 0 ? p.etapasPendientes.join(', ') : '-',
-                'Motivo': p.motivo || ''
-            }));
-            const ws = XLSX.utils.json_to_sheet(wsData);
-            ws['!cols'] = [{ wch: 14 }, { wch: 45 }, { wch: 14 }, { wch: 40 }, { wch: 30 }, { wch: 55 }];
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, 'Forecast Pendientes');
-            XLSX.writeFile(wb, `Forecast_Materiales_Pendientes_RMD_${dayjs().format('YYYYMMDD_HHmm')}.xlsx`);
-        }
+    const { pendientes, revisados, autorizados, rmdPendientes } = ultimoResultadoValidacionForecast;
+    if (!pendientes || pendientes.length === 0) {
+        Swal.fire({ icon: 'info', title: 'Nada que exportar', text: 'No hay materiales pendientes para exportar con los filtros actuales.', background: '#0f172a', timer: 2200, showConfirmButton: false });
+        return;
+    }
+    const filtroPlantaTxt = currentForecastPlantFilter === 'TODAS' ? 'Todas' : `${getCentroLabel(currentForecastPlantFilter)} (${currentForecastPlantFilter})`;
+    const filtroMesTxt = forecastMonthFilterMode === 'todos' ? 'Todos los meses'
+        : forecastMonthFilterMode === 'desde' ? `Desde ${dayjs((forecastMonthFilterValue || '') + '-01').format('MMMM YYYY')}`
+        : `Solo ${dayjs((forecastMonthFilterValue || '') + '-01').format('MMMM YYYY')}`;
+
+    const resumenAOA = [
+        ['RMD Pendientes de Autorización — Forecast'],
+        [`Generado: ${dayjs().format('DD/MM/YYYY HH:mm')}`],
+        [],
+        ['Filtro de Planta', filtroPlantaTxt],
+        ['Filtro de Mes', filtroMesTxt],
+        [],
+        ['Indicador', 'Valor'],
+        ['Materiales revisados', revisados || 0],
+        ['Materiales autorizados', autorizados || 0],
+        ['Productos pendientes', pendientes.length],
+        ['RMD (etapas) pendientes', rmdPendientes || 0]
+    ];
+    const wsResumen = XLSX.utils.aoa_to_sheet(resumenAOA);
+    wsResumen['!cols'] = [{ wch: 32 }, { wch: 28 }];
+    wsResumen['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 1 } }];
+
+    const wsData = pendientes.map(p => ({
+        'Material': p.material,
+        'Descripción': p.descripcion,
+        'Planta': p.centros,
+        'Mes(es) Programado(s)': (p.meses || []).join(', '),
+        'N° Etapas Pendientes': p.etapasPendientes && p.etapasPendientes.length > 0 ? p.etapasPendientes.length : 1,
+        'Etapa(s) Pendiente(s)': p.etapasPendientes && p.etapasPendientes.length > 0 ? p.etapasPendientes.join(', ') : '-',
+        'Motivo': p.motivo || ''
+    }));
+    const wsDetalle = XLSX.utils.json_to_sheet(wsData);
+    wsDetalle['!cols'] = [{ wch: 14 }, { wch: 42 }, { wch: 16 }, { wch: 34 }, { wch: 12 }, { wch: 30 }, { wch: 50 }];
+    wsDetalle['!autofilter'] = { ref: `A1:G${wsData.length + 1}` };
+    wsDetalle['!views'] = [{ state: 'frozen', ySplit: 1 }];
+
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, wsResumen, 'Resumen');
+    XLSX.utils.book_append_sheet(wb, wsDetalle, 'Detalle Pendientes');
+    XLSX.writeFile(wb, `Forecast_Materiales_Pendientes_RMD_${dayjs().format('YYYYMMDD_HHmm')}.xlsx`);
+}
 
         async function copyPendientesForecastToClipboard() {
             const btn = document.getElementById('copyPendientesForecastBtn');
@@ -3658,8 +3815,8 @@ return `<tr class="${rowCls}" title="${p.motivo || ''}">
                 return;
             }
 
-            const header = ['Material', 'Descripción', 'Centro(s)', 'Mes(es) Programado(s)', 'Etapa(s) Pendiente(s)'].join('\t');
-            const lines = pendientes.map(p => [p.material, p.descripcion, p.centros, (p.meses || []).join(', '), (p.etapasPendientes && p.etapasPendientes.length > 0 ? p.etapasPendientes.join(', ') : '-')].join('\t'));
+            const header = ['Material', 'Descripción', 'Planta', 'Mes(es) Programado(s)', 'N° Etapas Pendientes', 'Etapa(s) Pendiente(s)'].join('\t');
+            const lines = pendientes.map(p => [p.material, p.descripcion, p.centros, (p.meses || []).join(', '), (p.etapasPendientes && p.etapasPendientes.length > 0 ? p.etapasPendientes.length : 1), (p.etapasPendientes && p.etapasPendientes.length > 0 ? p.etapasPendientes.join(', ') : '-')].join('\t'));
             const tsv = [header, ...lines].join('\n');
 
             try {
