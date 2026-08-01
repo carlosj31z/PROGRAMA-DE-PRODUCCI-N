@@ -85,12 +85,10 @@
             padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
         }
 
-        /* Scroll con inercia en paneles con overflow (listas, tablas, calendario) */
         .custom-scrollbar, #tablaPendientesWrapper, #areaFiltersContainer {
             -webkit-overflow-scrolling: touch;
         }
 
-        /* Objetivo táctil mínimo recomendado (44x44px) en controles interactivos, sobre todo en móvil */
         @media (max-width: 768px) {
             .drop-zone-mini { min-height: 44px; padding: 0.6rem 0.9rem; }
             .filter-pill { min-height: 40px; display: inline-flex; align-items: center; }
@@ -129,7 +127,6 @@
             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
         }
 
-        /* ---------- Cards: pulido premium ---------- */
         .card {
             background: linear-gradient(145deg, rgba(30, 41, 59, 0.85), rgba(15, 23, 42, 0.92));
             border: 1px solid rgba(255, 255, 255, 0.06);
@@ -169,7 +166,6 @@
             transform: translateY(-2px);
         }
 
-        /* ---------- RMD Pendientes de Autorización: destacado bajo el calendario ---------- */
         .card-rmd-highlight {
             background: linear-gradient(150deg, rgba(120, 53, 15, 0.16), rgba(15, 23, 42, 0.94) 55%);
             border: 1px solid rgba(245, 158, 11, 0.28);
@@ -219,7 +215,6 @@
             box-shadow: 0 0 15px rgba(16, 185, 129, 0.35), 0 2px 8px rgba(0,0,0,0.3);
         }
 
-        /* ---------- Header / Título premium ---------- */
         .brand-mark {
             display: flex; align-items: center; justify-content: center;
             width: 2.5rem; height: 2.5rem; flex-shrink: 0;
@@ -295,7 +290,6 @@
             transform: translateY(-1px);
         }
 
-        /* ---------- Gooey Nav ---------- */
         .gooey-nav-container {
             position: relative;
             display: inline-flex;
@@ -349,10 +343,6 @@
             box-shadow: 0 2px 8px -2px rgba(59,130,246,0.45), 0 0 0 1px rgba(255,255,255,0.08) inset;
         }
 
-        /* El elemento .effect solo existe para la ráfaga de partículas gooey al cambiar de pestaña.
-           Su filtro pesado (blur+contrast) se activa exclusivamente durante esa breve animación
-           y se apaga después; dejarlo encendido de forma permanente es lo que generaba el halo
-           borroso "sucio" pegado al botón activo. */
         .gooey-nav-container .effect {
             position: absolute; left: 0; top: 0; width: 0; height: 0;
             opacity: 0; pointer-events: none; z-index: 1; border-radius: 0.6rem;
@@ -404,7 +394,6 @@
             100% { transform: scale(0); opacity: 0; }
         }
 
-        /* ---------- Drop zones ---------- */
         .drop-zone-mini {
             display: flex; align-items: center; gap: 0.5rem;
             padding: 0.55rem 1rem; border: 1px dashed rgba(255, 255, 255, 0.15);
@@ -430,7 +419,6 @@
             box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
         }
 
-        /* ---------- Base de Datos: componente unificado ---------- */
         .db-group {
             display: flex; align-items: stretch; gap: 0;
             border-radius: 0.7rem;
@@ -483,7 +471,6 @@
         @keyframes dbStatusIn { from { opacity: 0; transform: scale(0.9) translateX(-4px); } to { opacity: 1; transform: scale(1) translateX(0); } }
         @keyframes checkDraw { to { stroke-dashoffset: 0; } }
 
-        /* ---------- FullCalendar Overrides ---------- */
         .fc-theme-standard td, .fc-theme-standard th, .fc-theme-standard .fc-scrollgrid {
             border-color: rgba(255, 255, 255, 0.05) !important;
         }
@@ -506,7 +493,6 @@
         .fc .fc-daygrid-day-number { color: #cbd5e1; }
         .fc .fc-toolbar { flex-wrap: wrap; gap: 0.5rem; }
 
-        /* Días pasados: solo se "apagan" ligeramente, nunca se bloquean ni se ocultan */
         .fc-day-past { background-color: rgba(255, 255, 255, 0.012) !important; }
         .fc-day-past .fc-daygrid-day-number { color: #64748b; opacity: 0.75; }
         .fc-day-past .fc-daygrid-day-frame { opacity: 0.82; }
@@ -518,7 +504,6 @@
             .fc-daygrid-event { white-space: normal !important; }
         }
 
-        /* Foco visible y accesible para navegación por teclado (tarjetas KPI, zonas de carga, filas de alerta) */
         [role="button"]:focus-visible,
         .drop-zone-mini:focus-visible,
         .kpi-filter:focus-visible {
@@ -534,7 +519,6 @@
         .tab-content { display: none; will-change: transform, opacity, filter; }
         .tab-content.active { display: block; }
 
-        /* Evita interacción y refleja estado "en tránsito" mientras GSAP anima la salida/entrada */
         body.is-tab-switching #tab-rmd,
         body.is-tab-switching #tab-produccion,
         body.is-tab-switching #tab-forecast {
@@ -577,7 +561,6 @@
         .swal2-title { color: #f8fafc !important; }
         .swal2-html-container { color: #cbd5e1 !important; }
 
-        /* ---------- Diálogo: origen de Base de Datos ---------- */
         .bd-dialog-popup.swal2-popup { padding: 1.5rem 1.4rem 1.6rem !important; }
         .bd-dialog-popup .swal2-title {
             font-size: 1.05rem !important; font-weight: 800 !important;
@@ -629,7 +612,6 @@
         }
         .bd-dialog-option:hover .bd-dialog-option-chevron { transform: translateX(3px); color: #cbd5e1; }
 
-        /* ---------- Skeleton loaders ---------- */
         .skeleton {
             position: relative;
             overflow: hidden;
@@ -648,7 +630,6 @@
             transform: translateX(-100%);
         }
 
-        /* ---------- Summary module ---------- */
         .summary-card {
             background: linear-gradient(160deg, rgba(30, 41, 59, 0.9), rgba(11, 17, 32, 0.95));
             border: 1px solid rgba(255,255,255,0.07);
@@ -678,7 +659,6 @@
             box-shadow: 0 8px 20px -6px rgba(16,185,129,0.55);
         }
 
-        /* Spotlight card tilt (signature interactive element) */
         .tilt-card { transform-style: preserve-3d; will-change: transform; }
         .spotlight {
             position: absolute; inset: 0; border-radius: inherit;
@@ -687,7 +667,6 @@
         }
         .tilt-card:hover .spotlight { opacity: 1; }
 
-        /* ---------- Validación RMD (nuevo módulo) ---------- */
         .badge-auth { background: linear-gradient(145deg, rgba(34,197,94,0.2), rgba(22,101,52,0.3)); color:#86efac; border:1px solid rgba(34,197,94,0.25); }
         .badge-pending { background: linear-gradient(145deg, rgba(239,68,68,0.2), rgba(153,27,27,0.3)); color:#fca5a5; border:1px solid rgba(239,68,68,0.25); }
         .badge-unknown { background: linear-gradient(145deg, rgba(148,163,184,0.18), rgba(51,65,85,0.3)); color:#cbd5e1; border:1px solid rgba(148,163,184,0.25); }
@@ -695,7 +674,6 @@
         #tablaPendientes th, #tablaPendientes td, #tablaPendientesForecast th, #tablaPendientesForecast td { padding: 0.55rem 0.75rem; }
         #tablaPendientes thead th, #tablaPendientesForecast thead th { position: sticky; top: 0; background: rgba(15,23,42,0.96); z-index: 1; }
 
-        /* ---------- Forecast (nuevo módulo) ---------- */
         .card-forecast-highlight {
             background: linear-gradient(150deg, rgba(76, 5, 25, 0.18), rgba(15, 23, 42, 0.94) 55%);
             border: 1px solid rgba(244, 63, 94, 0.28);
@@ -724,7 +702,6 @@
             .section-spacing { margin-bottom: 1.1rem; }
         }
 
-        /* ---------- Backup discreto (exportar/importar JSON) ---------- */
         .backup-corner {
             position: fixed;
             right: 0.65rem;
@@ -788,6 +765,38 @@
         .backup-hint {
             font-size: 0.6rem; color: #475569; padding: 0.4rem 0.6rem 0.1rem;
             line-height: 1.35; border-top: 1px solid rgba(255,255,255,0.05); margin-top: 0.2rem;
+        }
+
+        /* Selector de planta - nuevo estilo */
+        .planta-selector {
+            display: inline-flex;
+            gap: 0.2rem;
+            background: rgba(30, 41, 59, 0.5);
+            border-radius: 0.6rem;
+            padding: 0.2rem;
+            border: 1px solid rgba(255,255,255,0.06);
+        }
+        .planta-btn {
+            padding: 0.3rem 0.9rem;
+            border-radius: 0.4rem;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #94a3b8;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+        .planta-btn:hover { color: #f8fafc; background: rgba(255,255,255,0.05); }
+        .planta-btn.active {
+            background: linear-gradient(145deg, #3b82f6, #2563eb);
+            color: white;
+            box-shadow: 0 2px 8px -2px rgba(59,130,246,0.4);
+        }
+        .planta-btn:focus-visible { outline: 2px solid #60a5fa; outline-offset: 1px; }
+        @media (max-width: 640px) {
+            .planta-btn { padding: 0.25rem 0.6rem; font-size: 0.65rem; }
         }
     </style>
 </head>
@@ -864,9 +873,15 @@
 
         <!-- Inline Upload Zone Prod -->
         <div class="flex items-center gap-2 flex-wrap" id="inlineUploadProd" style="display:none;">
-            <div class="drop-zone-mini prod-style" id="dropZoneProd" onclick="document.getElementById('fileInputProd').click()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();document.getElementById('fileInputProd').click();}" role="button" tabindex="0" title="Cargar Excel Producción" aria-label="Cargar Excel Producción">
+            <!-- Selector de Planta -->
+            <div class="planta-selector" id="plantaSelector">
+                <button class="planta-btn" data-planta="planta1" onclick="switchPlanta('planta1')">Planta 1</button>
+                <button class="planta-btn active" data-planta="planta2" onclick="switchPlanta('planta2')">Planta 2</button>
+            </div>
+
+            <div class="drop-zone-mini prod-style" id="dropZoneProd" onclick="document.getElementById('fileInputProd').click()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();document.getElementById('fileInputProd').click();}" role="button" tabindex="0" title="Cargar Excel Producción para la planta activa" aria-label="Cargar Excel Producción">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-emerald-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                <span>Cargar Excel</span>
+                <span id="prodDropLabel">Cargar Excel</span>
             </div>
             <input type="file" id="fileInputProd" class="hidden" accept=".xlsx, .xls" onchange="handleFileProd(event)">
             <span class="text-xs text-emerald-400 font-medium" id="prodStatusBadge" style="display:none;">✓ Cargado</span>
@@ -935,7 +950,6 @@
 
     <!-- ==================== TAB 1: RMD ==================== -->
     <div class="tab-content" id="tab-rmd">
-        <!-- (Mismo contenido que el original para la pestaña RMD, se mantiene íntegro) -->
         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4 section-spacing">
             <div class="card card-hover p-4 cursor-pointer transition-all kpi-filter active-filter opacity-0" onclick="setFilterRMD('ALL')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();setFilterRMD('ALL');}" role="button" tabindex="0" aria-label="Filtrar: todas las plantas" id="kpi-card-total">
                 <p class="text-xs text-slate-400 uppercase font-bold tracking-wider">Total Productos</p>
@@ -1026,7 +1040,6 @@
 
     <!-- ==================== TAB 2: Programa de Producción ==================== -->
     <div class="tab-content active" id="tab-produccion">
-        <!-- (Mismo contenido que el original para producción, sin cambios relevantes) -->
         <div class="info-badge opacity-0 section-spacing" id="dateFilterInfo" style="display: none;">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
             <span id="dateFilterText" class="text-xs"></span>
@@ -1371,8 +1384,16 @@
         dayjs.locale('es');
 
         let currentTab = 'produccion';
+        let currentPlanta = 'planta2'; // por defecto Planta 2 (para no romper la lógica anterior)
+        let productionData = [];
+        let availableAreas = new Set();
+        let currentAreaFilter = 'TODAS';
+        let calendarProd;
+        let chartAreaDist = null;
+        let chartPie3D = null;
+        let chartTrendProd = null;
 
-        // ==================== STORAGE LAYER (solo almacenamiento local en el navegador, sin nube) ====================
+        // ==================== STORAGE LAYER ====================
         const dbStore = localforage.createInstance({ name: 'programaProduccionDB', storeName: 'datos_app' });
 
         async function storeSet(key, value) { try { await dbStore.setItem(key, value); } catch (err) { console.error('IndexedDB set error:', key, err); } return true; }
@@ -1437,8 +1458,6 @@
                         setTimeout(() => { try { element.removeChild(particle); } catch {} }, t);
                     }, 30);
                 }
-                // Apaga el filtro gooey en cuanto la última partícula termina, para que no quede
-                // un halo borroso permanente detrás del botón activo.
                 setTimeout(() => { element.classList.remove('is-bursting', 'active'); }, maxDuration + 60);
             };
 
@@ -1495,7 +1514,7 @@
             animate();
         }
 
-        // ==================== TILT/SPOTLIGHT (signature micro-interaction) ====================
+        // ==================== TILT/SPOTLIGHT ====================
         function initTiltCards() {
             if (window.matchMedia('(pointer: coarse)').matches) return;
             const cards = document.querySelectorAll('.kpi-filter');
@@ -1558,7 +1577,6 @@
             };
 
             if (prefersReducedMotion || !outgoing || outgoing === incoming) {
-                // Camino accesible / directo: solo cross-fade suave, sin desplazamiento
                 glowOrb.style.background = targetGlow;
                 if (outgoing && outgoing !== incoming) outgoing.classList.remove('active');
                 incoming.classList.add('active');
@@ -1574,12 +1592,10 @@
                 onComplete: () => document.body.classList.remove('is-tab-switching')
             });
 
-            // Salida: el contenido actual se desliza y se difumina hacia la dirección de navegación
             tabSwitchTimeline.to(outgoing, {
                 x: -dist, opacity: 0, filter: 'blur(6px)', duration: 0.28, ease: 'power2.in'
             });
 
-            // Cambio de fondo ambiental a mitad de camino, sincronizado con el "vacío" entre paneles
             tabSwitchTimeline.call(() => {
                 gsap.to(glowOrb, { duration: 0.5, ease: 'sine.inOut', onStart: () => { glowOrb.style.background = targetGlow; } });
                 outgoing.classList.remove('active');
@@ -1588,7 +1604,6 @@
                 resizeCharts();
             });
 
-            // Entrada: el nuevo panel llega desde el lado opuesto con nitidez creciente
             tabSwitchTimeline.to(incoming, {
                 x: 0, opacity: 1, filter: 'blur(0px)', duration: 0.42, ease: 'power3.out',
                 clearProps: 'transform,filter,opacity',
@@ -1649,7 +1664,7 @@
             return hidden;
         }
 
-        // ==================== RMD MODULE ====================
+        // ==================== RMD MODULE (sin cambios) ====================
         let productsRMD = [];
         let calendarRMD;
         let chartWeeklyInst = null;
@@ -1946,15 +1961,7 @@
             });
         }
 
-        // ==================== PRODUCCIÓN MODULE ====================
-        let productionData = [];
-        let availableAreas = new Set();
-        let currentAreaFilter = 'TODAS';
-        let calendarProd;
-        let chartAreaDist = null;
-        let chartPie3D = null;
-        let chartTrendProd = null;
-
+        // ==================== PRODUCCIÓN MODULE (con soporte para planta 1 y planta 2) ====================
         const PROD_HEADER_ROW_INDEX = 3;
         const PROD_WEEK_LABEL_ROW_INDEX = 1;
 
@@ -1963,7 +1970,19 @@
         function sortAreas(a) { return a.sort((x, y) => { const px = getAreaPriority(x), py = getAreaPriority(y); return px !== py ? px - py : x.localeCompare(y); }); }
 
         const colorMap = { 'SOL': '#3b82f6', 'PEF': '#8b5cf6', 'ACO': '#ec4899', 'SOL HORM': '#f43f5e', 'SOL COLOR': '#f97316', 'CAP BLAN': '#eab308', 'INY': '#10b981', 'SEM HORM': '#06b6d4', 'COS': '#6366f1', 'SEM': '#14b8a6', 'MEN': '#84cc16', 'REA': '#64748b' };
-        function getAreaColor(a) { const c = String(a).trim().toUpperCase(); for (const k in colorMap) if (c.includes(k)) return colorMap[k]; return '#475569'; }
+const areaColorPalette = ['#3b82f6', '#8b5cf6', '#ec4899', '#f43f5e', '#f97316', '#eab308', '#10b981', '#06b6d4', '#6366f1', '#14b8a6', '#84cc16', '#f472b6', '#22d3ee', '#a78bfa', '#fb923c', '#4ade80', '#facc15', '#38bdf8', '#e879f9', '#2dd4bf'];
+const dynamicAreaColors = {};
+function hashStringToIndex(str, mod) {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) { hash = (hash * 31 + str.charCodeAt(i)) >>> 0; }
+    return hash % mod;
+}
+function getAreaColor(a) {
+    const c = String(a).trim().toUpperCase();
+    for (const k in colorMap) if (c.includes(k)) return colorMap[k];
+    if (!dynamicAreaColors[c]) dynamicAreaColors[c] = areaColorPalette[hashStringToIndex(c, areaColorPalette.length)];
+    return dynamicAreaColors[c];
+}
 
         function filtrarFechasFuturas(f) { return f.filter(d => isTodayOrFuture(d)); }
 
@@ -1982,6 +2001,100 @@
             const m = String(text).match(/(\d{1,2})\s*$/);
             return m ? m[1] : null;
         }
+// Calcula el lunes de la semana ISO dada para el año en curso
+function isoWeekMonday(weekNum) {
+    const year = dayjs().year();
+    const jan4 = dayjs(`${year}-01-04`);
+    const jan4Dow = (jan4.day() + 6) % 7; // 0=lunes
+    return jan4.subtract(jan4Dow, 'day').add((weekNum - 1) * 7, 'day');
+}
+ 
+// Detecta si el workbook usa el formato Planta 1:
+// • fila 2 (PROD_WEEK_LABEL_ROW_INDEX=1) tiene "S22","S23"...
+// • fila 4 (PROD_HEADER_ROW_INDEX=3)     tiene enteros de días (1-31) — NO fechas ISO
+function isPlanta1Format(workbook) {
+    const sh = workbook.Sheets[workbook.SheetNames[0]];
+    const rows = XLSX.utils.sheet_to_json(sh, { header: 1, defval: "", raw: true });
+    if (rows.length < 4) return false;
+    const weekRow = rows[PROD_WEEK_LABEL_ROW_INDEX] || [];
+    const dayRow  = rows[PROD_HEADER_ROW_INDEX] || [];
+    const hasSWeeks   = weekRow.some(v => v && /^S\d{1,2}$/.test(String(v).trim()));
+    const hasDayInts  = dayRow.some(v => typeof v === 'number' && v >= 1 && v <= 31);
+    const hasRealDates = dayRow.some(v => v instanceof Date || (typeof v === 'number' && v > 1000));
+    return hasSWeeks && hasDayInts && !hasRealDates;
+}
+ 
+// Construye { colIdx -> "YYYY-MM-DD" } para el formato Planta 1.
+// Lógica: cada semana "S22" define un lunes; cada columna dentro de esa semana
+// es lunes + offset (0=L, 1=M, 2=M, 3=J, 4=V, 5=S, 6=D).
+function buildDateColumnMapPlanta1(headerRowDays, weekLabelRow, hiddenCols) {
+    const dateColMap = {};
+    let weekMonday    = null;
+    let weekStartCol  = null;
+ 
+    for (let idx = 0; idx < weekLabelRow.length; idx++) {
+        if (hiddenCols.has(idx)) continue;
+        const wkLabel = String(weekLabelRow[idx] || '').trim();
+        if (/^S\d{1,2}$/.test(wkLabel)) {
+            const wkNum  = parseInt(wkLabel.replace(/\D/g, ''), 10);
+            weekMonday   = isoWeekMonday(wkNum);
+            weekStartCol = idx;
+        }
+        const dayVal = headerRowDays[idx];
+        if (weekMonday !== null && typeof dayVal === 'number' && dayVal >= 1 && dayVal <= 31) {
+            const offset = idx - weekStartCol;
+            dateColMap[idx] = weekMonday.add(offset, 'day').format('YYYY-MM-DD');
+        }
+    }
+    return dateColMap;
+}
+        // Calcula el lunes de la semana ISO dada para el año en curso
+function isoWeekMonday(weekNum) {
+    const year = dayjs().year();
+    const jan4 = dayjs(`${year}-01-04`);
+    const jan4Dow = (jan4.day() + 6) % 7; // 0=lunes
+    return jan4.subtract(jan4Dow, 'day').add((weekNum - 1) * 7, 'day');
+}
+ 
+// Detecta si el workbook usa el formato Planta 1:
+// • fila 2 (PROD_WEEK_LABEL_ROW_INDEX=1) tiene "S22","S23"...
+// • fila 4 (PROD_HEADER_ROW_INDEX=3)     tiene enteros de días (1-31) — NO fechas ISO
+function isPlanta1Format(workbook) {
+    const sh = workbook.Sheets[workbook.SheetNames[0]];
+    const rows = XLSX.utils.sheet_to_json(sh, { header: 1, defval: "", raw: true });
+    if (rows.length < 4) return false;
+    const weekRow = rows[PROD_WEEK_LABEL_ROW_INDEX] || [];
+    const dayRow  = rows[PROD_HEADER_ROW_INDEX] || [];
+    const hasSWeeks   = weekRow.some(v => v && /^S\d{1,2}$/.test(String(v).trim()));
+    const hasDayInts  = dayRow.some(v => typeof v === 'number' && v >= 1 && v <= 31);
+    const hasRealDates = dayRow.some(v => v instanceof Date || (typeof v === 'number' && v > 1000));
+    return hasSWeeks && hasDayInts && !hasRealDates;
+}
+ 
+// Construye { colIdx -> "YYYY-MM-DD" } para el formato Planta 1.
+// Lógica: cada semana "S22" define un lunes; cada columna dentro de esa semana
+// es lunes + offset (0=L, 1=M, 2=M, 3=J, 4=V, 5=S, 6=D).
+function buildDateColumnMapPlanta1(headerRowDays, weekLabelRow, hiddenCols) {
+    const dateColMap = {};
+    let weekMonday    = null;
+    let weekStartCol  = null;
+ 
+    for (let idx = 0; idx < weekLabelRow.length; idx++) {
+        if (hiddenCols.has(idx)) continue;
+        const wkLabel = String(weekLabelRow[idx] || '').trim();
+        if (/^S\d{1,2}$/.test(wkLabel)) {
+            const wkNum  = parseInt(wkLabel.replace(/\D/g, ''), 10);
+            weekMonday   = isoWeekMonday(wkNum);
+            weekStartCol = idx;
+        }
+        const dayVal = headerRowDays[idx];
+        if (weekMonday !== null && typeof dayVal === 'number' && dayVal >= 1 && dayVal <= 31) {
+            const offset = idx - weekStartCol;
+            dateColMap[idx] = weekMonday.add(offset, 'day').format('YYYY-MM-DD');
+        }
+    }
+    return dateColMap;
+}
 
         function buildGlobalWeekMondayMap(workbook) {
             const weekMondayMap = {};
@@ -2038,7 +2151,7 @@
         function handleFileProd(e) { const file = e.target.files[0]; if (file) processFileProd(file); e.target.value = ''; }
 
         function processFileProd(file) {
-            Swal.fire({ title: 'Analizando...', allowOutsideClick: false, didOpen: () => Swal.showLoading(), background: '#0f172a' });
+            Swal.fire({ title: `Analizando (${currentPlanta === 'planta1' ? 'Planta 1' : 'Planta 2'})...`, allowOutsideClick: false, didOpen: () => Swal.showLoading(), background: '#0f172a' });
             const reader = new FileReader();
             reader.onload = (ev) => {
                 try {
@@ -2048,6 +2161,7 @@
                     availableAreas.clear();
 
                     const globalWeekMondayMap = buildGlobalWeekMondayMap(wb);
+                    const planta1Format = isPlanta1Format(wb);
 
                     wb.SheetNames.forEach(sn => {
                         const sh = wb.Sheets[sn];
@@ -2057,14 +2171,23 @@
                         if (rows.length <= PROD_HEADER_ROW_INDEX) return;
 
                         const headerRow = rows[PROD_HEADER_ROW_INDEX];
-                        const codigoColIdx = headerRow.findIndex((h, idx) => !hiddenCols.has(idx) && /c[oó]digo/i.test(String(h || '')));
+                        const labelRow = rows[PROD_HEADER_ROW_INDEX - 1] || [];
+                        const findLabelCol = (regex) => {
+                            let idx = labelRow.findIndex((h, i) => !hiddenCols.has(i) && regex.test(String(h || '')));
+                            if (idx === -1) idx = headerRow.findIndex((h, i) => !hiddenCols.has(i) && regex.test(String(h || '')));
+                            return idx;
+                        };
+                        const codigoColIdx = findLabelCol(/c[oó]digo/i);
                         if (codigoColIdx === -1) return;
 
                         availableAreas.add(sn);
 
-                        const productoColIdx = headerRow.findIndex((h, idx) => !hiddenCols.has(idx) && /produc/i.test(String(h || '')));
+                        let productoColIdx = findLabelCol(/produc/i);
+if (productoColIdx === -1) productoColIdx = findLabelCol(/descripci/i);
                         const weekLabelRow = rows[PROD_WEEK_LABEL_ROW_INDEX] || [];
-                        const dateColMap = buildDateColumnMap(headerRow, weekLabelRow, globalWeekMondayMap, hiddenCols);
+                        const dateColMap = planta1Format
+                            ? buildDateColumnMapPlanta1(headerRow, weekLabelRow, hiddenCols)
+                            : buildDateColumnMap(headerRow, weekLabelRow, globalWeekMondayMap, hiddenCols);
 
                         const dataRows = rows.slice(PROD_HEADER_ROW_INDEX + 1);
                         dataRows.forEach((row, relIdx) => {
@@ -2112,15 +2235,38 @@
             reader.readAsArrayBuffer(file);
         }
 
-        async function saveProdData() { await storeSet('prod_data', { data: productionData, areas: Array.from(availableAreas) }); }
+        async function saveProdData() {
+            const key = `prod_data_${currentPlanta}`;
+            await storeSet(key, { data: productionData, areas: Array.from(availableAreas) });
+        }
         async function loadProdData() {
-            const saved = await storeGet('prod_data');
+            const key = `prod_data_${currentPlanta}`;
+            const saved = await storeGet(key);
             if (saved) {
                 productionData = saved.data;
                 availableAreas = new Set(saved.areas);
                 document.getElementById('prodStatusBadge').style.display = 'inline';
                 updateDashboardProd();
+            } else {
+                // Si no hay datos para la planta, limpiar
+                productionData = [];
+                availableAreas.clear();
+                document.getElementById('prodStatusBadge').style.display = 'none';
+                updateDashboardProd();
             }
+        }
+
+        function switchPlanta(planta) {
+            if (planta === currentPlanta) return;
+            currentPlanta = planta;
+            // Actualizar botones
+            document.querySelectorAll('.planta-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.planta === planta);
+            });
+            // Actualizar etiqueta del drop zone
+            document.getElementById('prodDropLabel').textContent = `Cargar Excel (${planta === 'planta1' ? 'Planta 1' : 'Planta 2'})`;
+            // Cargar datos de la planta seleccionada
+            loadProdData();
         }
 
         function updateDashboardProd() {
@@ -2354,9 +2500,10 @@
         }
 
         function clearProdData() {
-            Swal.fire({ title: '¿Limpiar?', text: 'Se borrará el programa.', icon: 'warning', showCancelButton: true, confirmButtonText: 'Sí', cancelButtonText: 'No', background: '#0f172a', color: '#f8fafc', width: 'min(420px, 92vw)', customClass: { confirmButton: 'bg-red-600 px-4 py-2.5 rounded text-white mr-2 text-xs min-w-[44px]', cancelButton: 'bg-slate-600 px-4 py-2.5 rounded text-white text-xs min-w-[44px]' }, buttonsStyling: false }).then(async r => {
+            Swal.fire({ title: `¿Limpiar datos de ${currentPlanta === 'planta1' ? 'Planta 1' : 'Planta 2'}?`, text: 'Se borrará el programa.', icon: 'warning', showCancelButton: true, confirmButtonText: 'Sí', cancelButtonText: 'No', background: '#0f172a', color: '#f8fafc', width: 'min(420px, 92vw)', customClass: { confirmButton: 'bg-red-600 px-4 py-2.5 rounded text-white mr-2 text-xs min-w-[44px]', cancelButton: 'bg-slate-600 px-4 py-2.5 rounded text-white text-xs min-w-[44px]' }, buttonsStyling: false }).then(async r => {
                 if (r.isConfirmed) {
-                    await storeRemove('prod_data');
+                    const key = `prod_data_${currentPlanta}`;
+                    await storeRemove(key);
                     productionData = []; availableAreas.clear(); currentAreaFilter = 'TODAS';
                     document.getElementById('dateFilterInfo').style.display = 'none';
                     document.getElementById('prodStatusBadge').style.display = 'none';
@@ -2375,7 +2522,7 @@
         let rmdAutorizadosLoaded = false;
         let ultimoResultadoValidacion = { revisados: 0, autorizados: 0, pendientes: [] };
         let manualAutorizados = new Set();
-        let validacionFiltroEstado = 'todos'; // 'todos' | 'pendientes' | 'autorizados'
+        let validacionFiltroEstado = 'todos';
         let validacionBusqueda = '';
 
         function normalizeEtapa(raw) {
@@ -2410,7 +2557,6 @@
             }
         }
 
-        // Nueva función: muestra diálogo unificado al pulsar "Base de Datos"
         function showBaseDatosOptions() {
             Swal.fire({
                 title: 'Cargar Base de Datos',
@@ -2458,7 +2604,6 @@
             });
         }
 
-        // Modificada para evitar CORS: abre nueva pestaña
         async function downloadBaseDatosFromCloud() {
             const btn = document.getElementById('btnDescargarBaseDatosNube');
             const originalHtml = btn ? btn.innerHTML : '';
@@ -2702,7 +2847,7 @@
                 emptyState.style.display = 'block';
                 tableWrapper.style.display = 'none';
                 if (toolbar) toolbar.style.display = 'none';
-                emptyState.textContent = 'Carga los tres archivos (Programa de Producción, Base de Datos y RMD Autorizados) para generar la validación de materiales.';
+                emptyState.textContent = `Carga los tres archivos (Programa de Producción - ${currentPlanta === 'planta1' ? 'Planta 1' : 'Planta 2'}, Base de Datos y RMD Autorizados) para generar la validación de materiales.`;
                 animateCounter('kpi-val-revisados', 0);
                 animateCounter('kpi-val-autorizados', 0);
                 animateCounter('kpi-val-pendientes', 0);
@@ -2899,9 +3044,9 @@
             }
         }
 
-        // ==================== MÓDULO FORECAST (Plan de Producción proyectado + validación RMD) ====================
+        // ==================== MÓDULO FORECAST (sin cambios) ====================
         let forecastData = [];
-        let forecastMonthsMeta = []; // [{key:'YYYY-MM', label:'Jul 2026'}] ordenado
+        let forecastMonthsMeta = [];
         let forecastStatusLoaded = false;
         let chartForecastMonthly = null;
         let manualAutorizadosForecast = new Set();
@@ -2910,8 +3055,8 @@
         let validacionForecastBusqueda = '';
 
         const FORECAST_SHEET_NAME = 'BD';
-        const FORECAST_HEADER_ROW_INDEX = 2; // fila 3 (0-based)
-        const FORECAST_LAST_COL_INDEX = 25; // columna Z (0-based, A=0)
+        const FORECAST_HEADER_ROW_INDEX = 2;
+        const FORECAST_LAST_COL_INDEX = 25;
 
         function handleFileForecast(e) { const file = e.target.files[0]; if (file) processFileForecast(file); e.target.value = ''; }
 
@@ -2957,8 +3102,7 @@
                         return;
                     }
 
-                    // Columnas de mes: cualquier columna (hasta Z) cuyo encabezado sea una fecha válida
-                    const monthColMeta = []; // {idx, key, label}
+                    const monthColMeta = [];
                     for (let idx = 0; idx <= FORECAST_LAST_COL_INDEX; idx++) {
                         if (hiddenCols.has(idx)) continue;
                         const headerVal = headerRowFull[idx];
@@ -3333,7 +3477,7 @@
             });
         }
 
-        // ==================== MÓDULO RESUMEN + COPIAR AL PORTAPAPELES ====================
+        // ==================== MÓDULO RESUMEN + COPIAR ====================
         function initSummaryModules() {
             const tpl = document.getElementById('summaryTemplate');
             const hostRMD = document.getElementById('summarySectionRMD');
@@ -3407,12 +3551,12 @@
             if (!textEl) return;
 
             if (productionData.length === 0) {
-                textEl.textContent = 'Sube el Excel de Producción para generar el resumen automático de volumen por área y fechas pico.';
+                textEl.textContent = `Sube el Excel de Producción (${currentPlanta === 'planta1' ? 'Planta 1' : 'Planta 2'}) para generar el resumen automático de volumen por área y fechas pico.`;
                 statsEl.innerHTML = '';
                 return;
             }
 
-            subtitleEl.textContent = `Basado en ${productionData.length} productos programados desde ${dayjs().format('DD/MM/YYYY')}`;
+            subtitleEl.textContent = `Basado en ${productionData.length} productos programados desde ${dayjs().format('DD/MM/YYYY')} (${currentPlanta === 'planta1' ? 'Planta 1' : 'Planta 2'})`;
 
             const areaTotals = {}; const dateCounts = {};
             productionData.forEach(p => {
@@ -3429,8 +3573,6 @@
             text += `El pico de producción será el día ${peakDateFmt}, con ${peakCount} productos programados para esa fecha. `;
             text += `En total, se registran ${productionData.length} productos únicos distribuidos en ${availableAreas.size} áreas.`;
 
-            // ---- RMD Pendientes de Autorización: se suma al resumen solo cuando las 3 fuentes
-            // (Producción, Base de Datos y RMD Autorizados) ya fueron cargadas ----
             const readyBase = databaseMaterialsLoaded && databaseMaterials.size > 0;
             const readyRmd = rmdAutorizadosLoaded && rmdAutorizadosEtapasPorAgrupador.size > 0;
             const rmdListo = readyBase && readyRmd && ultimoResultadoValidacion;
@@ -3445,8 +3587,6 @@
                 }
                 rmdStatCard = `<div class="bg-slate-900/50 border ${numPendientes > 0 ? 'border-red-700/30' : 'border-emerald-700/30'} rounded-lg px-3 py-2.5"><p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">RMD Pendientes</p><p class="text-lg font-bold mt-0.5 ${numPendientes > 0 ? 'text-red-400' : 'text-emerald-400'}">${numPendientes}</p></div>`;
             }
-            // Si aún faltan la Base de Datos o los RMD Autorizados, el resumen se mantiene
-            // enfocado solo en producción: no se menciona nada sobre RMD pendientes todavía.
 
             textEl.textContent = text;
 
@@ -3571,7 +3711,7 @@
             return canvas;
         }
 
-        // ==================== BACKUP: EXPORTAR / IMPORTAR JSON ====================
+        // ==================== BACKUP ====================
         const BACKUP_FORMAT_VERSION = 1;
 
         async function exportAllDataAsJson() {
@@ -3678,7 +3818,7 @@
             importInput.addEventListener('change', handleBackupImportFile);
         }
 
-        // ==================== DRAG & DROP EN ZONAS DE CARGA ====================
+        // ==================== DRAG & DROP ====================
         function initDragDrop() {
             const setupZone = (zoneId, inputId, handler) => {
                 const zone = document.getElementById(zoneId);
@@ -3710,6 +3850,7 @@
             initUpcomingFilters();
             await loadRMData();
             await loadValidacionData();
+            // Cargar producción de la planta por defecto (planta2)
             await loadProdData();
             await loadForecastData();
             initReactiveBackground();
@@ -3718,6 +3859,12 @@
             document.getElementById('inlineUploadRMD').style.display = 'none';
             document.getElementById('inlineUploadProd').style.display = 'flex';
             document.getElementById('inlineUploadForecast').style.display = 'none';
+
+            // Asegurar que el botón de planta activa esté correcto
+            document.querySelectorAll('.planta-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.planta === currentPlanta);
+            });
+            document.getElementById('prodDropLabel').textContent = `Cargar Excel (${currentPlanta === 'planta1' ? 'Planta 1' : 'Planta 2'})`;
 
             gsap.fromTo('.gsap-header', { y: -20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, ease: "power3.out" });
             gsap.fromTo('#tab-nav-row', { y: 15, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, delay: 0.2, ease: "power2.out" });
@@ -3732,7 +3879,9 @@
                 if (chartForecastMonthly && currentTab === 'forecast') chartForecastMonthly.update();
             });
         });
-    </script>    <!-- ==================== Backup discreto (exportar / importar JSON) ==================== -->
+    </script>
+
+    <!-- Backup discreto -->
     <div id="backupCorner" class="backup-corner" title="Copia de seguridad de los datos cargados">
         <button type="button" id="backupToggleBtn" class="backup-dot" aria-label="Opciones de copia de seguridad" aria-expanded="false">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M4 7v10c0 1.657 3.582 3 8 3s8-1.343 8-3V7M4 7c0 1.657 3.582 3 8 3s8-1.343 8-3M4 7c0-1.657 3.582-3 8-3s8 1.343 8 3" /></svg>
