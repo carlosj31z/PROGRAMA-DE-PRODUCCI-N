@@ -1168,17 +1168,27 @@
             </div>
 
             <div class="overflow-x-auto overflow-y-auto max-h-96 rounded-lg border border-slate-700/50 custom-scrollbar" id="tablaPendientesWrapper" style="display:none;">
-                <table class="w-full text-xs" id="tablaPendientes">
-                    <thead class="sticky top-0 bg-slate-900/95 backdrop-blur z-10">
-                        <tr class="text-left text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-700/50">
-                            <th class="py-2">Material</th>
-                            <th class="py-2">Descripción</th>
-                            <th class="py-2">Área(s)</th>
-                            <th class="py-2">Etapa(s) Pendiente(s)</th>
-                            <th class="py-2">Estado</th>
-                            <th class="py-2 text-right">Acción</th>
-                        </tr>
-                    </thead>
+                <table class="w-full text-xs table-fixed" id="tablaPendientes">
+    <colgroup>
+        <col style="width:12%">
+        <col style="width:28%">
+        <col style="width:10%">
+        <col style="width:13%">
+        <col style="width:17%">
+        <col style="width:10%">
+        <col style="width:10%">
+    </colgroup>
+    <thead class="sticky top-0 bg-slate-900/95 backdrop-blur z-10">
+    <tr class="text-left text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-700/50">
+        <th class="py-2">Material</th>
+        <th class="py-2">Descripción</th>
+        <th class="py-2">Área(s)</th>
+        <th class="py-2">Inicio de Producción</th>
+        <th class="py-2">Etapa(s) Pendiente(s)</th>
+        <th class="py-2">Estado</th>
+        <th class="py-2 text-right">Acción</th>
+    </tr>
+</thead>
                     <tbody id="tablaPendientesBody"></tbody>
                 </table>
             </div>
@@ -1334,14 +1344,14 @@
                 <table class="w-full text-xs" id="tablaPendientesForecast">
                     <thead class="sticky top-0 bg-slate-900/95 backdrop-blur z-10">
                         <tr class="text-left text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-700/50">
-                            <th class="py-2">Material</th>
-                            <th class="py-2">Descripción</th>
-                            <th class="py-2">Centro(s)</th>
-                            <th class="py-2">Mes(es) Programado(s)</th>
-                            <th class="py-2">Etapa(s) Pendiente(s)</th>
-                            <th class="py-2">Estado</th>
-                            <th class="py-2 text-right">Acción</th>
-                        </tr>
+    <th class="py-2">Material</th>
+    <th class="py-2">Descripción</th>
+    <th class="py-2">Área(s)</th>
+    <th class="py-2">Meses Programados</th>
+    <th class="py-2">Etapa(s) Pendiente(s)</th>
+    <th class="py-2">Estado</th>
+    <th class="py-2 text-right">Acción</th>
+</tr>
                     </thead>
                     <tbody id="tablaPendientesForecastBody"></tbody>
                 </table>
@@ -2861,51 +2871,69 @@ if (productoColIdx === -1) productoColIdx = findLabelCol(/descripci/i);
             }
 
             const materialAreas = new Map();
-            productionData.forEach(p => {
-                if (currentAreaFilter !== 'TODAS' && p.area !== currentAreaFilter) return;
-                const cod = normalizeMaterialCode(p.codigo);
-                if (!cod) return;
-                if (!materialAreas.has(cod)) materialAreas.set(cod, new Set());
-                materialAreas.get(cod).add(p.area);
-            });
+const materialFechaMin = new Map(); // 🔽 NUEVO: fecha más próxima por material
+
+productionData.forEach(p => {
+    if (currentAreaFilter !== 'TODAS' && p.area !== currentAreaFilter) return;
+    const cod = normalizeMaterialCode(p.codigo);
+    if (!cod) return;
+    if (!materialAreas.has(cod)) materialAreas.set(cod, new Set());
+    materialAreas.get(cod).add(p.area);
+
+    // p.fechas ya viene ordenado ascendente (ver processFileProd), así que fechas[0] es la más próxima
+    if (p.fechas && p.fechas.length > 0) {
+        const primeraFecha = p.fechas[0];
+        const actual = materialFechaMin.get(cod);
+        if (!actual || primeraFecha < actual) materialFechaMin.set(cod, primeraFecha);
+    }
+});
 
             let revisados = 0, autorizados = 0;
             const pendientes = [];
 
             materialAreas.forEach((areas, cod) => {
-                revisados++;
-                const info = databaseMaterials.get(cod);
+    revisados++;
+    const fechaProxima = materialFechaMin.get(cod) || null; // 🔽 LÍNEA NUEVA
+    const info = databaseMaterials.get(cod);
 
-                if (!info) {
-                    pendientes.push({ material: cod, descripcion: '(no encontrado en Base de Datos)', areas: Array.from(areas).join(', '), etapasPendientes: [], motivo: 'No encontrado en Base de Datos' });
-                    return;
-                }
+    if (!info) {
+        pendientes.push({ material: cod, descripcion: '(no encontrado en Base de Datos)', areas: Array.from(areas).join(', '), etapasPendientes: [], motivo: 'No encontrado en Base de Datos', fechaProxima }); // 🔽 se agregó "fechaProxima" al final
+        return;
+    }
 
-                if (!info.agrupador) {
-                    const etapasSinAgr = info.etapaPropia ? [info.etapaPropia] : [];
-                    pendientes.push({ material: cod, descripcion: info.descripcion || '-', areas: Array.from(areas).join(', '), etapasPendientes: etapasSinAgr, motivo: 'Sin agrupador válido en Base de Datos' });
-                    return;
-                }
+    if (!info.agrupador) {
+        const etapasSinAgr = info.etapaPropia ? [info.etapaPropia] : [];
+        pendientes.push({ material: cod, descripcion: info.descripcion || '-', areas: Array.from(areas).join(', '), etapasPendientes: etapasSinAgr, motivo: 'Sin agrupador válido en Base de Datos', fechaProxima }); // 🔽 se agregó "fechaProxima" al final
+        return;
+    }
 
-                const etapasSet = agrupadorEtapasMap.get(info.agrupador);
-                const etapasMaterial = etapasSet && etapasSet.size > 0 ? Array.from(etapasSet) : (info.etapaPropia ? [info.etapaPropia] : []);
-                const etapasAutorizadas = rmdAutorizadosEtapasPorAgrupador.get(info.agrupador);
+    const etapasSet = agrupadorEtapasMap.get(info.agrupador);
+    const etapasMaterial = etapasSet && etapasSet.size > 0 ? Array.from(etapasSet) : (info.etapaPropia ? [info.etapaPropia] : []);
+    const etapasAutorizadas = rmdAutorizadosEtapasPorAgrupador.get(info.agrupador);
 
-                if (!etapasAutorizadas || etapasAutorizadas.size === 0) {
-                    pendientes.push({ material: cod, descripcion: info.descripcion || '-', areas: Array.from(areas).join(', '), etapasPendientes: etapasMaterial, motivo: `Agrupador ${info.agrupador} sin RMD autorizado` });
-                    return;
-                }
+    if (!etapasAutorizadas || etapasAutorizadas.size === 0) {
+        pendientes.push({ material: cod, descripcion: info.descripcion || '-', areas: Array.from(areas).join(', '), etapasPendientes: etapasMaterial, motivo: `Agrupador ${info.agrupador} sin RMD autorizado`, fechaProxima }); // 🔽 se agregó "fechaProxima" al final
+        return;
+    }
 
-                const etapasPendientes = etapasMaterial.filter(et => !etapasAutorizadas.has(et));
+    const etapasPendientes = etapasMaterial.filter(et => !etapasAutorizadas.has(et));
 
-                if (etapasPendientes.length === 0) {
-                    autorizados++;
-                } else {
-                    pendientes.push({ material: cod, descripcion: info.descripcion || '-', areas: Array.from(areas).join(', '), etapasPendientes: etapasPendientes, motivo: etapasPendientes.map(et => `Etapa ${et} no tiene RMD autorizado para el agrupador ${info.agrupador}`).join(' | ') });
-                }
-            });
+    if (etapasPendientes.length === 0) {
+        autorizados++;
+    } else {
+        pendientes.push({ material: cod, descripcion: info.descripcion || '-', areas: Array.from(areas).join(', '), etapasPendientes: etapasPendientes, motivo: etapasPendientes.map(et => `Etapa ${et} no tiene RMD autorizado para el agrupador ${info.agrupador}`).join(' | '), fechaProxima }); // 🔽 se agregó "fechaProxima" al final
+    }
+});
 
-            pendientes.sort((a, b) => a.material.localeCompare(b.material));
+// 🔽 REEMPLAZASTE ESTA LÍNEA:
+// pendientes.sort((a, b) => a.material.localeCompare(b.material));
+// POR ESTAS:
+pendientes.sort((a, b) => {
+    if (!a.fechaProxima && !b.fechaProxima) return a.material.localeCompare(b.material);
+    if (!a.fechaProxima) return 1;
+    if (!b.fechaProxima) return -1;
+    return a.fechaProxima.localeCompare(b.fechaProxima);
+});
 
             const pendientesReales = [];
             const autorizadosManualLista = [];
@@ -2979,14 +3007,17 @@ if (productoColIdx === -1) productoColIdx = findLabelCol(/descripci/i);
                 const accionBtn = esAutorizado
                     ? `<button onclick="toggleManualAutorizado('${p.material}')" class="text-[10px] font-medium text-slate-400 hover:text-slate-200 border border-slate-600 hover:border-slate-400 px-2 py-1.5 rounded-md transition-colors whitespace-nowrap min-h-[32px]">Revertir</button>`
                     : `<button onclick="toggleManualAutorizado('${p.material}')" class="text-[10px] font-medium text-emerald-400 hover:text-emerald-300 border border-emerald-500/40 hover:border-emerald-400 bg-emerald-500/5 hover:bg-emerald-500/10 px-2 py-1.5 rounded-md transition-colors whitespace-nowrap min-h-[32px]">Marcar autorizado</button>`;
-                return `<tr class="${rowCls}" title="${p.motivo || ''}">
-                    <td class="font-medium text-slate-200 whitespace-nowrap py-2">${p.material}</td>
-                    <td class="text-slate-300 py-2">${p.descripcion}</td>
-                    <td class="text-slate-400 whitespace-nowrap py-2">${p.areas}</td>
-                    <td class="${etapasCls} py-2">${etapasTxt}</td>
-                    <td class="py-2">${badge}</td>
-                    <td class="py-2 text-right">${accionBtn}</td>
-                </tr>`;
+                const fechaTxt = p.fechaProxima ? dayjs(p.fechaProxima).format('DD/MM/YYYY') : '-';
+
+return `<tr class="${rowCls}" title="${p.motivo || ''}">
+    <td class="font-medium text-slate-200 whitespace-nowrap py-2">${p.material}</td>
+    <td class="text-slate-300 py-2">${p.descripcion}</td>
+    <td class="text-slate-400 whitespace-nowrap py-2">${p.areas}</td>
+    <td class="text-slate-300 whitespace-nowrap py-2">${fechaTxt}</td>
+    <td class="${etapasCls} py-2">${etapasTxt}</td>
+    <td class="py-2">${badge}</td>
+    <td class="py-2 text-right">${accionBtn}</td>
+</tr>`;
             }).join('');
         }
 
