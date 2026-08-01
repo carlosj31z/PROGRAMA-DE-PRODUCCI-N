@@ -2164,23 +2164,27 @@ function buildDateColumnMapPlanta1(headerRowDays, weekLabelRow, hiddenCols) {
                     const planta1Format = isPlanta1Format(wb);
 
                     wb.SheetNames.forEach(sn => {
-                        const sh = wb.Sheets[sn];
-                        const hiddenRows = getHiddenRowSet(sh);
-                        const hiddenCols = getHiddenColSet(sh);
-                        const rows = XLSX.utils.sheet_to_json(sh, { header: 1, defval: "" });
-                        if (rows.length <= PROD_HEADER_ROW_INDEX) return;
+    const sh = wb.Sheets[sn];
 
-                        const headerRow = rows[PROD_HEADER_ROW_INDEX];
-                        const labelRow = rows[PROD_HEADER_ROW_INDEX - 1] || [];
-                        const findLabelCol = (regex) => {
-                            let idx = labelRow.findIndex((h, i) => !hiddenCols.has(i) && regex.test(String(h || '')));
-                            if (idx === -1) idx = headerRow.findIndex((h, i) => !hiddenCols.has(i) && regex.test(String(h || '')));
-                            return idx;
-                        };
-                        const codigoColIdx = findLabelCol(/c[oó]digo/i);
-                        if (codigoColIdx === -1) return;
+    // Excluir el área "REA" (Reacondicionado) solo para Planta 2
+    if (currentPlanta === 'planta2' && sn.trim().toUpperCase() === 'REA') return;
 
-                        availableAreas.add(sn);
+    const hiddenRows = getHiddenRowSet(sh);
+    const hiddenCols = getHiddenColSet(sh);
+    const rows = XLSX.utils.sheet_to_json(sh, { header: 1, defval: "" });
+    if (rows.length <= PROD_HEADER_ROW_INDEX) return;
+
+    const headerRow = rows[PROD_HEADER_ROW_INDEX];
+    const labelRow = rows[PROD_HEADER_ROW_INDEX - 1] || [];
+    const findLabelCol = (regex) => {
+        let idx = labelRow.findIndex((h, i) => !hiddenCols.has(i) && regex.test(String(h || '')));
+        if (idx === -1) idx = headerRow.findIndex((h, i) => !hiddenCols.has(i) && regex.test(String(h || '')));
+        return idx;
+    };
+    const codigoColIdx = findLabelCol(/c[oó]digo/i);
+    if (codigoColIdx === -1) return;
+
+    availableAreas.add(sn);
 
                         let productoColIdx = findLabelCol(/produc/i);
 if (productoColIdx === -1) productoColIdx = findLabelCol(/descripci/i);
