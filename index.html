@@ -470,6 +470,45 @@
         .db-group-status svg { width: 0.9rem; height: 0.9rem; stroke-dasharray: 20; stroke-dashoffset: 20; animation: checkDraw 0.4s ease-out 0.1s forwards; }
         @keyframes dbStatusIn { from { opacity: 0; transform: scale(0.9) translateX(-4px); } to { opacity: 1; transform: scale(1) translateX(0); } }
         @keyframes checkDraw { to { stroke-dashoffset: 0; } }
+        .pp-group {
+    display: flex; align-items: stretch; gap: 0;
+    border-radius: 0.7rem;
+    border: 1px solid rgba(244, 63, 94, 0.2);
+    background: linear-gradient(160deg, rgba(76, 5, 25, 0.28), rgba(30, 41, 59, 0.55));
+    overflow: hidden;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    position: relative;
+}
+.pp-group:hover {
+    border-color: rgba(244, 63, 94, 0.42);
+    box-shadow: 0 0 0 1px rgba(244,63,94,0.08), 0 8px 20px -10px rgba(244,63,94,0.35);
+}
+.pp-group-icon {
+    display: flex; align-items: center; justify-content: center;
+    width: 2.1rem; flex-shrink: 0;
+    color: #fb7185;
+    border-right: 1px solid rgba(244, 63, 94, 0.18);
+    background: rgba(244, 63, 94, 0.07);
+}
+.pp-group-icon svg { width: 1rem; height: 1rem; }
+.pp-group-action {
+    display: flex; flex-direction: column; justify-content: center; gap: 0.05rem;
+    padding: 0.4rem 0.85rem; cursor: pointer; flex: 1;
+    transition: background 0.25s ease;
+}
+.pp-group-action:hover { background: rgba(244, 63, 94, 0.08); }
+.pp-group-label { font-size: 0.78rem; font-weight: 600; color: #e2e8f0; line-height: 1.15; white-space: nowrap; }
+.pp-group-sub { font-size: 0.62rem; color: #64748b; font-weight: 500; letter-spacing: 0.01em; white-space: nowrap; }
+.pp-group-status {
+    display: inline-flex; align-items: center; gap: 0.3rem;
+    padding: 0.4rem 0.75rem; flex-shrink: 0;
+    font-size: 0.7rem; font-weight: 600; color: #fda4af;
+    border-left: 1px solid rgba(244, 63, 94, 0.18);
+    background: rgba(244, 63, 94, 0.12);
+    animation: dbStatusIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+.pp-group-status svg { width: 0.9rem; height: 0.9rem; stroke-dasharray: 20; stroke-dashoffset: 20; animation: checkDraw 0.4s ease-out 0.1s forwards; }
+        
 
         .fc-theme-standard td, .fc-theme-standard th, .fc-theme-standard .fc-scrollgrid {
             border-color: rgba(255, 255, 255, 0.05) !important;
@@ -917,12 +956,20 @@
 
         <!-- Inline Upload Zone Forecast -->
         <div class="flex items-center gap-2 flex-wrap" id="inlineUploadForecast" style="display:none;">
-            <div class="drop-zone-mini forecast-style" id="dropZoneForecast" onclick="document.getElementById('fileInputForecast').click()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();document.getElementById('fileInputForecast').click();}" role="button" tabindex="0" title="Cargar Excel Plan de Producción (Forecast)" aria-label="Cargar Excel Plan de Producción Forecast">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-rose-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                <span>Cargar Plan de Producción</span>
+            <div class="pp-group" id="ppGroup">
+    <div class="pp-group-icon" aria-hidden="true">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+    </div>
+    <div class="pp-group-action" id="dropZoneForecast" onclick="showPlanProduccionOptions()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();showPlanProduccionOptions();}" role="button" tabindex="0" title="Cargar Excel Plan de Producción (Forecast)" aria-label="Cargar Excel Plan de Producción Forecast">
+        <span class="pp-group-label">Plan de Producción</span>
+        <span class="pp-group-sub">Excel local o nube</span>
+    </div>
+    <input type="file" id="fileInputForecast" class="hidden" accept=".xlsx, .xls" onchange="handleFileForecast(event)">
+    <span class="pp-group-status" id="forecastStatusBadge" style="display:none;">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M5 13l4 4L19 7" /></svg>
+        Cargado
+                </span>
             </div>
-            <input type="file" id="fileInputForecast" class="hidden" accept=".xlsx, .xls" onchange="handleFileForecast(event)">
-            <span class="text-xs text-rose-400 font-medium" id="forecastStatusBadge" style="display:none;">✓ Cargado</span>
 
             <!-- Base de Datos (reutiliza el mismo componente/estado global de Producción) -->
             <div class="db-group" id="dbGroupForecast">
@@ -2662,6 +2709,68 @@ function buildDateColumnMapPlanta1(headerRow, weekLabelRow, hiddenCols) {
             }
         }
 
+const PLAN_PRODUCCION_CLOUD_URL = "https://medifarmape-my.sharepoint.com/:x:/g/personal/cjesusz_humanovalab_com/IQAS3TEMynWGSY3rHI0McFYGAb09gMmQyXrEP5xVALMjH3Y?e=SiHGRu";
+ 
+function showPlanProduccionOptions() {
+    Swal.fire({
+        title: 'Cargar Plan de Producción',
+        html: `
+            <p class="bd-dialog-sub">Selecciona el origen del archivo de Forecast</p>
+            <div class="bd-dialog-options">
+                <button type="button" class="bd-dialog-option" id="ppOptLocal">
+                    <span class="bd-dialog-option-icon bd-icon-local">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                    </span>
+                    <span class="bd-dialog-option-text">
+                        <span class="bd-dialog-option-title">Desde mi equipo</span>
+                        <span class="bd-dialog-option-desc">Sube un archivo .xlsx guardado en tu dispositivo</span>
+                    </span>
+                    <svg class="bd-dialog-option-chevron" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                </button>
+                <button type="button" class="bd-dialog-option bd-dialog-option-cloud" id="ppOptCloud">
+                    <span class="bd-dialog-option-icon bd-icon-cloud">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3" /></svg>
+                    </span>
+                    <span class="bd-dialog-option-text">
+                        <span class="bd-dialog-option-title">Desde la nube</span>
+                        <span class="bd-dialog-option-desc">Descarga la última versión desde SharePoint</span>
+                    </span>
+                    <svg class="bd-dialog-option-chevron" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                </button>
+            </div>
+        `,
+        background: '#0f172a',
+        color: '#f8fafc',
+        showConfirmButton: false,
+        showCloseButton: true,
+        width: 420,
+        customClass: { popup: 'bd-dialog-popup', htmlContainer: 'bd-dialog-container' },
+        didOpen: () => {
+            document.getElementById('ppOptLocal').addEventListener('click', () => {
+                Swal.close();
+                document.getElementById('fileInputForecast').click();
+            });
+            document.getElementById('ppOptCloud').addEventListener('click', () => {
+                Swal.close();
+                downloadPlanProduccionFromCloud();
+            });
+        }
+    });
+}
+ 
+async function downloadPlanProduccionFromCloud() {
+    Swal.fire({
+        title: 'Descargando desde la nube',
+        html: 'Se abrirá una nueva pestaña para iniciar la descarga.<br><small>Si no comienza automáticamente, haz clic en "Descargar" en la página que se abre.</small>',
+        icon: 'info',
+        background: '#0f172a',
+        confirmButtonText: 'Entendido',
+        timer: 5000,
+        timerProgressBar: true
+    });
+    const downloadUrl = buildSharePointDirectDownloadUrl(PLAN_PRODUCCION_CLOUD_URL);
+    window.open(downloadUrl, '_blank');
+}
         function handleFileBaseDatos(e) { const file = e.target.files[0]; if (file) processFileBaseDatos(file); e.target.value = ''; }
         function handleFileRmdAutorizados(e) { const file = e.target.files[0]; if (file) processFileRmdAutorizados(file); e.target.value = ''; }
 
@@ -3211,7 +3320,7 @@ return `<tr class="${rowCls}" title="${p.motivo || ''}">
                         .sort((a, b) => a.key.localeCompare(b.key));
 
                     saveForecastData();
-                    document.getElementById('forecastStatusBadge').style.display = 'inline';
+                    document.getElementById('forecastStatusBadge').style.display = 'inline-flex';
                     updateDashboardForecast();
                     Swal.fire({ icon: 'success', title: '¡Listo!', text: `${forecastData.length} materiales con producción proyectada.`, timer: 2200, showConfirmButton: false, background: '#0f172a' });
                 } catch (error) {
@@ -3236,7 +3345,7 @@ return `<tr class="${rowCls}" title="${p.motivo || ''}">
             if (saved) {
                 forecastData = saved;
                 forecastMonthsMeta = savedMeta || [];
-                document.getElementById('forecastStatusBadge').style.display = 'inline';
+                document.getElementById('forecastStatusBadge').style.display = 'inline-flex';
                 updateDashboardForecast();
             } else {
                 runValidacionForecast();
