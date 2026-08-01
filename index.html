@@ -420,6 +420,10 @@
             border-color: rgba(16, 185, 129, 0.55);
             background: rgba(16, 185, 129, 0.1);
         }
+        .drop-zone-mini.forecast-style:hover {
+            border-color: rgba(244, 63, 94, 0.55);
+            background: rgba(244, 63, 94, 0.1);
+        }
         .drop-zone-mini.drag-over {
             border-color: rgba(59, 130, 246, 0.8) !important;
             background: rgba(59, 130, 246, 0.15) !important;
@@ -532,7 +536,8 @@
 
         /* Evita interacción y refleja estado "en tránsito" mientras GSAP anima la salida/entrada */
         body.is-tab-switching #tab-rmd,
-        body.is-tab-switching #tab-produccion {
+        body.is-tab-switching #tab-produccion,
+        body.is-tab-switching #tab-forecast {
             pointer-events: none;
         }
         body.is-tab-switching .gooey-nav-container nav ul li a {
@@ -686,9 +691,33 @@
         .badge-auth { background: linear-gradient(145deg, rgba(34,197,94,0.2), rgba(22,101,52,0.3)); color:#86efac; border:1px solid rgba(34,197,94,0.25); }
         .badge-pending { background: linear-gradient(145deg, rgba(239,68,68,0.2), rgba(153,27,27,0.3)); color:#fca5a5; border:1px solid rgba(239,68,68,0.25); }
         .badge-unknown { background: linear-gradient(145deg, rgba(148,163,184,0.18), rgba(51,65,85,0.3)); color:#cbd5e1; border:1px solid rgba(148,163,184,0.25); }
-        #tablaPendientes tbody tr:hover { background: rgba(51,65,85,0.35); }
-        #tablaPendientes th, #tablaPendientes td { padding: 0.55rem 0.75rem; }
-        #tablaPendientes thead th { position: sticky; top: 0; background: rgba(15,23,42,0.96); z-index: 1; }
+        #tablaPendientes tbody tr:hover, #tablaPendientesForecast tbody tr:hover { background: rgba(51,65,85,0.35); }
+        #tablaPendientes th, #tablaPendientes td, #tablaPendientesForecast th, #tablaPendientesForecast td { padding: 0.55rem 0.75rem; }
+        #tablaPendientes thead th, #tablaPendientesForecast thead th { position: sticky; top: 0; background: rgba(15,23,42,0.96); z-index: 1; }
+
+        /* ---------- Forecast (nuevo módulo) ---------- */
+        .card-forecast-highlight {
+            background: linear-gradient(150deg, rgba(76, 5, 25, 0.18), rgba(15, 23, 42, 0.94) 55%);
+            border: 1px solid rgba(244, 63, 94, 0.28);
+            box-shadow:
+                0 1px 0 0 rgba(255,255,255,0.05) inset,
+                0 24px 48px -14px rgba(0, 0, 0, 0.5),
+                0 0 0 1px rgba(244, 63, 94, 0.08),
+                0 0 40px -12px rgba(244, 63, 94, 0.22);
+        }
+        .card-forecast-highlight::before {
+            background: linear-gradient(160deg, rgba(244, 63, 94, 0.22), rgba(255,255,255,0) 45%);
+        }
+        .forecast-icon-badge {
+            display: flex; align-items: center; justify-content: center;
+            width: 2.05rem; height: 2.05rem; flex-shrink: 0; border-radius: 0.65rem;
+            color: #fb7185;
+            background: linear-gradient(150deg, rgba(244,63,94,0.24), rgba(244,63,94,0.06));
+            border: 1px solid rgba(244,63,94,0.3);
+            box-shadow: 0 0 16px -4px rgba(244,63,94,0.35);
+        }
+        .forecast-icon-badge svg { width: 1.1rem; height: 1.1rem; }
+        .mes-chip { display:inline-block; background: rgba(51,65,85,0.6); border:1px solid rgba(255,255,255,0.08); color:#cbd5e1; font-size:10px; padding: 1px 6px; border-radius: 5px; margin: 1px 3px 1px 0; white-space: nowrap; }
 
         @media (max-width: 768px) {
             .card { border-radius: 0.85rem; }
@@ -812,6 +841,12 @@
                             OP sin RMD
                         </a>
                     </li>
+                    <li data-tab="forecast">
+                        <a href="#" onclick="return false;">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
+                            Forecast
+                        </a>
+                    </li>
                 </ul>
             </nav>
             <span class="effect filter" id="gooeyFilter"></span>
@@ -863,6 +898,38 @@
             </div>
             <input type="file" id="fileInputRmdAutorizados" class="hidden" accept=".xlsx, .xls" onchange="handleFileRmdAutorizados(event)">
             <span class="text-xs text-amber-400 font-medium" id="rmdAutorizadosStatusBadge" style="display:none;">✓ Cargado</span>
+        </div>
+
+        <!-- Inline Upload Zone Forecast -->
+        <div class="flex items-center gap-2 flex-wrap" id="inlineUploadForecast" style="display:none;">
+            <div class="drop-zone-mini forecast-style" id="dropZoneForecast" onclick="document.getElementById('fileInputForecast').click()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();document.getElementById('fileInputForecast').click();}" role="button" tabindex="0" title="Cargar Excel Plan de Producción (Forecast)" aria-label="Cargar Excel Plan de Producción Forecast">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-rose-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                <span>Cargar Plan de Producción</span>
+            </div>
+            <input type="file" id="fileInputForecast" class="hidden" accept=".xlsx, .xls" onchange="handleFileForecast(event)">
+            <span class="text-xs text-rose-400 font-medium" id="forecastStatusBadge" style="display:none;">✓ Cargado</span>
+
+            <!-- Base de Datos (reutiliza el mismo componente/estado global de Producción) -->
+            <div class="db-group" id="dbGroupForecast">
+                <div class="db-group-icon" aria-hidden="true">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M4 7v10c0 1.657 3.582 3 8 3s8-1.343 8-3V7M4 7c0 1.657 3.582 3 8 3s8-1.343 8-3M4 7c0-1.657 3.582-3 8-3s8 1.343 8 3" /></svg>
+                </div>
+                <div class="db-group-action" onclick="showBaseDatosOptions()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();showBaseDatosOptions();}" role="button" tabindex="0" title="Cargar Base de Datos de materiales" aria-label="Cargar Base de Datos de materiales">
+                    <span class="db-group-label">Base de Datos</span>
+                    <span class="db-group-sub">Excel local o nube</span>
+                </div>
+                <span class="db-group-status" id="baseDatosStatusBadgeForecast" style="display:none;">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M5 13l4 4L19 7" /></svg>
+                    Cargado
+                </span>
+            </div>
+
+            <!-- RMD Autorizados (reutiliza el mismo input/estado global de Producción) -->
+            <div class="drop-zone-mini" onclick="document.getElementById('fileInputRmdAutorizados').click()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();document.getElementById('fileInputRmdAutorizados').click();}" role="button" tabindex="0" title="Cargar RMD Autorizados" aria-label="Cargar RMD Autorizados">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-amber-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>RMD Autorizados</span>
+            </div>
+            <span class="text-xs text-amber-400 font-medium" id="rmdAutorizadosStatusBadgeForecast" style="display:none;">✓ Cargado</span>
         </div>
     </div>
 
@@ -1142,6 +1209,133 @@
         <div id="summarySectionProd"></div>
     </div>
 
+    <!-- ==================== TAB 3: FORECAST ==================== -->
+    <div class="tab-content" id="tab-forecast">
+        <div class="info-badge opacity-0 section-spacing" id="forecastInfoBadge" style="display:none; border-color: rgba(244,63,94,0.3); background: rgba(244,63,94,0.12); color: #fda4af;">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            <span id="forecastInfoText" class="text-xs"></span>
+        </div>
+
+        <!-- KPIs Forecast -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 section-spacing">
+            <div class="card p-4 opacity-0 text-center">
+                <p class="text-xs text-slate-400 uppercase font-bold tracking-wider">Materiales en Forecast</p>
+                <p id="kpi-forecast-materiales" class="text-2xl font-bold mt-1.5 text-white">0</p>
+            </div>
+            <div class="card p-4 opacity-0 text-center">
+                <p class="text-xs text-slate-400 uppercase font-bold tracking-wider">Meses Cubiertos</p>
+                <p id="kpi-forecast-meses" class="text-2xl font-bold mt-1.5 text-transparent bg-clip-text bg-gradient-to-r from-rose-400 to-orange-400">0</p>
+            </div>
+            <div class="card p-4 opacity-0 text-center">
+                <p class="text-xs text-slate-400 uppercase font-bold tracking-wider">Mes con más carga</p>
+                <p id="kpi-forecast-mes-top" class="text-lg font-bold mt-2 text-rose-400">-</p>
+            </div>
+            <div class="card p-4 opacity-0 text-center">
+                <p class="text-xs text-slate-400 uppercase font-bold tracking-wider">Horizonte</p>
+                <p id="kpi-forecast-horizonte" class="text-lg font-bold mt-2 text-slate-300">-</p>
+            </div>
+        </div>
+
+        <!-- Gráfico de materiales programados por mes -->
+        <div class="card p-4 md:p-5 opacity-0 section-spacing">
+            <h2 class="font-semibold text-slate-200 mb-3 text-sm flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
+                Materiales Programados por Mes (Plan de Producción proyectado)
+            </h2>
+            <div class="h-[260px] md:h-[280px] w-full">
+                <canvas id="chartForecastMonthly"></canvas>
+            </div>
+        </div>
+
+        <!-- Panel de Validación de Materiales Forecast (cruce BASE DE DATOS + RMD Autorizados) -->
+        <div class="card card-forecast-highlight p-4 md:p-5 opacity-0 section-spacing" id="cardValidacionForecast">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
+                <h2 class="font-bold text-slate-100 text-base flex items-center gap-2.5">
+                    <span class="forecast-icon-badge">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4.5 w-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                    </span>
+                    RMD Pendientes de Autorización — Forecast
+                </h2>
+                <div class="flex items-center gap-2">
+                    <button onclick="exportPendientesForecastToExcel()" class="bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-600 px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 active:scale-95">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3" /></svg>
+                        Exportar Excel
+                    </button>
+                    <button onclick="copyPendientesForecastToClipboard()" class="bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-600 px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 active:scale-95" id="copyPendientesForecastBtn">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                        <span id="copyPendientesForecastLabel">Copiar tabla</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Estado de carga de las 3 fuentes -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 mb-4">
+                <div class="bg-slate-900/40 border border-slate-700/50 rounded-lg px-3 py-2 flex items-center justify-between text-xs">
+                    <span class="text-slate-400">Plan de Producción (Forecast)</span>
+                    <span id="fuenteStatusForecastPlan" class="text-slate-500 font-semibold">Pendiente</span>
+                </div>
+                <div class="bg-slate-900/40 border border-slate-700/50 rounded-lg px-3 py-2 flex items-center justify-between text-xs">
+                    <span class="text-slate-400">Base de Datos</span>
+                    <span id="fuenteStatusForecastBase" class="text-slate-500 font-semibold">Pendiente</span>
+                </div>
+                <div class="bg-slate-900/40 border border-slate-700/50 rounded-lg px-3 py-2 flex items-center justify-between text-xs">
+                    <span class="text-slate-400">RMD Autorizados</span>
+                    <span id="fuenteStatusForecastRmd" class="text-slate-500 font-semibold">Pendiente</span>
+                </div>
+            </div>
+
+            <!-- KPIs de validación -->
+            <div class="grid grid-cols-3 gap-2.5 mb-4">
+                <div class="bg-slate-900/50 border border-slate-700/50 rounded-lg px-3 py-2.5 text-center">
+                    <p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Revisados</p>
+                    <p id="kpi-val-revisados-forecast" class="text-xl font-bold mt-0.5 text-slate-100">0</p>
+                </div>
+                <div class="bg-slate-900/50 border border-emerald-700/30 rounded-lg px-3 py-2.5 text-center">
+                    <p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Autorizados</p>
+                    <p id="kpi-val-autorizados-forecast" class="text-xl font-bold mt-0.5 text-emerald-400">0</p>
+                </div>
+                <div class="bg-slate-900/50 border border-red-700/30 rounded-lg px-3 py-2.5 text-center">
+                    <p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Pendientes</p>
+                    <p id="kpi-val-pendientes-forecast" class="text-xl font-bold mt-0.5 text-red-400">0</p>
+                </div>
+            </div>
+
+            <div id="validacionForecastEmptyState" class="text-xs text-slate-500 text-center py-8">
+                Carga los tres archivos (Plan de Producción Forecast, Base de Datos y RMD Autorizados) para generar la validación de materiales proyectada.
+            </div>
+
+            <div id="validacionForecastToolbar" class="flex flex-col sm:flex-row sm:items-center gap-2.5 mb-3" style="display:none;">
+                <div class="relative flex-1 min-w-[160px]">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-slate-500 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M17 10a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                    <input id="validacionForecastBuscador" type="text" placeholder="Buscar por código o descripción..." oninput="validacionForecastBusqueda = this.value; refiltrarTablaPendientesForecast();" class="w-full bg-slate-900/60 border border-slate-700/50 rounded-lg pl-8 pr-3 py-1.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-rose-500/60 transition-colors">
+                </div>
+                <div class="flex items-center gap-1.5 flex-wrap">
+                    <button onclick="validacionForecastFiltroEstado='todos'; refiltrarValidacionForecastFiltros();" id="filtroValForecastTodos" class="filter-pill active px-3 py-1.5 rounded-lg text-[11px] font-medium">Todos</button>
+                    <button onclick="validacionForecastFiltroEstado='pendientes'; refiltrarValidacionForecastFiltros();" id="filtroValForecastPendientes" class="filter-pill px-3 py-1.5 rounded-lg text-[11px] font-medium">Pendientes</button>
+                    <button onclick="validacionForecastFiltroEstado='autorizados'; refiltrarValidacionForecastFiltros();" id="filtroValForecastAutorizados" class="filter-pill px-3 py-1.5 rounded-lg text-[11px] font-medium">Autorizados manual</button>
+                </div>
+                <span id="validacionForecastContadorFilas" class="text-[11px] text-slate-500 whitespace-nowrap sm:ml-auto"></span>
+            </div>
+
+            <div class="overflow-x-auto overflow-y-auto max-h-96 rounded-lg border border-slate-700/50 custom-scrollbar" id="tablaPendientesForecastWrapper" style="display:none;">
+                <table class="w-full text-xs" id="tablaPendientesForecast">
+                    <thead class="sticky top-0 bg-slate-900/95 backdrop-blur z-10">
+                        <tr class="text-left text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-700/50">
+                            <th class="py-2">Material</th>
+                            <th class="py-2">Descripción</th>
+                            <th class="py-2">Centro(s)</th>
+                            <th class="py-2">Mes(es) Programado(s)</th>
+                            <th class="py-2">Etapa(s) Pendiente(s)</th>
+                            <th class="py-2">Estado</th>
+                            <th class="py-2 text-right">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaPendientesForecastBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
     <!-- Template reutilizable para el módulo Resumen -->
     <template id="summaryTemplate">
         <div class="summary-card p-4 md:p-6 pb-6">
@@ -1326,33 +1520,40 @@
         // ==================== TAB SWITCHING ====================
         let tabSwitchTimeline = null;
         const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const TAB_ORDER = ['rmd', 'produccion', 'forecast'];
 
         function switchTab(tab) {
             if (currentTab === tab) return;
             const previousTab = currentTab;
-            const direction = tab === 'produccion' ? 1 : -1; // hacia la derecha al ir a Producción, izquierda al volver
+            const direction = TAB_ORDER.indexOf(tab) > TAB_ORDER.indexOf(previousTab) ? 1 : -1;
             currentTab = tab;
             const outgoing = document.querySelector('.tab-content.active');
             const incoming = document.getElementById(`tab-${tab}`);
 
             document.getElementById('inlineUploadRMD').style.display = tab === 'rmd' ? 'flex' : 'none';
             document.getElementById('inlineUploadProd').style.display = tab === 'produccion' ? 'flex' : 'none';
+            document.getElementById('inlineUploadForecast').style.display = tab === 'forecast' ? 'flex' : 'none';
 
             const glowOrb = document.getElementById('glow-orb');
-            const targetGlow = tab === 'rmd'
-                ? 'radial-gradient(circle, rgba(59, 130, 246, 0.15) 0%, rgba(139, 92, 246, 0.1) 40%, rgba(0, 0, 0, 0) 70%)'
-                : 'radial-gradient(circle, rgba(16, 185, 129, 0.15) 0%, rgba(59, 130, 246, 0.1) 40%, rgba(0, 0, 0, 0) 70%)';
+            const glowByTab = {
+                rmd: 'radial-gradient(circle, rgba(59, 130, 246, 0.15) 0%, rgba(139, 92, 246, 0.1) 40%, rgba(0, 0, 0, 0) 70%)',
+                produccion: 'radial-gradient(circle, rgba(16, 185, 129, 0.15) 0%, rgba(59, 130, 246, 0.1) 40%, rgba(0, 0, 0, 0) 70%)',
+                forecast: 'radial-gradient(circle, rgba(244, 63, 94, 0.15) 0%, rgba(249, 115, 22, 0.1) 40%, rgba(0, 0, 0, 0) 70%)'
+            };
+            const targetGlow = glowByTab[tab] || glowByTab.produccion;
 
             if (tabSwitchTimeline) tabSwitchTimeline.kill();
 
             const resizeCharts = () => {
                 if (tab === 'rmd') {
                     if (calendarRMD) calendarRMD.updateSize();
-                } else {
+                } else if (tab === 'produccion') {
                     if (calendarProd) calendarProd.updateSize();
                     if (chartAreaDist) chartAreaDist.resize();
                     if (chartPie3D) chartPie3D.resize();
                     if (chartTrendProd) chartTrendProd.resize();
+                } else if (tab === 'forecast') {
+                    if (chartForecastMonthly) chartForecastMonthly.resize();
                 }
             };
 
@@ -1404,7 +1605,11 @@
             tabFadeTimeline = gsap.to(cards, { y: 0, opacity: 1, duration: 0.4, ease: "power2.out", stagger: 0.03, overwrite: true, clearProps: "transform" });
         }
 
-        function clearCurrentTabData() { if (currentTab === 'rmd') clearRMData(); else clearProdData(); }
+        function clearCurrentTabData() {
+            if (currentTab === 'rmd') clearRMData();
+            else if (currentTab === 'produccion') clearProdData();
+            else clearForecastData();
+        }
 
         // ==================== UTILITY FUNCTIONS ====================
         function animateCounter(elementId, endValue, duration = 1.5) {
@@ -2350,8 +2555,10 @@
                 databaseMaterialsLoaded = true;
                 saveValidacionData();
                 document.getElementById('baseDatosStatusBadge').style.display = 'inline-flex';
+                const bdf = document.getElementById('baseDatosStatusBadgeForecast'); if (bdf) bdf.style.display = 'inline-flex';
                 Swal.fire({ icon: 'success', title: '¡Listo!', text: `${parsed.size} materiales cargados desde Base de Datos.`, timer: 2000, showConfirmButton: false, background: '#0f172a' });
                 runValidacionMateriales();
+                runValidacionForecast();
                 return true;
             } catch (error) {
                 console.error(error);
@@ -2422,8 +2629,10 @@
                     rmdAutorizadosLoaded = true;
                     saveValidacionData();
                     document.getElementById('rmdAutorizadosStatusBadge').style.display = 'inline';
+                    const raf = document.getElementById('rmdAutorizadosStatusBadgeForecast'); if (raf) raf.style.display = 'inline';
                     Swal.fire({ icon: 'success', title: '¡Listo!', text: `${raw.length} registros de RMD Autorizados cargados.`, timer: 2000, showConfirmButton: false, background: '#0f172a' });
                     runValidacionMateriales();
+                    runValidacionForecast();
                 } catch (error) {
                     console.error(error);
                     Swal.fire({ icon: 'error', title: 'Error', text: 'No se pudo leer el archivo RMD Autorizados.', background: '#0f172a' });
@@ -2461,8 +2670,14 @@
             databaseMaterialsLoaded = !!flags.databaseMaterialsLoaded;
             rmdAutorizadosLoaded = !!flags.rmdAutorizadosLoaded;
 
-            if (databaseMaterialsLoaded) document.getElementById('baseDatosStatusBadge').style.display = 'inline-flex';
-            if (rmdAutorizadosLoaded) document.getElementById('rmdAutorizadosStatusBadge').style.display = 'inline';
+            if (databaseMaterialsLoaded) {
+                document.getElementById('baseDatosStatusBadge').style.display = 'inline-flex';
+                const bdf = document.getElementById('baseDatosStatusBadgeForecast'); if (bdf) bdf.style.display = 'inline-flex';
+            }
+            if (rmdAutorizadosLoaded) {
+                document.getElementById('rmdAutorizadosStatusBadge').style.display = 'inline';
+                const raf = document.getElementById('rmdAutorizadosStatusBadgeForecast'); if (raf) raf.style.display = 'inline';
+            }
         }
 
         async function toggleManualAutorizado(material) {
@@ -2682,6 +2897,440 @@
                 console.error(err);
                 Swal.fire({ icon: 'error', title: 'No se pudo copiar', text: 'El navegador bloqueó el acceso al portapapeles.', background: '#0f172a' });
             }
+        }
+
+        // ==================== MÓDULO FORECAST (Plan de Producción proyectado + validación RMD) ====================
+        let forecastData = [];
+        let forecastMonthsMeta = []; // [{key:'YYYY-MM', label:'Jul 2026'}] ordenado
+        let forecastStatusLoaded = false;
+        let chartForecastMonthly = null;
+        let manualAutorizadosForecast = new Set();
+        let ultimoResultadoValidacionForecast = { revisados: 0, autorizados: 0, pendientes: [] };
+        let validacionForecastFiltroEstado = 'todos';
+        let validacionForecastBusqueda = '';
+
+        const FORECAST_SHEET_NAME = 'BD';
+        const FORECAST_HEADER_ROW_INDEX = 2; // fila 3 (0-based)
+        const FORECAST_LAST_COL_INDEX = 25; // columna Z (0-based, A=0)
+
+        function handleFileForecast(e) { const file = e.target.files[0]; if (file) processFileForecast(file); e.target.value = ''; }
+
+        function processFileForecast(file) {
+            Swal.fire({ title: 'Procesando Forecast...', allowOutsideClick: false, didOpen: () => Swal.showLoading(), background: '#0f172a' });
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array', cellDates: true });
+                    const sheetName = workbook.SheetNames.includes(FORECAST_SHEET_NAME) ? FORECAST_SHEET_NAME : workbook.SheetNames[0];
+                    const sheet = workbook.Sheets[sheetName];
+                    const hiddenRows = getHiddenRowSet(sheet);
+                    const hiddenCols = getHiddenColSet(sheet);
+                    const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: "", raw: true });
+
+                    if (rows.length <= FORECAST_HEADER_ROW_INDEX) {
+                        Swal.close();
+                        Swal.fire({ icon: 'warning', title: 'Vacío', text: `No se encontraron datos en la pestaña "${sheetName}".`, background: '#0f172a' });
+                        return;
+                    }
+
+                    const headerRowFull = rows[FORECAST_HEADER_ROW_INDEX] || [];
+                    const headerRow = headerRowFull.slice(0, FORECAST_LAST_COL_INDEX + 1);
+                    const keys = headerRow.map((h, idx) => hiddenCols.has(idx) ? null : String(h || '').trim());
+                    const colIndexByName = {};
+                    keys.forEach((k, idx) => { if (k) colIndexByName[k.toLowerCase()] = idx; });
+                    const findCol = (...aliases) => {
+                        for (const a of aliases) {
+                            const found = Object.keys(colIndexByName).find(k => k.includes(a));
+                            if (found) return colIndexByName[found];
+                        }
+                        return -1;
+                    };
+
+                    const materialCol = findCol('material');
+                    const descCol = findCol('descripcion material', 'descripci');
+                    const centroCol = findCol('centro');
+
+                    if (materialCol === -1) {
+                        Swal.close();
+                        Swal.fire({ icon: 'warning', title: 'Formato inesperado', text: `No se encontró la columna "MATERIAL" en la pestaña "${sheetName}" (columnas A-Z).`, background: '#0f172a' });
+                        return;
+                    }
+
+                    // Columnas de mes: cualquier columna (hasta Z) cuyo encabezado sea una fecha válida
+                    const monthColMeta = []; // {idx, key, label}
+                    for (let idx = 0; idx <= FORECAST_LAST_COL_INDEX; idx++) {
+                        if (hiddenCols.has(idx)) continue;
+                        const headerVal = headerRowFull[idx];
+                        const d = parseExcelDateDirect(headerVal);
+                        if (d) monthColMeta.push({ idx, key: d.format('YYYY-MM'), label: d.format('MMM YYYY') });
+                    }
+
+                    if (monthColMeta.length === 0) {
+                        Swal.close();
+                        Swal.fire({ icon: 'warning', title: 'Sin columnas de mes', text: 'No se encontraron columnas de fecha (mes) hasta la columna Z.', background: '#0f172a' });
+                        return;
+                    }
+
+                    const currentMonthStart = dayjs().startOf('month');
+                    const dataRows = rows.slice(FORECAST_HEADER_ROW_INDEX + 1);
+                    const parsedMap = new Map();
+
+                    dataRows.forEach((row, relIdx) => {
+                        const absoluteRowIdx = FORECAST_HEADER_ROW_INDEX + 1 + relIdx;
+                        if (hiddenRows.has(absoluteRowIdx) || !row || row.length === 0) return;
+
+                        const rawMat = row[materialCol];
+                        if (rawMat === undefined || rawMat === null || String(rawMat).trim() === '') return;
+                        const material = String(rawMat).trim();
+                        const descripcion = descCol !== -1 ? String(row[descCol] || '').trim() : '';
+                        const centro = centroCol !== -1 ? String(row[centroCol] || '').trim() : '';
+
+                        const mesesProgramados = [];
+                        monthColMeta.forEach(m => {
+                            const val = row[m.idx];
+                            const tieneProduccion = val !== undefined && val !== null && val !== '' && Number(val) !== 0;
+                            if (tieneProduccion && dayjs(m.key + '-01').isSameOrAfter(currentMonthStart, 'month')) {
+                                mesesProgramados.push(m.key);
+                            }
+                        });
+
+                        if (mesesProgramados.length === 0) return;
+
+                        if (!parsedMap.has(material)) {
+                            parsedMap.set(material, { material, descripcion, centros: new Set(centro ? [centro] : []), meses: new Set(mesesProgramados) });
+                        } else {
+                            const entry = parsedMap.get(material);
+                            if (centro) entry.centros.add(centro);
+                            mesesProgramados.forEach(mk => entry.meses.add(mk));
+                        }
+                    });
+
+                    forecastData = Array.from(parsedMap.values()).map(e => ({
+                        material: e.material, descripcion: e.descripcion,
+                        centros: Array.from(e.centros),
+                        meses: Array.from(e.meses).sort()
+                    }));
+                    forecastMonthsMeta = monthColMeta
+                        .filter((m, i, arr) => arr.findIndex(x => x.key === m.key) === i)
+                        .filter(m => dayjs(m.key + '-01').isSameOrAfter(currentMonthStart, 'month'))
+                        .sort((a, b) => a.key.localeCompare(b.key));
+
+                    saveForecastData();
+                    document.getElementById('forecastStatusBadge').style.display = 'inline';
+                    updateDashboardForecast();
+                    Swal.fire({ icon: 'success', title: '¡Listo!', text: `${forecastData.length} materiales con producción proyectada.`, timer: 2200, showConfirmButton: false, background: '#0f172a' });
+                } catch (error) {
+                    console.error(error);
+                    Swal.fire({ icon: 'error', title: 'Error', text: 'No se pudo procesar el archivo de Forecast.', background: '#0f172a' });
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        async function saveForecastData() {
+            await storeSet('forecast_data', forecastData);
+            await storeSet('forecast_months_meta', forecastMonthsMeta);
+        }
+        async function saveManualAutorizadosForecast() { await storeSet('val_manual_autorizados_forecast', Array.from(manualAutorizadosForecast)); }
+
+        async function loadForecastData() {
+            const saved = await storeGet('forecast_data');
+            const savedMeta = await storeGet('forecast_months_meta');
+            const ma = await storeGet('val_manual_autorizados_forecast');
+            if (ma) manualAutorizadosForecast = new Set(ma);
+            if (saved) {
+                forecastData = saved;
+                forecastMonthsMeta = savedMeta || [];
+                document.getElementById('forecastStatusBadge').style.display = 'inline';
+                updateDashboardForecast();
+            } else {
+                runValidacionForecast();
+            }
+        }
+
+        function updateDashboardForecast() {
+            renderKPIsForecast();
+            renderChartForecastMonthly();
+            runValidacionForecast();
+            const ib = document.getElementById('forecastInfoBadge');
+            if (forecastData.length > 0) {
+                ib.style.display = 'flex';
+                document.getElementById('forecastInfoText').textContent = `${forecastData.length} materiales con producción proyectada desde ${dayjs().format('MMMM YYYY')} en adelante.`;
+            } else {
+                ib.style.display = 'none';
+            }
+        }
+
+        function renderKPIsForecast() {
+            animateCounter('kpi-forecast-materiales', forecastData.length);
+            animateCounter('kpi-forecast-meses', forecastMonthsMeta.length);
+            const mesCounts = {};
+            forecastData.forEach(m => m.meses.forEach(mk => { mesCounts[mk] = (mesCounts[mk] || 0) + 1; }));
+            let topMes = '-', topVal = 0;
+            for (const [mk, c] of Object.entries(mesCounts)) { if (c > topVal) { topVal = c; topMes = mk; } }
+            document.getElementById('kpi-forecast-mes-top').textContent = topVal > 0 ? `${dayjs(topMes + '-01').format('MMM YYYY')} (${topVal})` : '-';
+            if (forecastMonthsMeta.length > 0) {
+                const first = forecastMonthsMeta[0].label, last = forecastMonthsMeta[forecastMonthsMeta.length - 1].label;
+                document.getElementById('kpi-forecast-horizonte').textContent = `${first} - ${last}`;
+            } else {
+                document.getElementById('kpi-forecast-horizonte').textContent = '-';
+            }
+        }
+
+        function renderChartForecastMonthly() {
+            const ctx = document.getElementById('chartForecastMonthly'); if (!ctx) return;
+            const mesCounts = {};
+            forecastMonthsMeta.forEach(m => { mesCounts[m.key] = 0; });
+            forecastData.forEach(mat => mat.meses.forEach(mk => { mesCounts[mk] = (mesCounts[mk] || 0) + 1; }));
+            const labels = forecastMonthsMeta.map(m => m.label);
+            const values = forecastMonthsMeta.map(m => mesCounts[m.key] || 0);
+
+            if (chartForecastMonthly) chartForecastMonthly.destroy();
+            const gradient = ctx.getContext('2d').createLinearGradient(0, 0, 0, 260);
+            gradient.addColorStop(0, 'rgba(244, 63, 94, 0.85)');
+            gradient.addColorStop(1, 'rgba(244, 63, 94, 0.1)');
+
+            Chart.defaults.color = '#94a3b8'; Chart.defaults.font.family = 'Inter';
+            chartForecastMonthly = new Chart(ctx, {
+                type: 'bar',
+                data: { labels, datasets: [{ label: 'Materiales programados', data: values, backgroundColor: gradient, borderRadius: 8, borderSkipped: false, maxBarThickness: 56 }] },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { backgroundColor: 'rgba(15,23,42,0.95)', borderColor: 'rgba(244,63,94,0.4)', borderWidth: 1, padding: 10, titleColor: '#f8fafc', bodyColor: '#cbd5e1', displayColors: false, callbacks: { label: (c) => `${c.raw} materiales con fabricación programada` } }
+                    },
+                    scales: { y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { precision: 0 } }, x: { grid: { display: false } } }
+                }
+            });
+        }
+
+        async function toggleManualAutorizadoForecast(material) {
+            if (manualAutorizadosForecast.has(material)) manualAutorizadosForecast.delete(material);
+            else manualAutorizadosForecast.add(material);
+            await saveManualAutorizadosForecast();
+            runValidacionForecast();
+        }
+
+        function updateFuentesStatusForecastUI() {
+            const setStatus = (id, ok) => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                el.textContent = ok ? '✓ Cargado' : 'Pendiente';
+                el.className = ok ? 'text-emerald-400 font-semibold' : 'text-slate-500 font-semibold';
+            };
+            setStatus('fuenteStatusForecastPlan', forecastData.length > 0);
+            setStatus('fuenteStatusForecastBase', databaseMaterialsLoaded && databaseMaterials.size > 0);
+            setStatus('fuenteStatusForecastRmd', rmdAutorizadosLoaded && rmdAutorizadosEtapasPorAgrupador.size > 0);
+        }
+
+        function runValidacionForecast() {
+            updateFuentesStatusForecastUI();
+
+            const readyForecast = forecastData.length > 0;
+            const readyBase = databaseMaterialsLoaded && databaseMaterials.size > 0;
+            const readyRmd = rmdAutorizadosLoaded && rmdAutorizadosEtapasPorAgrupador.size > 0;
+
+            const emptyState = document.getElementById('validacionForecastEmptyState');
+            const tableWrapper = document.getElementById('tablaPendientesForecastWrapper');
+            const toolbar = document.getElementById('validacionForecastToolbar');
+            if (!emptyState) return;
+
+            if (!readyForecast || !readyBase || !readyRmd) {
+                emptyState.style.display = 'block';
+                tableWrapper.style.display = 'none';
+                if (toolbar) toolbar.style.display = 'none';
+                emptyState.textContent = 'Carga los tres archivos (Plan de Producción Forecast, Base de Datos y RMD Autorizados) para generar la validación de materiales proyectada.';
+                animateCounter('kpi-val-revisados-forecast', 0);
+                animateCounter('kpi-val-autorizados-forecast', 0);
+                animateCounter('kpi-val-pendientes-forecast', 0);
+                ultimoResultadoValidacionForecast = { revisados: 0, autorizados: 0, pendientes: [] };
+                return;
+            }
+
+            let revisados = 0, autorizados = 0;
+            const pendientes = [];
+
+            forecastData.forEach(mat => {
+                const cod = normalizeMaterialCode(mat.material);
+                if (!cod) return;
+                revisados++;
+                const mesesLabel = mat.meses.map(mk => dayjs(mk + '-01').format('MMM YYYY'));
+                const info = databaseMaterials.get(cod);
+
+                if (!info) {
+                    pendientes.push({ material: cod, descripcion: mat.descripcion || '(no encontrado en Base de Datos)', centros: mat.centros.join(', '), meses: mesesLabel, etapasPendientes: [], motivo: 'No encontrado en Base de Datos' });
+                    return;
+                }
+
+                if (!info.agrupador) {
+                    const etapasSinAgr = info.etapaPropia ? [info.etapaPropia] : [];
+                    pendientes.push({ material: cod, descripcion: info.descripcion || mat.descripcion || '-', centros: mat.centros.join(', '), meses: mesesLabel, etapasPendientes: etapasSinAgr, motivo: 'Sin agrupador válido en Base de Datos' });
+                    return;
+                }
+
+                const etapasSet = agrupadorEtapasMap.get(info.agrupador);
+                const etapasMaterial = etapasSet && etapasSet.size > 0 ? Array.from(etapasSet) : (info.etapaPropia ? [info.etapaPropia] : []);
+                const etapasAutorizadas = rmdAutorizadosEtapasPorAgrupador.get(info.agrupador);
+
+                if (!etapasAutorizadas || etapasAutorizadas.size === 0) {
+                    pendientes.push({ material: cod, descripcion: info.descripcion || mat.descripcion || '-', centros: mat.centros.join(', '), meses: mesesLabel, etapasPendientes: etapasMaterial, motivo: `Agrupador ${info.agrupador} sin RMD autorizado` });
+                    return;
+                }
+
+                const etapasPendientes = etapasMaterial.filter(et => !etapasAutorizadas.has(et));
+                if (etapasPendientes.length === 0) {
+                    autorizados++;
+                } else {
+                    pendientes.push({ material: cod, descripcion: info.descripcion || mat.descripcion || '-', centros: mat.centros.join(', '), meses: mesesLabel, etapasPendientes: etapasPendientes, motivo: etapasPendientes.map(et => `Etapa ${et} no tiene RMD autorizado para el agrupador ${info.agrupador}`).join(' | ') });
+                }
+            });
+
+            pendientes.sort((a, b) => a.material.localeCompare(b.material));
+
+            const pendientesReales = [];
+            const autorizadosManualLista = [];
+            pendientes.forEach(p => {
+                if (manualAutorizadosForecast.has(p.material)) autorizadosManualLista.push(p);
+                else pendientesReales.push(p);
+            });
+
+            const autorizadosTotal = autorizados + autorizadosManualLista.length;
+            ultimoResultadoValidacionForecast = { revisados, autorizados: autorizadosTotal, pendientes: pendientesReales, autorizadosManual: autorizadosManualLista };
+
+            animateCounter('kpi-val-revisados-forecast', revisados, 1.2);
+            animateCounter('kpi-val-autorizados-forecast', autorizadosTotal, 1.2);
+            animateCounter('kpi-val-pendientes-forecast', pendientesReales.length, 1.2);
+
+            const todasLasFilas = [...pendientesReales.map(p => ({ ...p, estado: 'pendiente' })), ...autorizadosManualLista.map(p => ({ ...p, estado: 'autorizado' }))];
+
+            if (todasLasFilas.length === 0) {
+                emptyState.style.display = 'block';
+                emptyState.textContent = revisados > 0 ? 'Todos los materiales del forecast están autorizados en todas sus etapas. ✅' : 'No hay materiales proyectados para validar.';
+                tableWrapper.style.display = 'none';
+                if (toolbar) toolbar.style.display = 'none';
+            } else {
+                emptyState.style.display = 'none';
+                tableWrapper.style.display = 'block';
+                if (toolbar) toolbar.style.display = 'flex';
+                renderTablaPendientesForecast(todasLasFilas);
+            }
+        }
+
+        function refiltrarValidacionForecastFiltros() {
+            const map = { todos: 'filtroValForecastTodos', pendientes: 'filtroValForecastPendientes', autorizados: 'filtroValForecastAutorizados' };
+            Object.values(map).forEach(id => document.getElementById(id) && document.getElementById(id).classList.remove('active'));
+            const activeBtn = document.getElementById(map[validacionForecastFiltroEstado]);
+            if (activeBtn) activeBtn.classList.add('active');
+            refiltrarTablaPendientesForecast();
+        }
+
+        function renderTablaPendientesForecast(filas) {
+            window.__ultimasFilasValidacionForecast = filas;
+
+            let visibles = filas;
+            if (validacionForecastFiltroEstado === 'pendientes') visibles = visibles.filter(f => f.estado === 'pendiente');
+            else if (validacionForecastFiltroEstado === 'autorizados') visibles = visibles.filter(f => f.estado === 'autorizado');
+
+            if (validacionForecastBusqueda.trim()) {
+                const q = validacionForecastBusqueda.trim().toLowerCase();
+                visibles = visibles.filter(f => f.material.toLowerCase().includes(q) || (f.descripcion || '').toLowerCase().includes(q));
+            }
+
+            const body = document.getElementById('tablaPendientesForecastBody');
+            const contador = document.getElementById('validacionForecastContadorFilas');
+            if (contador) contador.textContent = `${visibles.length} de ${filas.length} materiales`;
+
+            if (visibles.length === 0) {
+                body.innerHTML = `<tr><td colspan="7" class="text-center text-slate-500 py-6 text-xs">Ningún material coincide con el filtro/búsqueda actual.</td></tr>`;
+                return;
+            }
+
+            body.innerHTML = visibles.map(p => {
+                const etapasTxt = p.etapasPendientes && p.etapasPendientes.length > 0 ? p.etapasPendientes.join(', ') : (p.motivo || 'No encontrado');
+                const mesesHtml = (p.meses || []).map(m => `<span class="mes-chip">${m}</span>`).join('');
+                const esAutorizado = p.estado === 'autorizado';
+                const rowCls = esAutorizado
+                    ? 'border-b border-slate-800/60 last:border-0 bg-emerald-500/10 hover:bg-emerald-500/15 transition-colors'
+                    : 'border-b border-slate-800/60 last:border-0 hover:bg-slate-800/40 transition-colors';
+                const badge = esAutorizado
+                    ? '<span class="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-2 py-0.5 rounded-full whitespace-nowrap"><svg xmlns="http://www.w3.org/2000/svg" class="h-2.5 w-2.5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.7 5.3a1 1 0 010 1.4l-8 8a1 1 0 01-1.4 0l-4-4a1 1 0 111.4-1.4L8 12.6l7.3-7.3a1 1 0 011.4 0z" clip-rule="evenodd"/></svg>Autorizado manual</span>'
+                    : '<span class="inline-flex items-center gap-1 text-[10px] font-semibold text-red-300 bg-red-500/10 border border-red-500/30 px-2 py-0.5 rounded-full whitespace-nowrap">Pendiente</span>';
+                const etapasCls = esAutorizado ? 'text-emerald-300/70 line-through whitespace-nowrap' : 'text-red-300 whitespace-nowrap';
+                const accionBtn = esAutorizado
+                    ? `<button onclick="toggleManualAutorizadoForecast('${p.material}')" class="text-[10px] font-medium text-slate-400 hover:text-slate-200 border border-slate-600 hover:border-slate-400 px-2 py-1.5 rounded-md transition-colors whitespace-nowrap min-h-[32px]">Revertir</button>`
+                    : `<button onclick="toggleManualAutorizadoForecast('${p.material}')" class="text-[10px] font-medium text-emerald-400 hover:text-emerald-300 border border-emerald-500/40 hover:border-emerald-400 bg-emerald-500/5 hover:bg-emerald-500/10 px-2 py-1.5 rounded-md transition-colors whitespace-nowrap min-h-[32px]">Marcar autorizado</button>`;
+                return `<tr class="${rowCls}" title="${p.motivo || ''}">
+                    <td class="font-medium text-slate-200 whitespace-nowrap py-2">${p.material}</td>
+                    <td class="text-slate-300 py-2">${p.descripcion}</td>
+                    <td class="text-slate-400 whitespace-nowrap py-2">${p.centros || '-'}</td>
+                    <td class="py-2">${mesesHtml}</td>
+                    <td class="${etapasCls} py-2">${etapasTxt}</td>
+                    <td class="py-2">${badge}</td>
+                    <td class="py-2 text-right">${accionBtn}</td>
+                </tr>`;
+            }).join('');
+        }
+
+        function refiltrarTablaPendientesForecast() { if (window.__ultimasFilasValidacionForecast) renderTablaPendientesForecast(window.__ultimasFilasValidacionForecast); }
+
+        function exportPendientesForecastToExcel() {
+            const { pendientes } = ultimoResultadoValidacionForecast;
+            if (!pendientes || pendientes.length === 0) {
+                Swal.fire({ icon: 'info', title: 'Nada que exportar', text: 'No hay materiales pendientes para exportar en este momento.', background: '#0f172a', timer: 2000, showConfirmButton: false });
+                return;
+            }
+            const wsData = pendientes.map(p => ({
+                'Material': p.material, 'Descripción': p.descripcion, 'Centro(s)': p.centros,
+                'Mes(es) Programado(s)': (p.meses || []).join(', '),
+                'Etapa(s) Pendiente(s)': p.etapasPendientes && p.etapasPendientes.length > 0 ? p.etapasPendientes.join(', ') : '-',
+                'Motivo': p.motivo || ''
+            }));
+            const ws = XLSX.utils.json_to_sheet(wsData);
+            ws['!cols'] = [{ wch: 14 }, { wch: 45 }, { wch: 14 }, { wch: 40 }, { wch: 30 }, { wch: 55 }];
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Forecast Pendientes');
+            XLSX.writeFile(wb, `Forecast_Materiales_Pendientes_RMD_${dayjs().format('YYYYMMDD_HHmm')}.xlsx`);
+        }
+
+        async function copyPendientesForecastToClipboard() {
+            const btn = document.getElementById('copyPendientesForecastBtn');
+            const label = document.getElementById('copyPendientesForecastLabel');
+            const originalLabel = label.textContent;
+            const { pendientes } = ultimoResultadoValidacionForecast;
+
+            if (!pendientes || pendientes.length === 0) {
+                Swal.fire({ icon: 'info', title: 'Nada que copiar', text: 'No hay materiales pendientes para copiar en este momento.', background: '#0f172a', timer: 2000, showConfirmButton: false });
+                return;
+            }
+
+            const header = ['Material', 'Descripción', 'Centro(s)', 'Mes(es) Programado(s)', 'Etapa(s) Pendiente(s)'].join('\t');
+            const lines = pendientes.map(p => [p.material, p.descripcion, p.centros, (p.meses || []).join(', '), (p.etapasPendientes && p.etapasPendientes.length > 0 ? p.etapasPendientes.join(', ') : '-')].join('\t'));
+            const tsv = [header, ...lines].join('\n');
+
+            try {
+                await navigator.clipboard.writeText(tsv);
+                label.textContent = '¡Copiado!';
+                btn.classList.add('copied');
+                setTimeout(() => { label.textContent = originalLabel; btn.classList.remove('copied'); }, 2000);
+            } catch (err) {
+                console.error(err);
+                Swal.fire({ icon: 'error', title: 'No se pudo copiar', text: 'El navegador bloqueó el acceso al portapapeles.', background: '#0f172a' });
+            }
+        }
+
+        function clearForecastData() {
+            Swal.fire({ title: '¿Limpiar datos de Forecast?', icon: 'warning', showCancelButton: true, confirmButtonText: 'Sí', cancelButtonText: 'No', background: '#0f172a', color: '#f8fafc', width: 'min(420px, 92vw)', customClass: { confirmButton: 'bg-red-600 px-4 py-2.5 rounded text-white mr-2 text-xs min-w-[44px]', cancelButton: 'bg-slate-600 px-4 py-2.5 rounded text-white text-xs min-w-[44px]' }, buttonsStyling: false }).then(async (res) => {
+                if (res.isConfirmed) {
+                    await storeRemove('forecast_data');
+                    await storeRemove('forecast_months_meta');
+                    forecastData = []; forecastMonthsMeta = [];
+                    document.getElementById('forecastStatusBadge').style.display = 'none';
+                    updateDashboardForecast();
+                    Swal.fire({ icon: 'success', title: 'Limpio', timer: 1500, showConfirmButton: false, background: '#0f172a' });
+                }
+            });
         }
 
         // ==================== MÓDULO RESUMEN + COPIAR AL PORTAPAPELES ====================
@@ -3047,6 +3696,7 @@
             setupZone('dropZoneProd', 'fileInputProd', processFileProd);
             setupZone('dropZoneBaseDatos', 'fileInputBaseDatos', processFileBaseDatos);
             setupZone('dropZoneRmdAutorizados', 'fileInputRmdAutorizados', processFileRmdAutorizados);
+            setupZone('dropZoneForecast', 'fileInputForecast', processFileForecast);
         }
 
         // ==================== INITIALIZATION ====================
@@ -3061,11 +3711,13 @@
             await loadRMData();
             await loadValidacionData();
             await loadProdData();
+            await loadForecastData();
             initReactiveBackground();
             initTiltCards();
 
             document.getElementById('inlineUploadRMD').style.display = 'none';
             document.getElementById('inlineUploadProd').style.display = 'flex';
+            document.getElementById('inlineUploadForecast').style.display = 'none';
 
             gsap.fromTo('.gsap-header', { y: -20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, ease: "power3.out" });
             gsap.fromTo('#tab-nav-row', { y: 15, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, delay: 0.2, ease: "power2.out" });
@@ -3077,6 +3729,7 @@
                 if (chartAreaDist && currentTab === 'produccion') chartAreaDist.update();
                 if (chartPie3D && currentTab === 'produccion') chartPie3D.update();
                 if (chartTrendProd && currentTab === 'produccion') chartTrendProd.update();
+                if (chartForecastMonthly && currentTab === 'forecast') chartForecastMonthly.update();
             });
         });
     </script>    <!-- ==================== Backup discreto (exportar / importar JSON) ==================== -->
