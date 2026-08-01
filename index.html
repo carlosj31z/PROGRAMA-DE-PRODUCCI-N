@@ -1972,8 +1972,18 @@
         }
 
         // ==================== PRODUCCIÓN MODULE (con soporte para planta 1 y planta 2) ====================
-        const PROD_HEADER_ROW_INDEX = 3;
-        const PROD_WEEK_LABEL_ROW_INDEX = 1;
+        // Busca en las primeras filas de la hoja cuál contiene "CODIGO"/"CÓDIGO".
+// Devuelve el índice (0-based) de esa fila, o -1 si no se encuentra.
+function findProductionHeaderRowIndex(rows, maxScanRows = 12) {
+    const limit = Math.min(rows.length, maxScanRows);
+    for (let i = 0; i < limit; i++) {
+        const row = rows[i] || [];
+        if (row.some(cell => cell && /c[oó]digo/i.test(String(cell)))) {
+            return i;
+        }
+    }
+    return -1;
+}
 
         const areaOrderPriority = { 'SOL': 1, 'SOL HORM': 2, 'SOL COLOR': 3, 'ACO': 4, 'COS': 5, 'CAP BLAN': 6, 'MEN': 99 };
         function getAreaPriority(n) { const c = String(n).trim().toUpperCase(); for (const k in areaOrderPriority) if (c.includes(k)) return areaOrderPriority[k]; return 50; }
@@ -1994,6 +2004,13 @@ function getAreaColor(a) {
     return dynamicAreaColors[c];
 }
 
+const PLANTA1_EXCLUDED_TERMS = ['LIMP', 'VAL', 'PIL', 'SETUP', 'CAL', 'RES', 'RECUPERACION', 'MTTO'];
+
+function containsExcludedTermPlanta1(text) {
+    if (!text) return false;
+    const upper = String(text).toUpperCase();
+    return PLANTA1_EXCLUDED_TERMS.some(term => new RegExp(`\\b${term}\\b`, 'i').test(upper));
+}
         function filtrarFechasFuturas(f) { return f.filter(d => isTodayOrFuture(d)); }
 
         function parseExcelDateDirect(v) {
@@ -2018,118 +2035,67 @@ function isoWeekMonday(weekNum) {
     const jan4Dow = (jan4.day() + 6) % 7; // 0=lunes
     return jan4.subtract(jan4Dow, 'day').add((weekNum - 1) * 7, 'day');
 }
- 
-// Detecta si el workbook usa el formato Planta 1:
-// • fila 2 (PROD_WEEK_LABEL_ROW_INDEX=1) tiene "S22","S23"...
-// • fila 4 (PROD_HEADER_ROW_INDEX=3)     tiene enteros de días (1-31) — NO fechas ISO
-function isPlanta1Format(workbook) {
-    const sh = workbook.Sheets[workbook.SheetNames[0]];
-    const rows = XLSX.utils.sheet_to_json(sh, { header: 1, defval: "", raw: true });
-    if (rows.length < 4) return false;
-    const weekRow = rows[PROD_WEEK_LABEL_ROW_INDEX] || [];
-    const dayRow  = rows[PROD_HEADER_ROW_INDEX] || [];
-    const hasSWeeks   = weekRow.some(v => v && /^S\d{1,2}$/.test(String(v).trim()));
-    const hasDayInts  = dayRow.some(v => typeof v === 'number' && v >= 1 && v <= 31);
-    const hasRealDates = dayRow.some(v => v instanceof Date || (typeof v === 'number' && v > 1000));
-    return hasSWeeks && hasDayInts && !hasRealDates;
-}
- 
-// Construye { colIdx -> "YYYY-MM-DD" } para el formato Planta 1.
-// Lógica: cada semana "S22" define un lunes; cada columna dentro de esa semana
-// es lunes + offset (0=L, 1=M, 2=M, 3=J, 4=V, 5=S, 6=D).
-function buildDateColumnMapPlanta1(headerRowDays, weekLabelRow, hiddenCols) {
+
+// Construye { colIdx -> "YYYY-MM-DD" } para Planta 1, usando solo la posición
+// de la columna dentro del bloque semanal (0=Lunes ... 6=Domingo), sin
+// depender del valor literal de la celda (que puede venir corrupto o con
+// formatos mixtos dentro de la misma hoja).
+function buildDateColumnMapPlanta1(headerRow, weekLabelRow, hiddenCols) {
     const dateColMap = {};
-    let weekMonday    = null;
-    let weekStartCol  = null;
- 
+    let weekMonday = null;
+    let weekStartCol = null;
+
     for (let idx = 0; idx < weekLabelRow.length; idx++) {
         if (hiddenCols.has(idx)) continue;
+
         const wkLabel = String(weekLabelRow[idx] || '').trim();
-        if (/^S\d{1,2}$/.test(wkLabel)) {
-            const wkNum  = parseInt(wkLabel.replace(/\D/g, ''), 10);
-            weekMonday   = isoWeekMonday(wkNum);
+        if (/^S\d{1,2}$/i.test(wkLabel)) {
+            const wkNum = parseInt(wkLabel.replace(/\D/g, ''), 10);
+            weekMonday = isoWeekMonday(wkNum);
             weekStartCol = idx;
         }
-        const dayVal = headerRowDays[idx];
-        if (weekMonday !== null && typeof dayVal === 'number' && dayVal >= 1 && dayVal <= 31) {
+
+        if (weekMonday !== null && weekStartCol !== null) {
             const offset = idx - weekStartCol;
-            dateColMap[idx] = weekMonday.add(offset, 'day').format('YYYY-MM-DD');
-        }
-    }
-    return dateColMap;
-}
-        // Calcula el lunes de la semana ISO dada para el año en curso
-function isoWeekMonday(weekNum) {
-    const year = dayjs().year();
-    const jan4 = dayjs(`${year}-01-04`);
-    const jan4Dow = (jan4.day() + 6) % 7; // 0=lunes
-    return jan4.subtract(jan4Dow, 'day').add((weekNum - 1) * 7, 'day');
-}
- 
-// Detecta si el workbook usa el formato Planta 1:
-// • fila 2 (PROD_WEEK_LABEL_ROW_INDEX=1) tiene "S22","S23"...
-// • fila 4 (PROD_HEADER_ROW_INDEX=3)     tiene enteros de días (1-31) — NO fechas ISO
-function isPlanta1Format(workbook) {
-    const sh = workbook.Sheets[workbook.SheetNames[0]];
-    const rows = XLSX.utils.sheet_to_json(sh, { header: 1, defval: "", raw: true });
-    if (rows.length < 4) return false;
-    const weekRow = rows[PROD_WEEK_LABEL_ROW_INDEX] || [];
-    const dayRow  = rows[PROD_HEADER_ROW_INDEX] || [];
-    const hasSWeeks   = weekRow.some(v => v && /^S\d{1,2}$/.test(String(v).trim()));
-    const hasDayInts  = dayRow.some(v => typeof v === 'number' && v >= 1 && v <= 31);
-    const hasRealDates = dayRow.some(v => v instanceof Date || (typeof v === 'number' && v > 1000));
-    return hasSWeeks && hasDayInts && !hasRealDates;
-}
- 
-// Construye { colIdx -> "YYYY-MM-DD" } para el formato Planta 1.
-// Lógica: cada semana "S22" define un lunes; cada columna dentro de esa semana
-// es lunes + offset (0=L, 1=M, 2=M, 3=J, 4=V, 5=S, 6=D).
-function buildDateColumnMapPlanta1(headerRowDays, weekLabelRow, hiddenCols) {
-    const dateColMap = {};
-    let weekMonday    = null;
-    let weekStartCol  = null;
- 
-    for (let idx = 0; idx < weekLabelRow.length; idx++) {
-        if (hiddenCols.has(idx)) continue;
-        const wkLabel = String(weekLabelRow[idx] || '').trim();
-        if (/^S\d{1,2}$/.test(wkLabel)) {
-            const wkNum  = parseInt(wkLabel.replace(/\D/g, ''), 10);
-            weekMonday   = isoWeekMonday(wkNum);
-            weekStartCol = idx;
-        }
-        const dayVal = headerRowDays[idx];
-        if (weekMonday !== null && typeof dayVal === 'number' && dayVal >= 1 && dayVal <= 31) {
-            const offset = idx - weekStartCol;
-            dateColMap[idx] = weekMonday.add(offset, 'day').format('YYYY-MM-DD');
+            if (offset >= 0 && offset <= 6) {
+                const headerVal = headerRow[idx];
+                const hasContent = headerVal !== undefined && headerVal !== null && String(headerVal).trim() !== '';
+                if (hasContent) {
+                    dateColMap[idx] = weekMonday.add(offset, 'day').format('YYYY-MM-DD');
+                }
+            }
         }
     }
     return dateColMap;
 }
 
+
         function buildGlobalWeekMondayMap(workbook) {
-            const weekMondayMap = {};
-            workbook.SheetNames.forEach(sn => {
-                const sh = workbook.Sheets[sn];
-                const rows = XLSX.utils.sheet_to_json(sh, { header: 1, defval: "" });
-                if (rows.length <= PROD_HEADER_ROW_INDEX) return;
-                const headerRow = rows[PROD_HEADER_ROW_INDEX];
-                const weekLabelRow = rows[PROD_WEEK_LABEL_ROW_INDEX] || [];
-                let currentWeekKey = null;
-                for (let idx = 0; idx < headerRow.length; idx++) {
-                    const label = weekLabelRow[idx];
-                    if (label && /sem/i.test(String(label))) {
-                        const wk = extractWeekLabelKey(label);
-                        if (wk) currentWeekKey = wk;
-                    }
-                    const direct = parseExcelDateDirect(headerRow[idx]);
-                    if (direct && currentWeekKey && !(currentWeekKey in weekMondayMap)) {
-                        const monday = direct.subtract((direct.day() + 6) % 7, 'day');
-                        weekMondayMap[currentWeekKey] = monday.format('YYYY-MM-DD');
-                    }
-                }
-            });
-            return weekMondayMap;
+    const weekMondayMap = {};
+    workbook.SheetNames.forEach(sn => {
+        const sh = workbook.Sheets[sn];
+        const rows = XLSX.utils.sheet_to_json(sh, { header: 1, defval: "" });
+        const labelRowIdx = findProductionHeaderRowIndex(rows);
+        if (labelRowIdx === -1 || rows.length <= labelRowIdx + 1) return;
+
+        const headerRow = rows[labelRowIdx + 1] || [];      // fila con números de día / fechas
+        const weekLabelRow = rows[labelRowIdx - 1] || [];    // fila con "SEM31" o similar
+        let currentWeekKey = null;
+        for (let idx = 0; idx < headerRow.length; idx++) {
+            const label = weekLabelRow[idx];
+            if (label && /sem/i.test(String(label))) {
+                const wk = extractWeekLabelKey(label);
+                if (wk) currentWeekKey = wk;
+            }
+            const direct = parseExcelDateDirect(headerRow[idx]);
+            if (direct && currentWeekKey && !(currentWeekKey in weekMondayMap)) {
+                const monday = direct.subtract((direct.day() + 6) % 7, 'day');
+                weekMondayMap[currentWeekKey] = monday.format('YYYY-MM-DD');
+            }
         }
+    });
+    return weekMondayMap;
+}
 
         function buildDateColumnMap(headerRow, weekLabelRow, globalWeekMondayMap, hiddenCols) {
             const dateColMap = {};
@@ -2171,7 +2137,7 @@ function buildDateColumnMapPlanta1(headerRowDays, weekLabelRow, hiddenCols) {
                     availableAreas.clear();
 
                     const globalWeekMondayMap = buildGlobalWeekMondayMap(wb);
-                    const planta1Format = isPlanta1Format(wb);
+                    const planta1Format = currentPlanta === 'planta1';
 
                     wb.SheetNames.forEach(sn => {
     const sh = wb.Sheets[sn];
@@ -2182,54 +2148,103 @@ function buildDateColumnMapPlanta1(headerRowDays, weekLabelRow, hiddenCols) {
     const hiddenRows = getHiddenRowSet(sh);
     const hiddenCols = getHiddenColSet(sh);
     const rows = XLSX.utils.sheet_to_json(sh, { header: 1, defval: "" });
-    if (rows.length <= PROD_HEADER_ROW_INDEX) return;
 
-    const headerRow = rows[PROD_HEADER_ROW_INDEX];
-    const labelRow = rows[PROD_HEADER_ROW_INDEX - 1] || [];
+    // Detecta dinámicamente en qué fila está "CODIGO" para esta pestaña
+    const labelRowIdx = findProductionHeaderRowIndex(rows);
+    if (labelRowIdx === -1 || rows.length <= labelRowIdx + 1) return;
+
+    const labelRow = rows[labelRowIdx] || [];
+    const hiddenColsForRow = hiddenCols;
+ 
+    let weekLabelRow, headerRow, headerRowIdx;
+ 
+    if (planta1Format) {
+        // Formato Planta 1: fila "SEM" arriba, fila CODIGO, y una fila aparte
+        // debajo con los números de día. Se mantiene el comportamiento original.
+        weekLabelRow = rows[labelRowIdx - 1] || [];
+        headerRowIdx = labelRowIdx + 1;
+        headerRow = rows[headerRowIdx] || [];
+    } else {
+        // Formato Planta 2: las fechas pueden venir en la MISMA fila que
+        // "Código" (formato actual, con objetos Date directos) o en la fila
+        // siguiente (formato anterior con números de día). Se detecta
+        // automáticamente comparando cuántas celdas de cada fila son fechas
+        // reales, en vez de asumir un offset fijo.
+        const scoreDirectDates = (row) => {
+            if (!row) return 0;
+            let c = 0;
+            row.forEach((v, i) => { if (!hiddenColsForRow.has(i) && parseExcelDateDirect(v)) c++; });
+            return c;
+        };
+        const sameRowScore = scoreDirectDates(rows[labelRowIdx]);
+        const nextRowScore = scoreDirectDates(rows[labelRowIdx + 1]);
+        headerRowIdx = (nextRowScore >= sameRowScore && nextRowScore > 0) ? (labelRowIdx + 1) : labelRowIdx;
+        headerRow = rows[headerRowIdx] || [];
+ 
+        // Busca la fila "SEMANA" escaneando hacia arriba desde headerRowIdx
+        // (puede estar 1 o varias filas arriba según el formato del archivo).
+        let weekLabelRowIdx = headerRowIdx - 1;
+        for (let i = headerRowIdx - 1; i >= Math.max(0, headerRowIdx - 4); i--) {
+            const r = rows[i] || [];
+            if (r.some(c => c && /sem/i.test(String(c)))) { weekLabelRowIdx = i; break; }
+        }
+        weekLabelRow = rows[weekLabelRowIdx] || [];
+    }
+ 
     const findLabelCol = (regex) => {
-        let idx = labelRow.findIndex((h, i) => !hiddenCols.has(i) && regex.test(String(h || '')));
-        if (idx === -1) idx = headerRow.findIndex((h, i) => !hiddenCols.has(i) && regex.test(String(h || '')));
+        let idx = labelRow.findIndex((h, i) => !hiddenColsForRow.has(i) && regex.test(String(h || '')));
+        if (idx === -1) idx = headerRow.findIndex((h, i) => !hiddenColsForRow.has(i) && regex.test(String(h || '')));
         return idx;
     };
     const codigoColIdx = findLabelCol(/c[oó]digo/i);
     if (codigoColIdx === -1) return;
-
+ 
     availableAreas.add(sn);
+ 
+    let productoColIdx = findLabelCol(/produc/i);
+    if (productoColIdx === -1) productoColIdx = findLabelCol(/descripci/i);
+ 
+    const dateColMap = planta1Format
+        ? buildDateColumnMapPlanta1(headerRow, weekLabelRow, hiddenCols)
+        : buildDateColumnMap(headerRow, weekLabelRow, globalWeekMondayMap, hiddenCols);
+ 
+    // dataStartIdx: arranca justo después de la fila que realmente tiene el
+    // header/fechas (que puede coincidir con labelRowIdx en Planta 2 nueva).
+    const dataStartIdx = Math.max(labelRowIdx, headerRowIdx) + 1;
+    const dataRows = rows.slice(dataStartIdx);
+    dataRows.forEach((row, relIdx) => {
+        const absoluteRowIdx = dataStartIdx + relIdx;
+        if (hiddenRows.has(absoluteRowIdx) || !row || row.length === 0) return;
 
-                        let productoColIdx = findLabelCol(/produc/i);
-if (productoColIdx === -1) productoColIdx = findLabelCol(/descripci/i);
-                        const weekLabelRow = rows[PROD_WEEK_LABEL_ROW_INDEX] || [];
-                        const dateColMap = planta1Format
-                            ? buildDateColumnMapPlanta1(headerRow, weekLabelRow, hiddenCols)
-                            : buildDateColumnMap(headerRow, weekLabelRow, globalWeekMondayMap, hiddenCols);
+        const rawCod = row[codigoColIdx];
+        if (rawCod === undefined || rawCod === null || rawCod === '') return;
+        const cod = String(rawCod).trim();
+        if (!/^[56]\d{9}$/.test(cod)) return;
 
-                        const dataRows = rows.slice(PROD_HEADER_ROW_INDEX + 1);
-                        dataRows.forEach((row, relIdx) => {
-                            const absoluteRowIdx = PROD_HEADER_ROW_INDEX + 1 + relIdx;
-                            if (hiddenRows.has(absoluteRowIdx) || !row || row.length === 0) return;
+        const prod = productoColIdx !== -1 ? String(row[productoColIdx] || "").trim() : "";
+        const scheduledDates = [];
+        Object.keys(dateColMap).forEach(colIdx => {
+            const cellVal = row[colIdx];
+            const cellStr = (cellVal !== undefined && cellVal !== null) ? String(cellVal).trim() : "";
+            if (cellStr === "") return;
+            // Ignora celdas cuyo contenido sea un término de excepción
+            // (LIMP, VAL, PIL, SETUP, CAL, RES, RECUPERACION, MTTO) — solo
+            // aplica a Planta 1, donde esos códigos aparecen directamente
+            // en la celda del día en vez de una producción real.
+            if (planta1Format && containsExcludedTermPlanta1(cellStr)) return;
+            scheduledDates.push(dateColMap[colIdx]);
+        });
 
-                            const rawCod = row[codigoColIdx];
-                            if (rawCod === undefined || rawCod === null || rawCod === '') return;
-                            const cod = String(rawCod).trim();
-                            if (!/^[56]\d{9}$/.test(cod)) return;
-
-                            const prod = productoColIdx !== -1 ? String(row[productoColIdx] || "").trim() : "";
-                            const scheduledDates = [];
-                            Object.keys(dateColMap).forEach(colIdx => {
-                                const cellVal = row[colIdx];
-                                if (cellVal !== undefined && cellVal !== null && String(cellVal).trim() !== "") scheduledDates.push(dateColMap[colIdx]);
-                            });
-
-                            if (scheduledDates.length > 0) {
-                                const futureDates = filtrarFechasFuturas(scheduledDates);
-                                if (futureDates.length > 0) {
-                                    const key = `${cod}_${sn}`;
-                                    if (!pmap.has(key)) pmap.set(key, { codigo: cod, producto: prod, area: sn, fechas: new Set(futureDates) });
-                                    else futureDates.forEach(d => pmap.get(key).fechas.add(d));
-                                }
-                            }
-                        });
-                    });
+        if (scheduledDates.length > 0) {
+            const futureDates = filtrarFechasFuturas(scheduledDates);
+            if (futureDates.length > 0) {
+                const key = `${cod}_${sn}`;
+                if (!pmap.has(key)) pmap.set(key, { codigo: cod, producto: prod, area: sn, fechas: new Set(futureDates) });
+                else futureDates.forEach(d => pmap.get(key).fechas.add(d));
+            }
+        }
+    });
+});
 
                     productionData = Array.from(pmap.values()).map(p => ({ ...p, fechas: Array.from(p.fechas).sort((a, b) => new Date(a) - new Date(b)) }));
                     saveProdData();
